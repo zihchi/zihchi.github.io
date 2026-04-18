@@ -100,23 +100,19 @@
     </div>
 
     <script>
-        // ★ 安全升級：利用字元碼陣列組合密碼，HTML 明文中不會出現 104788
         const getSecKey = () => [49, 48, 52, 55, 56, 56].map(c => String.fromCharCode(c)).join('');
-        // ★ 請務必保留您的 GAS 部署網址 ★
+        // ★ 請保留您的 GAS 部署網址 ★
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwXYpCVHhPi5w5pejBndNN8mKZ4VtveLhgIEVbzCKwiFuKebwH6Re2j58UbPHdL00Z2Vg/exec'; 
 
-        // 全域變數：暫存 Lido 憑證
         let savedLidoUser = '';
         let savedLidoPass = '';
 
-        // DOM 元素
         const lockScreen = document.getElementById('lock-screen');
         const lidoLoginScreen = document.getElementById('lido-login-screen');
         const mainApp = document.getElementById('main-app');
         const pagePwdInput = document.getElementById('page-password');
         const toast = document.getElementById('toast');
 
-        // 輔助功能
         function showToast(msg, isError = false) {
             toast.textContent = msg;
             toast.className = `fixed top-5 right-5 transform transition-transform duration-300 shadow-lg z-50 px-6 py-3 rounded text-white ${isError ? 'bg-red-600' : 'bg-blue-600'}`;
@@ -124,7 +120,6 @@
             setTimeout(() => toast.classList.add('translate-x-full', 'opacity-0'), 3000);
         }
 
-        // 階段一 ➜ 階段二：解鎖網頁
         function attemptUnlock() {
             if (pagePwdInput.value === getSecKey()) {
                 lockScreen.classList.add('hidden');
@@ -137,7 +132,6 @@
         document.getElementById('unlock-btn').addEventListener('click', attemptUnlock);
         pagePwdInput.addEventListener('keypress', e => { if (e.key === 'Enter') attemptUnlock(); });
 
-        // 階段二 ➜ 階段三：Lido 憑證暫存
         document.getElementById('lido-connect-btn').addEventListener('click', () => {
             const user = document.getElementById('lido-user').value.trim();
             const pass = document.getElementById('lido-pass').value.trim();
@@ -150,7 +144,6 @@
             showToast('憑證已暫存，請開始查詢航班');
         });
 
-        // 返回鎖定畫面並清除憑證
         document.getElementById('lock-again-btn').addEventListener('click', () => {
             savedLidoUser = '';
             savedLidoPass = '';
@@ -165,7 +158,6 @@
             showToast('系統已鎖定，憑證已銷毀');
         });
 
-        // 航空時間解算器
         function formatAviationTime(ms) {
             if (!ms) return 'N/A';
             const d = new Date(ms);
@@ -174,7 +166,6 @@
             return `${hh}${mm}Z`;
         }
 
-        // JSON 元資料抽取器
         function getMetaValue(docs, targetKey) {
             if (!docs || !Array.isArray(docs)) return null;
             for (let doc of docs) {
@@ -186,14 +177,14 @@
             return null;
         }
 
-        // 核心擷取邏輯
         const fetchBtn = document.getElementById('fetch-data-btn');
         fetchBtn.addEventListener('click', async () => {
-            const targetRaw = document.getElementById('target-flight').value.trim();
-            if (!targetRaw) return showToast('請輸入目標航班號碼。', true);
-            
+            let targetRaw = document.getElementById('target-flight').value.trim();
+            targetRaw = targetRaw.replace(/^SJX/i, ''); 
             const target = 'SJX' + targetRaw;
-            
+
+            if (!savedLidoUser || !savedLidoPass || !targetRaw) return showToast('請完整輸入資料。', true);
+
             fetchBtn.disabled = true;
             document.getElementById('loading-spinner').classList.remove('hidden');
             document.getElementById('result-display').value = '連線中，正在攔截並分析機密文件...';
@@ -260,25 +251,31 @@
                         if (efbMatches.length > 0) efbVer = efbMatches[efbMatches.length - 1][1]; 
                     }
 
+                    // 航空油量精算變數與氣象解析
                     let wc = 'N/A', mxsh = 'N/A', tocAlt = 'N/A', nextWptTemp = 'N/A';
+                    let totalFuel = 'N/A', divFuelCalc = 'N/A', spareFuelCalc = 'N/A';
+
                     if (rawTexts['OFP']) {
-                        const ofpLines = rawTexts['OFP'].split('\n');
-                        const wcMatch = rawTexts['OFP'].match(/W\/C\s+([A-Z0-9]+)/);
+                        const ofpText = rawTexts['OFP'];
+                        const ofpLines = ofpText.split('\n');
+                        
+                        // -- 氣象與導航資料擷取 --
+                        const wcMatch = ofpText.match(/W\/C\s+([A-Z0-9]+)/);
                         if (wcMatch) wc = wcMatch[1];
                         
-                        const mxshMatch = rawTexts['OFP'].match(/MXSH\s+([A-Z0-9\/]+)/);
+                        const mxshMatch = ofpText.match(/MXSH\s+([A-Z0-9\/]+)/);
                         if (mxshMatch) {
                             mxsh = mxshMatch[1];
                             const mxshParts = mxsh.split('/');
                             if (mxshParts.length > 1) {
                                 const wptName = mxshParts[1].trim();
                                 const wptRegex = new RegExp(`\\b${wptName}\\b[\\s\\S]{0,300}?\\.{2,}\\s*(\\d{4})`);
-                                const atgoMatch = rawTexts['OFP'].match(wptRegex);
+                                const atgoMatch = ofpText.match(wptRegex);
                                 if (atgoMatch) {
                                     mxsh += ` ATGO ${atgoMatch[1]}`;
                                 } else {
                                     const fallbackRegex = new RegExp(`\\b${wptName}\\b[\\s\\S]{0,300}?\\n\\s*0\\d{3}\\b`);
-                                    const fbMatch = rawTexts['OFP'].match(fallbackRegex);
+                                    const fbMatch = ofpText.match(fallbackRegex);
                                     if (fbMatch) mxsh += ` ATGO ${fbMatch[1].trim()}`;
                                 }
                             }
@@ -289,7 +286,7 @@
                             const altMatch = ofpLines[tocIndex].match(/\b([2-4]\d{2})\b/);
                             if (altMatch) tocAlt = 'FL' + altMatch[1];
 
-                            const textAfterTOC = rawTexts['OFP'].substring(rawTexts['OFP'].indexOf(ofpLines[tocIndex]));
+                            const textAfterTOC = ofpText.substring(ofpText.indexOf(ofpLines[tocIndex]));
                             const tempMatches = [...textAfterTOC.matchAll(/\b([MP]\d{2})(?:\/\d{2})?\b/g)];
                             if (tempMatches.length > 1) {
                                 nextWptTemp = tempMatches[1][1]; 
@@ -301,6 +298,31 @@
                                 }
                             }
                         }
+
+                        // -- 航空油量精算引擎 --
+                        const getFuel = (regex) => {
+                            const m = ofpText.match(regex);
+                            return m ? parseInt(m[1], 10) : 0;
+                        };
+
+                        const f_total = getFuel(/TOTAL\s+(\d+)/);
+                        if (f_total > 0) totalFuel = f_total;
+
+                        const f_altn = getFuel(/ALTN(?:\s+[A-Z0-9]{3,4})?\s+(\d+)/);
+                        const f_frf = getFuel(/FINAL RES\s+(\d+)/);
+                        divFuelCalc = `${f_altn} + ${f_frf} = ${f_altn + f_frf}`;
+
+                        const f_addWxx = getFuel(/ADD WXX\s+(\d+)/);
+                        const f_addOpn = getFuel(/ADD OPN\s+(\d+)/);
+                        const f_addAtc = getFuel(/ADD ATC\s+(\d+)/);
+                        const f_addDev = getFuel(/ADD DEV\s+(\d+)/);
+                        const f_cont = getFuel(/CONT\s+(\d+)/);
+                        const f_crit = getFuel(/CRIT FUEL\s+(\d+)/);
+                        const f_tank = getFuel(/TANKERING\s+(\d+)/);
+                        const f_extra = getFuel(/EXTRA\s+(\d+)/);
+
+                        const f_spare = f_addWxx + f_addOpn + f_addAtc + f_addDev + f_cont + f_crit + f_tank + f_extra;
+                        spareFuelCalc = f_spare.toString();
                     }
 
                     let raimOutage = 'RAIM not satisfied', raimSatellites = 'N/A';
@@ -329,6 +351,9 @@
                     block += `MXSH: ${mxsh}\n`;
                     block += `TOW: ${tow}\n`;
                     block += `LDW: ${ldw}\n`;
+                    block += `Total Fuel: ${totalFuel}\n`;
+                    block += `Division Fuel (ALTN+FRF): ${divFuelCalc}\n`;
+                    block += `SPARE Fuel: ${spareFuelCalc}\n`;
                     block += `TOC 高度: ${tocAlt}\n`;
                     block += `TOC 下個航點溫度: ${nextWptTemp}\n`;
                     block += `RAIM Outages: ${raimOutage}\n`;
@@ -337,7 +362,7 @@
 
                     document.getElementById('result-display').value = block;
                     document.getElementById('copy-btn-main').classList.remove('hidden');
-                    showToast('機密資料萃取完畢！');
+                    showToast('機密資料萃取與精算完畢！');
                 } else {
                     document.getElementById('result-display').value = '發生錯誤：\n' + responseData.message;
                     showToast('擷取失敗', true);
