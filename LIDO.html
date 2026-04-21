@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -307,12 +306,19 @@
 
                     let efbVer = 'N/A';
                     if (rawTexts['CREWINFO']) {
-                        const efbMatches = [...rawTexts['CREWINFO'].matchAll(/EFB VER[.\sA-Z0-9-]*?(R\d{3,4})/ig)];
-                        if (efbMatches.length > 0) efbVer = efbMatches[efbMatches.length - 1][1]; 
+                        // ★ 優先尋找 SJX-IOS-Rxxx 格式，並強制抓取最後一筆 (即最新生效之 AFTER 版本)
+                        const efbMatches = [...rawTexts['CREWINFO'].matchAll(/EFB VER\.?\s*SJX-IOS-(R\d{3,4})/ig)];
+                        if (efbMatches.length > 0) {
+                            efbVer = efbMatches[efbMatches.length - 1][1]; 
+                        } else {
+                            const fallbackMatches = [...rawTexts['CREWINFO'].matchAll(/EFB VER[.\sA-Z0-9-]*?(R\d{3,4})/ig)];
+                            if (fallbackMatches.length > 0) efbVer = fallbackMatches[fallbackMatches.length - 1][1]; 
+                        }
                     }
 
                     let wc = 'N/A', mxsh = 'N/A', tocAlt = 'N/A', nextWptTemp = 'N/A';
                     let totalFuel = 'N/A', divFuelCalc = 'N/A', spareFuelCalc = 'N/A';
+                    let f_addWxx = 0, f_addOpn = 0, f_addAtc = 0, f_addDev = 0, f_cont = 0, f_crit = 0, f_tank = 0, f_extra = 0;
 
                     if (rawTexts['OFP']) {
                         const ofpText = rawTexts['OFP'];
@@ -361,19 +367,24 @@
                             const m = ofpText.match(regex);
                             return m ? parseInt(m[1], 10) : 0;
                         };
+
                         const f_total = getFuel(/TOTAL\s+(\d+)/);
                         if (f_total > 0) totalFuel = f_total;
+
                         const f_altn = getFuel(/ALTN(?:\s+[A-Z0-9]{3,4})?\s+(\d+)/);
                         const f_frf = getFuel(/FINAL RES\s+(\d+)/);
                         divFuelCalc = `${f_altn} + ${f_frf} = ${f_altn + f_frf}`;
-                        const f_addWxx = getFuel(/ADD WXX\s+(\d+)/);
-                        const f_addOpn = getFuel(/ADD OPN\s+(\d+)/);
-                        const f_addAtc = getFuel(/ADD ATC\s+(\d+)/);
-                        const f_addDev = getFuel(/ADD DEV\s+(\d+)/);
-                        const f_cont = getFuel(/CONT\s+(\d+)/);
-                        const f_crit = getFuel(/CRIT FUEL\s+(\d+)/);
-                        const f_tank = getFuel(/TANKERING\s+(\d+)/);
-                        const f_extra = getFuel(/EXTRA\s+(\d+)/);
+
+                        // 將原先宣告於內部的 const 移除，指派給全域變數，以便帶出迴圈展示
+                        f_addWxx = getFuel(/ADD WXX\s+(\d+)/);
+                        f_addOpn = getFuel(/ADD OPN\s+(\d+)/);
+                        f_addAtc = getFuel(/ADD ATC\s+(\d+)/);
+                        f_addDev = getFuel(/ADD DEV\s+(\d+)/);
+                        f_cont = getFuel(/CONT\s+(\d+)/);
+                        f_crit = getFuel(/CRIT FUEL\s+(\d+)/);
+                        f_tank = getFuel(/TANKERING\s+(\d+)/);
+                        f_extra = getFuel(/EXTRA\s+(\d+)/);
+
                         const f_spare = f_addWxx + f_addOpn + f_addAtc + f_addDev + f_cont + f_crit + f_tank + f_extra;
                         spareFuelCalc = f_spare.toString();
                     }
@@ -420,6 +431,14 @@
                     rawBlock += `Total Fuel: ${totalFuel}\n`;
                     rawBlock += `Division Fuel (ALTN+FRF): ${divFuelCalc}\n`;
                     rawBlock += `SPARE Fuel: ${spareFuelCalc}\n`;
+                    rawBlock += `ADD WXX: ${f_addWxx}\n`;
+                    rawBlock += `ADD OPN: ${f_addOpn}\n`;
+                    rawBlock += `ADD ATC: ${f_addAtc}\n`;
+                    rawBlock += `ADD DEV: ${f_addDev}\n`;
+                    rawBlock += `CONT: ${f_cont}\n`;
+                    rawBlock += `CRIT FUEL: ${f_crit}\n`;
+                    rawBlock += `TANKERING: ${f_tank}\n`;
+                    rawBlock += `EXTRA: ${f_extra}\n`;
                     rawBlock += `------------------------------------------------------\n`;
                     
                     rawBlock += `其他資訊：\n`;
@@ -489,6 +508,16 @@
                                 ${renderRow('Total Fuel', totalFuel)}
                                 ${renderRow('Division Fuel (ALTN+FRF)', divFuelCalc)}
                                 ${renderRow('SPARE Fuel', spareFuelCalc, true)}
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 w-full border-t border-slate-700/30 pt-2 mt-2">
+                                    ${renderRow('ADD WXX', f_addWxx)}
+                                    ${renderRow('ADD OPN', f_addOpn)}
+                                    ${renderRow('ADD ATC', f_addAtc)}
+                                    ${renderRow('ADD DEV', f_addDev)}
+                                    ${renderRow('CONT', f_cont)}
+                                    ${renderRow('CRIT FUEL', f_crit)}
+                                    ${renderRow('TANKERING', f_tank)}
+                                    ${renderRow('EXTRA', f_extra)}
+                                </div>
                             </div>
                         </div>
 
@@ -543,5 +572,3 @@
 </body>
 </html>
 
-
-```
