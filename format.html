@@ -243,14 +243,14 @@
                         </div>
                         <!-- Embedded CRZ and FLIGHT TIME footer inside Route Block -->
                         <div class="flex border-t border-stone-200 bg-[#fbf9f6] divide-x divide-stone-200">
+                            <div class="flex-1 p-3 flex justify-between items-center bg-amber-50">
+                                <span class="text-[10px] font-bold text-[#8b5a2b] uppercase tracking-widest">CRZ Alt/Temp</span>
+                                <span class="data-font font-black text-xl text-[#b35900]" id="out-cruise-alt-temp">---</span>
+                            </div>
                             <div class="flex-1 p-3 flex justify-between items-center bg-[#2c3e50]">
                                 <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Flight Time</span>
                                 <span class="data-font font-black text-xl text-amber-400 tracking-wider" id="out-ete">--:--</span>
                             </div>
-                            <div class="flex-1 p-3 flex justify-between items-center bg-amber-50">
-                                <span class="text-[10px] font-bold text-[#8b5a2b] uppercase tracking-widest">CRZ Alt/Temp</span>
-                                <span class="data-font font-black text-xl text-[#b35900]" id="out-cruise-alt-temp">---</span>
-                            </div>       
                         </div>
                     </div>
 
@@ -427,21 +427,84 @@
         // 核心資料解析系統
         // ==========================================
         const tzMapping = {
-            'RCTP': 'Asia/Taipei', 'RCKH': 'Asia/Taipei', 'RCSS': 'Asia/Taipei', 'RCMQ': 'Asia/Taipei',
-            'VMMC': 'Asia/Macau', 'VHHH': 'Asia/Hong_Kong',
-            'ZSPD': 'Asia/Shanghai', 'ZBAA': 'Asia/Shanghai', 'ZGGG': 'Asia/Shanghai', 'ZBTJ': 'Asia/Shanghai',
-            'RJAA': 'Asia/Tokyo', 'RJTT': 'Asia/Tokyo', 'RJBB': 'Asia/Tokyo', 'ROAH': 'Asia/Tokyo', 'RJCC': 'Asia/Tokyo',
-            'RJFF': 'Asia/Tokyo', 'RJFT': 'Asia/Tokyo', 'RJFK': 'Asia/Tokyo', 'RJGG': 'Asia/Tokyo',
-            'RKSI': 'Asia/Seoul', 'RKSS': 'Asia/Seoul', 'RKPC': 'Asia/Seoul',
-            'WSSS': 'Asia/Singapore', 'WMKK': 'Asia/Kuala_Lumpur', 'WBKK': 'Asia/Kuala_Lumpur',
-            'VTBS': 'Asia/Bangkok', 'VTBD': 'Asia/Bangkok', 'VTSG': 'Asia/Bangkok',
-            'VVTS': 'Asia/Ho_Chi_Minh', 'VVNB': 'Asia/Bangkok',
-            'RPLL': 'Asia/Manila', 'RPVM': 'Asia/Manila',
-            'KLAX': 'America/Los_Angeles', 'KSFO': 'America/Los_Angeles', 'KSEA': 'America/Los_Angeles',
-            'KJFK': 'America/New_York', 'KEWR': 'America/New_York', 'KORD': 'America/Chicago',
-            'EGLL': 'Europe/London', 'EHAM': 'Europe/Amsterdam', 'EDDF': 'Europe/Berlin', 'LFPG': 'Europe/Paris',
-            'OMDB': 'Asia/Dubai', 'OTHH': 'Asia/Qatar',
-            'YSSY': 'Australia/Sydney', 'YMML': 'Australia/Melbourne', 'YBBN': 'Australia/Brisbane'
+            // 🇹🇼 台灣 (UTC+8)
+            'RCTP': 'Asia/Taipei', 'TPE': 'Asia/Taipei',
+            'RCKH': 'Asia/Taipei', 'KHH': 'Asia/Taipei',
+            'RCSS': 'Asia/Taipei', 'TSA': 'Asia/Taipei',
+            'RCMQ': 'Asia/Taipei', 'RMQ': 'Asia/Taipei',
+
+            // 🇯🇵 日本 (UTC+9)
+            'RJAA': 'Asia/Tokyo', 'NRT': 'Asia/Tokyo',
+            'RJTT': 'Asia/Tokyo', 'HND': 'Asia/Tokyo',
+            'RJBB': 'Asia/Tokyo', 'KIX': 'Asia/Tokyo',
+            'RJBE': 'Asia/Tokyo', 'UKB': 'Asia/Tokyo',
+            'RJGG': 'Asia/Tokyo', 'NGO': 'Asia/Tokyo',
+            'RJFF': 'Asia/Tokyo', 'FUK': 'Asia/Tokyo',
+            'RJFT': 'Asia/Tokyo', 'KMJ': 'Asia/Tokyo',
+            'RJFK': 'Asia/Tokyo', 'KOJ': 'Asia/Tokyo',
+            'RJCC': 'Asia/Tokyo', 'CTS': 'Asia/Tokyo',
+            'RJCH': 'Asia/Tokyo', 'HKD': 'Asia/Tokyo',
+            'RJSS': 'Asia/Tokyo', 'SDJ': 'Asia/Tokyo',
+            'ROAH': 'Asia/Tokyo', 'OKA': 'Asia/Tokyo',
+            'RORS': 'Asia/Tokyo', 'SHI': 'Asia/Tokyo',
+
+            // 🇭🇰 🇲🇴 港澳 (UTC+8)
+            'VHHH': 'Asia/Hong_Kong', 'HKG': 'Asia/Hong_Kong',
+            'VMMC': 'Asia/Macau', 'MFM': 'Asia/Macau',
+
+            // 🇻🇳 越南 (UTC+7)
+            'VVTS': 'Asia/Ho_Chi_Minh', 'SGN': 'Asia/Ho_Chi_Minh',
+            'VVNB': 'Asia/Ho_Chi_Minh', 'HAN': 'Asia/Ho_Chi_Minh',
+            'VVDN': 'Asia/Ho_Chi_Minh', 'DAD': 'Asia/Ho_Chi_Minh',
+            'VVPQ': 'Asia/Ho_Chi_Minh', 'PQC': 'Asia/Ho_Chi_Minh',
+
+            // 🇹🇭 泰國 (UTC+7)
+            'VTBS': 'Asia/Bangkok', 'BKK': 'Asia/Bangkok',
+            'VTBD': 'Asia/Bangkok', 'DMK': 'Asia/Bangkok',
+            'VTCC': 'Asia/Bangkok', 'CNX': 'Asia/Bangkok',
+
+            // 🇲🇾 馬來西亞 (UTC+8)
+            'WMKK': 'Asia/Kuala_Lumpur', 'KUL': 'Asia/Kuala_Lumpur',
+            'WBKK': 'Asia/Kuala_Lumpur', 'BKI': 'Asia/Kuala_Lumpur',
+
+            // 🇸🇬 新加坡 (UTC+8)
+            'WSSS': 'Asia/Singapore', 'SIN': 'Asia/Singapore',
+
+            // 🇮🇩 印尼 (UTC+7)
+            'WIII': 'Asia/Jakarta', 'CGK': 'Asia/Jakarta',
+
+            // 🇵🇭 菲律賓 (UTC+8)
+            'RPLL': 'Asia/Manila', 'MNL': 'Asia/Manila',
+            'RPVM': 'Asia/Manila', 'CEB': 'Asia/Manila',
+            'RPLC': 'Asia/Manila', 'CRK': 'Asia/Manila',
+
+            // 🇺🇸 北美 (多時區)
+            'KLAX': 'America/Los_Angeles', 'LAX': 'America/Los_Angeles',
+            'KSFO': 'America/Los_Angeles', 'SFO': 'America/Los_Angeles',
+            'KONT': 'America/Los_Angeles', 'ONT': 'America/Los_Angeles',
+            'KSEA': 'America/Los_Angeles', 'SEA': 'America/Los_Angeles',
+            'KPHX': 'America/Phoenix', 'PHX': 'America/Phoenix',
+            
+            // 補充：中國、韓國及歐澳中東等熱門航點
+            'ZSPD': 'Asia/Shanghai', 'PVG': 'Asia/Shanghai',
+            'ZBAA': 'Asia/Shanghai', 'PEK': 'Asia/Shanghai',
+            'ZGGG': 'Asia/Shanghai', 'CAN': 'Asia/Shanghai',
+            'ZBTJ': 'Asia/Shanghai', 'TSN': 'Asia/Shanghai',
+            'RKSI': 'Asia/Seoul', 'ICN': 'Asia/Seoul',
+            'RKSS': 'Asia/Seoul', 'GMP': 'Asia/Seoul',
+            'RKPC': 'Asia/Seoul', 'CJU': 'Asia/Seoul',
+            'KJFK': 'America/New_York', 'JFK': 'America/New_York',
+            'KEWR': 'America/New_York', 'EWR': 'America/New_York',
+            'KORD': 'America/Chicago', 'ORD': 'America/Chicago',
+            'EGLL': 'Europe/London', 'LHR': 'Europe/London',
+            'EHAM': 'Europe/Amsterdam', 'AMS': 'Europe/Amsterdam',
+            'EDDF': 'Europe/Berlin', 'FRA': 'Europe/Berlin',
+            'LFPG': 'Europe/Paris', 'CDG': 'Europe/Paris',
+            'OMDB': 'Asia/Dubai', 'DXB': 'Asia/Dubai',
+            'OTHH': 'Asia/Qatar', 'DOH': 'Asia/Qatar',
+            'YSSY': 'Australia/Sydney', 'SYD': 'Australia/Sydney',
+            'YMML': 'Australia/Melbourne', 'MEL': 'Australia/Melbourne',
+            'YBBN': 'Australia/Brisbane', 'BNE': 'Australia/Brisbane'
         };
 
         function extractData(text, keyword) {
