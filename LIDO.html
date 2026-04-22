@@ -187,12 +187,24 @@
             showToast('已斷開連線，憑證清除完畢');
         });
 
+        // 轉換航空時間格式 (HHMMZ)
         function formatAviationTime(ms) {
             if (!ms) return 'N/A';
             const d = new Date(ms);
             const hh = ('0' + d.getUTCHours()).slice(-2);
             const mm = ('0' + d.getUTCMinutes()).slice(-2);
             return `${hh}${mm}Z`;
+        }
+
+        // ★ 新增：轉換航空日期格式 (YYYY-MMM-DD)
+        function formatAviationDate(ms) {
+            if (!ms) return 'N/A';
+            const d = new Date(ms);
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const yyyy = d.getUTCFullYear();
+            const mmm = months[d.getUTCMonth()];
+            const dd = ('0' + d.getUTCDate()).slice(-2);
+            return `${yyyy}-${mmm}-${dd}`;
         }
 
         function getMetaValue(docs, targetKey) {
@@ -287,7 +299,6 @@
                             const match = iwfr.match(regex);
                             if (match) {
                                 match[1].split('\n').forEach(l => {
-                                    // 嚴格過濾：必須緊貼行首且為 4 個大寫英文字母，完美閃避縮排的 METAR/TAF 氣象代碼
                                     if (l.match(/^[A-Z]{4}/)) { 
                                         const m = l.match(/^([A-Z]{4})(?:\/([A-Z]{3}))?\b/);
                                         if (m) addAirport(set, m[1], m[2]);
@@ -358,6 +369,8 @@
                         }
                     }
 
+                    // --- 擷取航空日期與時間 ---
+                    const flightDateStr = formatAviationDate(leg.scheduledDepartureTime); // ★ 動態萃取任務日期
                     const stdStr = formatAviationTime(leg.scheduledDepartureTime);
                     const staStr = formatAviationTime(leg.scheduledTimeOfArrival);
                     const etdStr = formatAviationTime(leg.estimatedDepartureTime);
@@ -458,7 +471,11 @@
                         if (satMatch) raimSatellites = satMatch[1];
                     }
 
+                    // ==============================================
+                    // 3. 組合「隱藏的」純文字區塊 (專門供 Word 複製)
+                    // ==============================================
                     let rawBlock = `基本資訊：\n`;
+                    rawBlock += `日期: ${flightDateStr}\n`; // ★ 日期輸出
                     rawBlock += `Flight number: ${flightNo}\n`;
                     rawBlock += `機號: ${reg}\n`;
                     rawBlock += `出發地/目的地: ${dep}/${dest}\n`;
@@ -544,6 +561,9 @@
                         enrouteVisualHtml += `</div>`;
                     }
 
+                    // ==============================================
+                    // 4. 構建「高科技動態儀表板」視覺 HTML
+                    // ==============================================
                     const visualHtml = `
                         <!-- 基本資訊區塊 -->
                         <div class="bg-slate-800/40 rounded-xl border border-slate-700/60 overflow-hidden mb-6">
@@ -552,6 +572,7 @@
                                 <h3 class="text-blue-400 font-bold tracking-widest text-xs">基本資訊</h3>
                             </div>
                             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
+                                ${renderRow('日期', flightDateStr, true)} <!-- ★ 視覺化日期輸出 -->
                                 ${renderRow('Flight number', flightNo, true)}
                                 ${renderRow('機號', reg)}
                                 ${renderRow('出發地/目的地', `${dep}/${dest}`)}
@@ -688,4 +709,3 @@
     </script>
 </body>
 </html>
-
