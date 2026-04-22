@@ -40,6 +40,19 @@
             transition: all 0.3s ease;
         }
 
+        /* Custom scrollbar for MEL list */
+        .mel-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .mel-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .mel-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+
         /* A4 Landscape print settings */
         @page {
             size: A4 landscape;
@@ -72,6 +85,10 @@
             }
             .weather-block {
                 page-break-inside: avoid;
+            }
+            .mel-scroll {
+                overflow-y: visible !important;
+                max-height: none !important;
             }
         }
 
@@ -108,8 +125,19 @@
                 </button>
             </div>
         </div>
-        <p class="text-sm text-stone-500 mb-3 font-bold text-amber-600">系統提示：貼上資料後將自動解析，並於背景擷取沿線機場即時氣象 (METAR/TAF)。</p>
-        <textarea id="rawInput" class="w-full h-48 p-4 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-sm bg-stone-50" placeholder="請在此貼上您的航班與氣象資訊..." oninput="debouncedParseData()"></textarea>
+        <p class="text-sm text-stone-500 mb-3 font-bold text-amber-600">系統提示：請分別於左右兩側貼上「航路氣象」及「酬載補充」資料，系統將自動合併解析。</p>
+        
+        <!-- Grid Layout for Inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-bold text-stone-600 bg-stone-100 px-3 py-1 rounded-md inline-block w-max">📄 Part 1: 基本航路與油量 (OFP)</label>
+                <textarea id="rawInput" class="w-full h-48 p-4 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-sm bg-stone-50" placeholder="請在此貼上 航班 / 油量 / 機場資訊..." oninput="debouncedParseData()"></textarea>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-bold text-stone-600 bg-stone-100 px-3 py-1 rounded-md inline-block w-max">📦 Part 2: 載重與地勤補充 (Payload & MEL)</label>
+                <textarea id="rawInput2" class="w-full h-48 p-4 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-sm bg-stone-50" placeholder="請在此貼上 PAX / CARGO / MEL / BAY 資訊..." oninput="debouncedParseData()"></textarea>
+            </div>
+        </div>
     </div>
 
     <!-- Multi-Page Print Section -->
@@ -117,68 +145,63 @@
         
         <!-- ================= PAGE 1: Dispatch Release ================= -->
         <div id="page-1" class="a4-container flex flex-col border border-stone-200">
-            <!-- Top Row: Critical Flight Info -->
-            <div class="flex bg-[#f7f4f0] rounded-lg p-5 mb-6 justify-between items-center shadow-sm border border-[#e8dfd5]">
-                <div class="text-center px-8 flex-1">
-                    <div class="text-xs text-stone-500 uppercase font-bold mb-1">Flight No.</div>
-                    <div class="text-4xl font-black text-[#b35900] data-font tracking-wider" id="out-flight-no">----</div>
-                </div>
-                <div class="h-12 w-px bg-stone-300"></div>
-                <div class="text-center px-8 flex-1">
-                    <div class="text-xs text-stone-500 uppercase font-bold mb-1">Registration</div>
-                    <div class="text-4xl font-black text-[#4a3627] data-font tracking-wider" id="out-reg">----</div>
-                </div>
-                <div class="h-12 w-px bg-stone-300"></div>
-                <div class="text-center px-8 flex-1">
-                    <div class="text-xs text-stone-500 uppercase font-bold mb-1">OFP No.</div>
-                    <div class="text-2xl font-bold text-stone-700 data-font mt-1" id="out-ofp">----</div>
-                </div>
-                <div class="h-12 w-px bg-stone-300"></div>
-                <div class="text-center px-8 flex-1">
-                    <div class="text-xs text-stone-500 uppercase font-bold mb-1">EFB Ver.</div>
-                    <div class="text-2xl font-bold text-stone-700 data-font mt-1" id="out-efb">----</div>
-                </div>
-            </div>
-
-            <!-- Main Grid -->
-            <div class="grid grid-cols-12 gap-6 flex-grow">
+            <!-- Main Grid (Top bar removed, data merged into Flight Info) -->
+            <div class="grid grid-cols-12 gap-6 mt-4 flex-grow">
                 
-                <!-- Left Column: Highlighted Routing & Timings -->
+                <!-- Left Column: Flight Information -->
                 <div class="col-span-4 flex flex-col gap-4">
                     <div class="border-2 border-[#b35900] rounded-lg overflow-hidden flex-grow shadow-md flex flex-col bg-[#fffbf7]">
                         <div class="bg-[#b35900] text-[#f7f4f0] text-sm font-black uppercase tracking-widest px-4 py-3 text-center">
-                            Routing & Schedule
+                            Flight Information
                         </div>
                         
-                        <div class="p-6 flex-grow flex flex-col justify-around">
-                            <!-- Departure Block -->
-                            <div class="flex flex-col items-center border-b border-stone-200 pb-5">
-                                <div class="text-sm font-bold text-stone-400 tracking-widest mb-1">DEPARTURE</div>
-                                <div class="text-5xl font-black text-[#4a3627] data-font tracking-wider mb-4" id="out-dep">----</div>
-                                <div class="w-full flex justify-between items-center bg-stone-100 px-4 py-2 rounded-md">
-                                    <span class="text-sm font-black text-stone-500">STD</span>
-                                    <span class="data-font font-bold text-xl text-stone-800" id="out-std">--:--</span>
+                        <div class="p-5 flex-grow flex flex-col justify-around">
+                            <!-- Flight No & Reg -->
+                            <div class="flex justify-between items-end border-b border-stone-200 pb-3 mb-3">
+                                <div>
+                                    <div class="text-[10px] font-bold text-stone-400 tracking-widest mb-1">FLIGHT</div>
+                                    <div class="text-4xl font-black text-[#b35900] data-font tracking-wider leading-none" id="out-flight-no">----</div>
                                 </div>
-                                <div class="w-full flex justify-between items-center px-4 py-2 mt-1 bg-orange-50 rounded-md border border-orange-100">
-                                    <span class="text-sm font-black text-[#b35900]">ETD</span>
-                                    <span class="data-font font-bold text-xl text-[#b35900]" id="out-etd">--:--</span>
+                                <div class="text-right">
+                                    <div class="text-[10px] font-bold text-stone-400 tracking-widest mb-1">REG</div>
+                                    <div class="text-3xl font-black text-[#4a3627] data-font tracking-wider leading-none" id="out-reg">----</div>
+                                </div>
+                            </div>
+
+                            <!-- Departure Block -->
+                            <div class="flex flex-col items-center border-b border-stone-200 pb-3">
+                                <div class="text-[10px] font-bold text-stone-400 tracking-widest mb-1">DEPARTURE</div>
+                                <div class="text-4xl font-black text-[#4a3627] data-font tracking-wider mb-2" id="out-dep">----</div>
+                                <div class="w-full flex justify-between items-center bg-stone-100 px-3 py-1.5 rounded-md">
+                                    <span class="text-xs font-black text-stone-500">STD</span>
+                                    <span class="data-font font-bold text-lg text-stone-800" id="out-std">--:--</span>
+                                </div>
+                                <div class="w-full flex justify-between items-center px-3 py-1.5 mt-1 bg-orange-50 rounded-md border border-orange-100">
+                                    <span class="text-xs font-black text-[#b35900]">ETD</span>
+                                    <span class="data-font font-bold text-lg text-[#b35900]" id="out-etd">--:--</span>
                                 </div>
                             </div>
 
                             <!-- Arrival Block -->
-                            <div class="flex flex-col items-center border-b border-stone-200 pb-5 mt-4">
-                                <div class="text-sm font-bold text-stone-400 tracking-widest mb-1">ARRIVAL</div>
-                                <div class="text-5xl font-black text-[#4a3627] data-font tracking-wider mb-4" id="out-arr">----</div>
-                                <div class="w-full flex justify-between items-center bg-stone-100 px-4 py-2 rounded-md">
-                                    <span class="text-sm font-black text-stone-500">STA</span>
-                                    <span class="data-font font-bold text-xl text-stone-800" id="out-sta">--:--</span>
+                            <div class="flex flex-col items-center border-b border-stone-200 pb-3 mt-3">
+                                <div class="text-[10px] font-bold text-stone-400 tracking-widest mb-1">ARRIVAL</div>
+                                <div class="text-4xl font-black text-[#4a3627] data-font tracking-wider mb-2" id="out-arr">----</div>
+                                <div class="w-full flex justify-between items-center bg-stone-100 px-3 py-1.5 rounded-md">
+                                    <span class="text-xs font-black text-stone-500">STA</span>
+                                    <span class="data-font font-bold text-lg text-stone-800" id="out-sta">--:--</span>
                                 </div>
                             </div>
 
-                            <!-- ETE Block -->
-                            <div class="flex justify-between items-center pt-4 px-2">
-                                <span class="text-sm text-stone-500 font-bold tracking-widest">BLOCK TIME</span>
-                                <span class="data-font font-black text-3xl text-[#5c4033]" id="out-ete">--:--</span>
+                            <!-- Highlighted CRZ & ETE -->
+                            <div class="pt-3 flex flex-col gap-2 mt-auto">
+                                <div class="flex justify-between items-center bg-amber-100/60 px-3 py-2.5 rounded-lg border border-amber-300 shadow-sm">
+                                    <span class="text-xs text-[#b35900] font-black tracking-widest">CRZ ALT/TEMP</span>
+                                    <span class="data-font font-black text-xl text-[#8b5a2b]" id="out-cruise-alt-temp">---</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-[#2c3e50] px-3 py-2.5 rounded-lg border border-[#1a252f] shadow-inner mt-1">
+                                    <span class="text-xs text-stone-300 font-black tracking-widest">FLIGHT TIME</span>
+                                    <span class="data-font font-black text-2xl text-[#2ecc71] tracking-wider" id="out-ete">--:--</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -190,7 +213,10 @@
                     <div class="border border-[#e8dfd5] rounded-lg overflow-hidden flex-grow flex flex-col">
                         <div class="bg-[#5c4033] text-[#f7f4f0] text-xs font-bold uppercase tracking-wider px-3 py-2 flex justify-between items-center">
                             <span>ATC Clearance Route</span>
-                            <span>✈️</span>
+                            <div class="flex gap-2">
+                                <span class="bg-[#3a2a1f] px-2 py-0.5 rounded text-[#d4c3b3] data-font text-[10px] shadow-inner">OFP: <span id="out-ofp" class="text-white font-bold">--</span></span>
+                                <span class="bg-[#3a2a1f] px-2 py-0.5 rounded text-[#d4c3b3] data-font text-[10px] shadow-inner">EFB: <span id="out-efb" class="text-white font-bold">--</span></span>
+                            </div>
                         </div>
                         <div class="p-5 bg-white flex-grow flex flex-col justify-center">
                             <div class="data-font text-[1.1rem] leading-relaxed text-[#3a2a1f] tracking-wide break-words" id="out-route">
@@ -201,10 +227,6 @@
 
                     <!-- Enroute Data -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2 border border-[#e8dfd5] rounded-lg p-4 bg-white shadow-sm flex flex-col justify-center">
-                            <div class="text-xs text-stone-500 uppercase mb-1">Cruising Alt / Temp</div>
-                            <div class="data-font font-bold text-2xl text-[#8b5a2b]" id="out-cruise-alt-temp">---</div>
-                        </div>
                         <div class="border border-[#e8dfd5] rounded-lg p-4 bg-white shadow-sm flex flex-col justify-center">
                             <div class="text-xs text-stone-500 uppercase mb-1">Wind Component (W/C)</div>
                             <div class="data-font font-bold text-xl text-stone-800" id="out-wc">---</div>
@@ -231,7 +253,7 @@
                 <!-- Right Column: Fuel Distribution -->
                 <div class="col-span-3 flex flex-col gap-4">
                     <!-- Fuel -->
-                    <div class="border border-[#d4c3b3] rounded-lg overflow-hidden flex-grow flex flex-col">
+                    <div class="border border-[#d4c3b3] rounded-lg overflow-hidden flex-grow flex flex-col shadow-sm">
                         <div class="bg-[#b37a4c] text-white text-xs font-bold uppercase tracking-wider px-3 py-2">Fuel Distribution</div>
                         <div class="p-4 bg-[#fdfaf6] flex flex-col gap-3 flex-grow">
                             <!-- Total Fuel -->
@@ -255,7 +277,7 @@
                             </div>
                             
                             <!-- Spare Breakdown -->
-                            <div class="pl-3 border-l-2 border-[#d4c3b3] flex flex-col gap-1.5 mt-1 flex-grow justify-center">
+                            <div class="pl-3 border-l-2 border-[#d4c3b3] flex flex-col gap-1 mt-1 flex-grow justify-center">
                                 <div class="flex justify-between items-center">
                                     <span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD WXX</span>
                                     <span class="data-font text-sm font-bold text-stone-700" id="out-add-wxx">--</span>
@@ -290,6 +312,51 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Payload & Ground Remarks (Optimized Layout) -->
+            <div class="mt-4 grid grid-cols-12 gap-6 flex-grow">
+                <!-- Payload & Water (Condensed) -->
+                <div class="col-span-4 border border-[#e8dfd5] rounded-lg overflow-hidden flex flex-col shadow-sm">
+                    <div class="bg-[#7a5c43] text-white text-xs font-bold uppercase tracking-wider px-3 py-2">Payload & Cabin</div>
+                    <div class="p-3 bg-white flex justify-between items-center flex-grow">
+                        <!-- PAX -->
+                        <div class="text-center px-2">
+                            <div class="text-[10px] text-stone-500 font-bold tracking-wider mb-0.5">TOTAL PAX</div>
+                            <div class="data-font font-black text-4xl text-[#b35900]" id="out-pax">---</div>
+                        </div>
+                        <div class="w-px h-12 bg-stone-200"></div>
+                        <!-- CARGO / FCST Stacked -->
+                        <div class="flex flex-col justify-center gap-2 px-1">
+                            <div>
+                                <div class="text-[9px] text-stone-400 font-bold tracking-wider leading-none">CARGO(KG)</div>
+                                <div class="data-font font-bold text-sm text-stone-700 leading-none mt-1" id="out-cargo">----</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] text-stone-400 font-bold tracking-wider leading-none">FCST PLD</div>
+                                <div class="data-font font-bold text-sm text-stone-700 leading-none mt-1" id="out-fcst">----</div>
+                            </div>
+                        </div>
+                        <div class="w-px h-12 bg-stone-200"></div>
+                        <!-- WATER -->
+                        <div class="text-center px-2">
+                            <div class="text-[10px] text-stone-500 font-bold tracking-wider mb-0.5">WATER</div>
+                            <div class="data-font font-black text-3xl text-blue-600" id="out-water">--%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ground Remarks (MEL Expanded) -->
+                <div class="col-span-8 border border-[#e8dfd5] rounded-lg overflow-hidden flex flex-col shadow-sm">
+                    <div class="bg-[#5c4033] text-white text-xs font-bold uppercase tracking-wider px-3 py-2 flex justify-between items-center">
+                        <span>MEL / Dispatch Remarks</span>
+                        <span class="text-amber-200 data-font text-[10px] tracking-wider">PARKING BAY: <span id="out-bay" class="font-black text-white text-sm ml-1">----</span></span>
+                    </div>
+                    <!-- Dynamically filled MEL block -->
+                    <div class="p-4 bg-white flex flex-col flex-grow text-sm data-font text-stone-700 mel-scroll overflow-y-auto max-h-[120px]" id="out-mel-container">
+                        <div class="text-emerald-600 font-bold text-3xl tracking-widest text-center my-auto">NIL</div>
                     </div>
                 </div>
             </div>
@@ -353,7 +420,6 @@
             const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             let regexStr = `${escapedKeyword}\\s*:\\s*(.+)`;
             if (keyword === 'CONT') regexStr = `CONT.*?:\\s*(.+)`;
-            // Special handler for dynamic Division Fuel label
             if (keyword === 'Division Fuel') regexStr = `Division Fuel.*?:\\s*(.+)`;
             const regex = new RegExp(regexStr, 'i');
             const match = text.match(regex);
@@ -387,10 +453,10 @@
 
         function clearData() {
             document.getElementById('rawInput').value = '';
+            document.getElementById('rawInput2').value = '';
             parseData(); 
         }
 
-        // 防抖動機制：避免使用者連續輸入時過度觸發氣象 API
         let parseTimer;
         function debouncedParseData() {
             clearTimeout(parseTimer);
@@ -399,8 +465,11 @@
 
         function parseData() {
             const rawText = document.getElementById('rawInput').value;
+            const rawText2 = document.getElementById('rawInput2').value || '';
 
-            // --- 1. 處理 Page 1: 基本派遣資訊 ---
+            // ==========================================
+            // 處理 Page 1: 基本派遣資訊 (Input 1)
+            // ==========================================
             const routeStr = extractData(rawText, '出發地/目的地');
             let depICAO = '----', arrICAO = '----';
             if (routeStr !== 'N/A' && routeStr.includes('/')) {
@@ -415,7 +484,6 @@
                 { id: 'out-reg', key: '機號' },
                 { id: 'out-ete', key: 'ETE' },
                 { id: 'out-cruise-alt-temp', key: '巡航高度' },
-                { id: 'out-ofp', key: 'OFP 號碼' },
                 { id: 'out-efb', key: 'EFB 版本' },
                 { id: 'out-route', key: 'Route' },
                 { id: 'out-wc', key: 'W/C' },
@@ -444,12 +512,10 @@
                 }
             });
 
-            // 處理時區
             document.getElementById('out-std').textContent = convertToZuluLocalStr(extractData(rawText, 'STD'), depICAO);
             document.getElementById('out-etd').textContent = convertToZuluLocalStr(extractData(rawText, 'ETD'), depICAO);
             document.getElementById('out-sta').textContent = convertToZuluLocalStr(extractData(rawText, 'STA'), arrICAO);
             
-            // 完美解決 Division Fuel 標籤動態更替 (捕捉原始輸入內的括號文字)
             const divFuelLabel = document.getElementById('label-div-fuel');
             const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:/i);
             if (divMatch) {
@@ -458,32 +524,106 @@
                 divFuelLabel.textContent = `Division Fuel (ALTN+FRF)`;
             }
 
-            // Route 強制大寫
             const routeEl = document.getElementById('out-route');
             if (routeEl.textContent !== '----' && routeEl.textContent !== 'NO ROUTE DATA') {
                 routeEl.textContent = routeEl.textContent.toUpperCase();
             }
 
-            // --- 2. 處理 Page 2: 氣象解析與擷取 ---
+            // ==========================================
+            // 處理 Page 1 底部: 酬載與地勤補充 (Input 2)
+            // ==========================================
+            // PAX
+            const paxMatch = rawText2.match(/PAX\s*:\s*(\d+)\/(\d+)/i);
+            if (paxMatch) {
+                document.getElementById('out-pax').textContent = parseInt(paxMatch[1], 10) + parseInt(paxMatch[2], 10);
+            } else {
+                document.getElementById('out-pax').textContent = '---';
+            }
+
+            // CARGO / FCST PLD / POTABLE WATER
+            const cargoMatch = rawText2.match(/CARGO\s*:\s*(.+)/i);
+            document.getElementById('out-cargo').textContent = cargoMatch ? cargoMatch[1].trim() : '----';
+
+            const fcstMatch = rawText2.match(/FCST PLD\s*:\s*(.+)/i);
+            document.getElementById('out-fcst').textContent = fcstMatch ? fcstMatch[1].trim() : '----';
+
+            const waterMatch = rawText2.match(/POTABLE WATER QUANTITY\s*:\s*(.+)/i);
+            document.getElementById('out-water').textContent = waterMatch ? waterMatch[1].trim() : '--%';
+
+            // OFP (兩區段合併)
+            let ofp1 = extractData(rawText, 'OFP 號碼');
+            let ofp2 = '----';
+            const ofp2Match = rawText2.match(/OFP\s*:\s*(.+)/i);
+            if (ofp2Match) ofp2 = ofp2Match[1].trim();
+
+            if (ofp1 !== 'N/A' && ofp1 !== '----' && ofp2 !== '----' && ofp1 !== ofp2) {
+                document.getElementById('out-ofp').textContent = `${ofp1} / ${ofp2}`;
+            } else if (ofp1 !== 'N/A' && ofp1 !== '----') {
+                document.getElementById('out-ofp').textContent = ofp1;
+            } else if (ofp2 !== '----') {
+                document.getElementById('out-ofp').textContent = ofp2;
+            } else {
+                document.getElementById('out-ofp').textContent = '----';
+            }
+
+            // BAY (抓取 PARKING BAY 到標頭去)
+            const bayMatch = rawText2.match(/BAY:\s*([^]+?)(?=\(\d+\)|ADD OPN|$)/i);
+            document.getElementById('out-bay').textContent = bayMatch ? bayMatch[1].trim() : '----';
+
+            // MEL 智慧解析 (動態條列與過濾機號)
+            const melMatch = rawText2.match(/MEL:\s*([^]+?)(?=\(\d+\)|BAY:|$)/i);
+            let melText = melMatch ? melMatch[1].trim() : '';
+            const melContainer = document.getElementById('out-mel-container');
+
+            if(!melText || melText === '----' || melText.toUpperCase() === 'NIL' || melText.toUpperCase() === 'NONE') {
+                melContainer.innerHTML = `<div class="text-emerald-600 font-bold text-3xl tracking-widest text-center my-auto">NIL</div>`;
+            } else {
+                // 自動消除飛機註冊編號 (如 B-58301, B58306 等國籍碼)
+                const regRegex = /\bB-?\d{5}\b/gi;
+                let cleanedMel = melText.replace(regRegex, '').trim();
+
+                // 依據換行符號切割成陣列
+                const lines = cleanedMel.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                
+                let htmlObj = '<div class="flex flex-col gap-2">';
+                lines.forEach(line => {
+                    // 縮減多餘空白，讓排版更緊湊
+                    let cleanLine = line.replace(/\s{2,}/g, ' ');
+                    htmlObj += `
+                        <div class="flex items-start gap-2 border-b border-stone-100 pb-1.5 last:border-0">
+                            <span class="text-[#e74c3c] mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            <span class="leading-relaxed text-red-700 font-bold">${cleanLine}</span>
+                        </div>
+                    `;
+                });
+                htmlObj += '</div>';
+                melContainer.innerHTML = htmlObj;
+            }
+
+
+            // ==========================================
+            // 處理 Page 2: 氣象解析與擷取
+            // ==========================================
             if(rawText.trim() === '') {
                 document.getElementById('weather-blocks-container').innerHTML = `<div class="flex items-center justify-center h-full text-stone-400 font-bold">請於上方輸入區貼上含有「機場資訊」之資料，系統將自動擷取氣象。</div>`;
                 document.getElementById('global-wx-sync').textContent = "Waiting for Data...";
                 return;
             }
 
-            // 尋找「機場資訊：」區塊並擷取 ICAO
             let icaosToFetch = [];
             const wxSection = rawText.split(/機場資訊[：:]/i)[1];
             
             if (wxSection) {
-                // 抓取格式如 RCTP/TPE 的 ICAO (4碼大寫字母前置斜線)
                 const matches = wxSection.matchAll(/\b([A-Z]{4})\/[A-Z]{3}\b/g);
                 for (const match of matches) {
                     if (!icaosToFetch.includes(match[1])) icaosToFetch.push(match[1]);
                 }
             }
             
-            // 若未找到特定格式，回退至基本起降地
             if (icaosToFetch.length === 0 && depICAO !== '----') {
                 if (depICAO !== '----') icaosToFetch.push(depICAO);
                 if (arrICAO !== '----') icaosToFetch.push(arrICAO);
@@ -504,12 +644,10 @@
             document.getElementById('global-wx-sync').textContent = "SYNCING...";
             document.getElementById('global-wx-sync').className = "text-sm font-bold text-blue-600 animate-pulse";
             
-            // 建立 DOM 骨架
             for (const icao of icaos) {
                 container.innerHTML += createWeatherBlockHTML(icao);
             }
             
-            // 平行發射氣象請求
             const fetchPromises = icaos.map(icao => fetchSingleAirportWeather(icao));
             await Promise.allSettled(fetchPromises);
             
@@ -527,7 +665,6 @@
                     <span id="sync-${icao}" class="text-xs px-2 py-1 rounded bg-stone-500 font-bold tracking-wider shadow-sm">Loading...</span>
                 </div>
                 <div class="p-4 flex flex-col gap-4">
-                    <!-- METAR -->
                     <div>
                         <div class="text-sm font-bold text-[#b35900] mb-2 flex items-center gap-2">
                             <span id="metar-header-${icao}">METAR (即時天氣)</span>
@@ -535,7 +672,6 @@
                         </div>
                         <div id="metar-content-${icao}" class="raw-text border-unk text-[13.5px]">連線中...</div>
                     </div>
-                    <!-- TAF -->
                     <div>
                         <div class="text-sm font-bold text-[#b35900] mb-2 flex items-center gap-2">
                             <span>TAF (機場預報)</span>
@@ -550,7 +686,6 @@
             `;
         }
 
-        // --- 氣象核心解析邏輯 (與提供檔案完全一致) ---
         function getWeatherEmojis(text) {
             if (!text) return '';
             let emojis = [];
@@ -683,7 +818,6 @@
             return htmlOutput;
         }
 
-        // 極速平行競速 API 擷取邏輯
         async function fetchAWCData(type, icao) {
             const cleanUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}&format=json`;
             const textUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}`;
@@ -750,7 +884,6 @@
                     fetchAWCData('taf', icao)
                 ]);
 
-                // METAR
                 if (metarResult.status === 'fulfilled' && metarResult.value) {
                     const rawMetar = metarResult.value;
                     const parsed = parseWeatherElements(rawMetar, 999, 99999);
@@ -766,7 +899,6 @@
                     metarContent.className = "raw-text border-unk text-red-500 font-bold";
                 }
 
-                // TAF
                 if (tafResult.status === 'fulfilled' && tafResult.value) {
                     const rawTaf = tafResult.value;
                     tafContent.innerHTML = formatColorTAF(rawTaf);
@@ -775,7 +907,6 @@
                     tafContent.innerHTML = `<div class="bg-red-50 p-3 rounded-md text-[13.5px] text-red-600 data-font border-l-4 border-red-500 font-bold">❌ 無有效 TAF 預報資料</div>`;
                 }
 
-                // Status Badge
                 if (metarResult.status === 'rejected' && tafResult.status === 'rejected') {
                     syncStatus.innerText = "OFFLINE";
                     syncStatus.className = "text-xs px-2 py-1 rounded bg-red-500 text-white shadow font-bold tracking-widest";
@@ -796,4 +927,3 @@
     </script>
 </body>
 </html>
-
