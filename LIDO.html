@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -20,7 +19,6 @@
 </head>
 <body class="bg-slate-900 text-slate-200 min-h-screen font-sans flex items-center justify-center p-2 md:p-4">
 
-    <!-- 系統訊息提示框 -->
     <div id="toast" class="fixed top-5 right-5 transform transition-transform translate-x-full opacity-0 bg-blue-600 text-white px-6 py-3 rounded shadow-lg z-50">訊息提示</div>
 
     <!-- 階段一：網頁鎖定畫面 -->
@@ -91,12 +89,10 @@
                         </button>
                     </div>
                     
-                    <!-- 美化版的 HTML 呈現區 -->
                     <div id="visual-dashboard" class="p-5 overflow-y-auto w-full h-full font-mono text-sm space-y-6">
                         <div class="flex h-full items-center justify-center text-slate-600 text-base tracking-widest">等待目標輸入...</div>
                     </div>
                     
-                    <!-- 隱藏的純文字區塊 -->
                     <textarea id="hidden-raw-text" class="hidden"></textarea>
                 </div>
 
@@ -117,16 +113,14 @@
     </div>
 
     <script>
-        // ★ 密碼防護：字元碼陣列 [49,48,52,55,56,56] = 104788
         const getSecKey = () => [49, 48, 52, 55, 56, 56].map(c => String.fromCharCode(c)).join('');
-        // ★ GAS 後端網址
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwXYpCVHhPi5w5pejBndNN8mKZ4VtveLhgIEVbzCKwiFuKebwH6Re2j58UbPHdL00Z2Vg/exec'; 
+        // ★ 請務必貼上您重新部署後的 GAS 網址 ★
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzMbB36SdcqP56CaHlfbRuAE28ozPldpSmw85wC1e3WVPFtQRLCCH48_5LnSmoBBlxjZw/exec'; 
 
-        // ICAO 轉 IATA 字典庫 (星宇常見航網)
         const airportMap = {
             'RCTP':'TPE', 'RCKH':'KHH', 'RCSS':'TSA', 'RMQ':'RMQ',
             'VMMC':'MFM', 'VHHH':'HKG',
-            'RJAA':'NRT', 'RJTT':'HND', 'RJBB':'KIX', 'RJGG':'NGO', 'RJFF':'FUK', 'ROAH':'OKA', 'RJSS':'SDJ', 'RJCC':'CTS', 'RJCH':'HKD', 'RJFU':'NGS', 'RJOA':'HIJ', 'RJSN':'KIJ',
+            'RJAA':'NRT', 'RJTT':'HND', 'RJBB':'KIX', 'RJGG':'NGO', 'RJFF':'FUK', 'ROAH':'OKA', 'RJSS':'SDJ', 'RJCC':'CTS', 'RJCH':'HKD', 'RJFU':'NGS', 'RJOA':'HIJ', 'RJSN':'KIJ', 'RJFK':'KOJ',
             'KSFO':'SFO', 'KLAX':'LAX', 'KSEA':'SEA', 'KOAK':'OAK', 'KSMF':'SMF', 'KONT':'ONT', 'KPDX':'PDX', 'PANC':'ANC', 'PMDY':'MDY', 'PHNL':'HNL',
             'RPLL':'MNL', 'RPVM':'CEB', 'RPLC':'CRK',
             'VVNB':'HAN', 'VVTS':'SGN', 'VVDN':'DAD', 'VVCR':'CXR', 'VVPQ':'PQC',
@@ -251,9 +245,6 @@
                     const leg = ofpData.briefingPackages && ofpData.briefingPackages[0] && ofpData.briefingPackages[0].leg ? ofpData.briefingPackages[0].leg[0] : {};
                     const rawTexts = f.rawTexts || {};
 
-                    // ==============================================
-                    // 1. ATC Flight Plan 擷取
-                    // ==============================================
                     let atcText = '未尋獲 ATC 報文';
                     if (rawTexts['ATS']) {
                         const fplMatch = rawTexts['ATS'].match(/\(FPL-[\s\S]*?\)/);
@@ -262,9 +253,6 @@
                     document.getElementById('atc-display').value = atcText;
                     if (atcText !== '未尋獲 ATC 報文') document.getElementById('copy-btn-atc').classList.remove('hidden');
 
-                    // ==============================================
-                    // 2. 核心數據運算
-                    // ==============================================
                     const flightNo = (leg.commercialAirlineICAO || '') + (leg.flightNumber || '');
                     const reg = leg.aircraftDetails?.aircraftRegistration || 'N/A';
                     const dep = leg.departureAirportICAO || 'N/A';
@@ -276,45 +264,81 @@
                     const ofpNoRaw = getMetaValue(ofpDocs, 'ofpNumber') || leg.ofpNumber || '0';
                     const ofpNo = `OFP ${String(ofpNoRaw.split('/')[0]).padStart(2, '0')}`;
 
-                    // --- 跑道與機場情報 ---
                     const routeParts = flightRoute.split(/\s+/);
                     const depRwy = routeParts.length > 0 ? routeParts[0] : 'N/A';
                     const destRwy = routeParts.length > 1 ? routeParts[routeParts.length - 1] : 'N/A';
 
-                    let destAltnAirports = [], enrouteAirports = [];
-                    const isEdto = rawTexts['OFP'] && /EDTO|ETOPS/.test(rawTexts['OFP']);
+                    let destAltnSet = new Set();
+                    let enrouteSet = new Set();
+                    let suitableSet = new Set();
 
-                    if (rawTexts['OFP']) {
-                        const ofpText = rawTexts['OFP'];
-                        const altnSection = ofpText.match(/ALTERNATES[\s\S]+?(?=NAVIGATION LOG|EDTO SUMMARY)/);
-                        if (altnSection) {
-                            const lines = altnSection[0].split('\n');
-                            lines.forEach(l => {
-                                const m = l.match(/^([A-Z]{4})\b/);
-                                if (m && m[1] !== 'TIME') destAltnAirports.push(m[1]);
-                            });
+                    const addAirport = (set, icao, iata) => {
+                        if (icao && icao.length === 4) {
+                            set.add(icao);
+                            if (iata && iata.length === 3) airportMap[icao] = iata;
                         }
-                        const enrteSection = ofpText.match(/ENRTE ALTNS(?:[\s\S]*?)\n([\s\S]+?)(?=\n\n|\f|Page \d|RAMP FUEL)/i);
-                        if (enrteSection) {
-                            const lines = enrteSection[1].split('\n');
-                            lines.forEach(l => {
-                                const m = l.match(/^\s*([A-Z]{4})\b/);
-                                if (m) enrouteAirports.push(m[1]);
-                            });
-                        }
+                    };
+
+                    if (rawTexts['IWFR']) {
+                        const iwfr = rawTexts['IWFR'];
+                        
+                        const extractAirports = (headerStr, set) => {
+                            const regex = new RegExp(headerStr + "[^A-Z]*([\\s\\S]*?)(?=\\n[A-Z0-9\\s()]+:|$)", "i");
+                            const match = iwfr.match(regex);
+                            if (match) {
+                                match[1].split('\n').forEach(l => {
+                                    // 嚴格過濾：必須緊貼行首且為 4 個大寫英文字母，完美閃避縮排的 METAR/TAF 氣象代碼
+                                    if (l.match(/^[A-Z]{4}/)) { 
+                                        const m = l.match(/^([A-Z]{4})(?:\/([A-Z]{3}))?\b/);
+                                        if (m) addAirport(set, m[1], m[2]);
+                                    }
+                                });
+                            }
+                        };
+
+                        extractAirports('DESTINATION ALTERNATE[S]?', destAltnSet);
+                        extractAirports('ENROUTE AIRPORT\\(S\\)', enrouteSet);
+                        extractAirports('SUITABLE ENROUTE AIRPORT\\(S\\)', suitableSet);
                     }
 
-                    if (destAltnAirports.length === 0 && atcText !== '未尋獲 ATC 報文') {
+                    if (destAltnSet.size === 0 && atcText !== '未尋獲 ATC 報文') {
                         const destAltnMatch = atcText.match(/-[A-Z]{4}\d{4}\s+([A-Z]{4})(?:\s+([A-Z]{4}))?/);
                         if (destAltnMatch) {
-                            if (destAltnMatch[1]) destAltnAirports.push(destAltnMatch[1]);
-                            if (destAltnMatch[2]) destAltnAirports.push(destAltnMatch[2]);
+                            if (destAltnMatch[1]) addAirport(destAltnSet, destAltnMatch[1]);
+                            if (destAltnMatch[2]) addAirport(destAltnSet, destAltnMatch[2]);
                         }
                     }
-                    if (enrouteAirports.length === 0 && atcText !== '未尋獲 ATC 報文') {
-                        const raltMatch = atcText.match(/RALT\/([A-Z\s]+)(?:RMK|\n|\))/);
-                        if (raltMatch) enrouteAirports = raltMatch[1].trim().split(/\s+/);
+                    if (enrouteSet.size === 0 && suitableSet.size === 0 && atcText !== '未尋獲 ATC 報文') {
+                        const raltMatch = atcText.match(/RALT\/([\s\S]+?)(?=\s+[A-Z]{3,4}\/|\))/);
+                        if (raltMatch) {
+                            raltMatch[1].trim().split(/\s+/).forEach(code => {
+                                if (/^[A-Z]{4}$/.test(code) && code !== dep && code !== dest) addAirport(enrouteSet, code);
+                            });
+                        }
                     }
+
+                    if (destAltnSet.size === 0 && rawTexts['OFP']) {
+                        const altnSection = rawTexts['OFP'].match(/ALTERNATES[\s\S]+?(?=NAVIGATION LOG|EDTO SUMMARY)/);
+                        if (altnSection) {
+                            [...altnSection[0].matchAll(/^([A-Z]{4})\b/gm)].forEach(m => {
+                                if (m[1] !== 'TIME' && m[1] !== dep && m[1] !== dest) addAirport(destAltnSet, m[1]);
+                            });
+                        }
+                    }
+                    if (enrouteSet.size === 0 && suitableSet.size === 0 && rawTexts['OFP']) {
+                        const enrteSection = rawTexts['OFP'].match(/(?:ENRTE ALTNS|EDTO ALTERNATES|SUITABLE ENROUTE)[^\n]*\n([\s\S]+?)(?=CRITICAL FUEL|RAMP FUEL|WIND SUMMARY|EDTO|PAGE \d|LIMIT)/i);
+                        if (enrteSection) {
+                            [...enrteSection[1].matchAll(/^\s*([A-Z]{4})\b/gm)].forEach(m => {
+                                if (m[1] !== 'TIME' && m[1] !== 'PAGE' && m[1] !== dep && m[1] !== dest) {
+                                    addAirport(suitableSet, m[1]); 
+                                }
+                            });
+                        }
+                    }
+
+                    let destAltnAirports = Array.from(destAltnSet);
+                    let enrouteAirports = Array.from(enrouteSet);
+                    const isEdto = rawTexts['OFP'] && /EDTO|ETOPS/.test(rawTexts['OFP']);
 
                     let alt1Rwy = 'N/A', alt2Rwy = 'N/A';
                     if (destAltnAirports.length > 0) {
@@ -334,7 +358,6 @@
                         }
                     }
 
-                    // --- 時間與重量 ---
                     const stdStr = formatAviationTime(leg.scheduledDepartureTime);
                     const staStr = formatAviationTime(leg.scheduledTimeOfArrival);
                     const etdStr = formatAviationTime(leg.estimatedDepartureTime);
@@ -347,7 +370,6 @@
                     const tow = zfw > 0 ? ((zfw + tkofFuel) / 1000).toFixed(1) : 'N/A';
                     const ldw = zfw > 0 ? ((zfw + tkofFuel - tripFuel) / 1000).toFixed(1) : 'N/A';
 
-                    // --- EFB 版本 (精準鎖定最新版) ---
                     let efbVer = 'N/A';
                     if (rawTexts['CREWINFO']) {
                         const efbMatches = [...rawTexts['CREWINFO'].matchAll(/EFB VER\.?\s*SJX-IOS-(R\d{3,4})/ig)];
@@ -359,7 +381,6 @@
                         }
                     }
 
-                    // --- 氣象、高度與精算油量 ---
                     let cruiseAltStr = 'N/A', wc = 'N/A', mxsh = 'N/A';
                     let totalFuel = 'N/A', divFuelCalc = 'N/A', spareFuelCalc = 'N/A';
                     let f_addWxx = 0, f_addOpn = 0, f_addAtc = 0, f_addDev = 0, f_cont = 0, f_crit = 0, f_tank = 0, f_extra = 0;
@@ -402,13 +423,8 @@
                                 nextWptTempStr = tempRaw.startsWith('M') ? `-${tempRaw.substring(1)}` : `+${tempRaw.substring(1)}`;
                             }
                         }
-                        if (tocAlt !== 'N/A' && nextWptTempStr) {
-                            cruiseAltStr = `${tocAlt}/${nextWptTempStr}`;
-                        } else {
-                            cruiseAltStr = tocAlt;
-                        }
+                        cruiseAltStr = (tocAlt !== 'N/A' && nextWptTempStr) ? `${tocAlt}/${nextWptTempStr}` : tocAlt;
 
-                        // 油量精準抓取
                         const getFuel = (regex) => {
                             const m = ofpText.match(regex);
                             return m ? parseInt(m[1], 10) : 0;
@@ -433,7 +449,6 @@
                         spareFuelCalc = f_spare.toString();
                     }
 
-                    // --- RAIM ---
                     let raimOutage = 'RAIM not satisfied', raimSatellites = 'N/A';
                     if (rawTexts['RAIM']) {
                         if (rawTexts['RAIM'].includes('THERE ARE NO RAIM OUTAGES FOR THE PLANNED APPROACHES')) {
@@ -443,9 +458,6 @@
                         if (satMatch) raimSatellites = satMatch[1];
                     }
 
-                    // ==============================================
-                    // 3. 組合「隱藏的」純文字區塊 (專門供 Word 複製)
-                    // ==============================================
                     let rawBlock = `基本資訊：\n`;
                     rawBlock += `Flight number: ${flightNo}\n`;
                     rawBlock += `機號: ${reg}\n`;
@@ -487,13 +499,17 @@
                     let airportBlock = `機場資訊：\n`;
                     airportBlock += `DEPARTURE AIRPORT:\n${getAirportStr(dep)}\n`;
                     airportBlock += `DESTINATION AIRPORT:\n${getAirportStr(dest)}\n`;
-                    if (destAltnAirports.length > 0) {
+                    if (destAltnSet.size > 0) {
                         airportBlock += `DESTINATION ALTERNATE:\n`;
-                        destAltnAirports.forEach(a => airportBlock += `${getAirportStr(a)}\n`);
+                        destAltnSet.forEach(a => airportBlock += `${getAirportStr(a)}\n`);
                     }
-                    if (enrouteAirports.length > 0) {
-                        airportBlock += isEdto ? `SUITABLE ENROUTE AIRPORT(S):\n` : `ENROUTE AIRPORT(S):\n`;
-                        enrouteAirports.forEach(a => airportBlock += `${getAirportStr(a)}\n`);
+                    if (enrouteSet.size > 0) {
+                        airportBlock += `ENROUTE AIRPORT(S):\n`;
+                        enrouteSet.forEach(a => airportBlock += `${getAirportStr(a)}\n`);
+                    }
+                    if (suitableSet.size > 0) {
+                        airportBlock += `SUITABLE ENROUTE AIRPORT(S):\n`;
+                        suitableSet.forEach(a => airportBlock += `${getAirportStr(a)}\n`);
                     }
                     rawBlock += airportBlock;
                     rawBlock += `------------------------------------------------------\n`;
@@ -504,9 +520,30 @@
 
                     document.getElementById('hidden-raw-text').value = rawBlock;
 
-                    // ==============================================
-                    // 4. 構建「高科技動態儀表板」視覺 HTML
-                    // ==============================================
+                    let enrouteVisualHtml = '';
+                    if (enrouteSet.size > 0 || suitableSet.size > 0) {
+                        enrouteVisualHtml = `<div class="md:col-span-2 border-t border-slate-700/30 pt-3 mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">`;
+                        if (enrouteSet.size > 0) {
+                            enrouteVisualHtml += `
+                            <div>
+                                <span class="text-slate-400 block text-xs mb-1">ENROUTE AIRPORT(S)</span>
+                                <div class="space-y-1">
+                                    ${Array.from(enrouteSet).map(a => `<span class="text-slate-200 block font-bold tracking-widest">${getAirportStr(a)}</span>`).join('')}
+                                </div>
+                            </div>`;
+                        }
+                        if (suitableSet.size > 0) {
+                            enrouteVisualHtml += `
+                            <div>
+                                <span class="text-slate-400 block text-xs mb-1">SUITABLE ENROUTE AIRPORT(S)</span>
+                                <div class="space-y-1">
+                                    ${Array.from(suitableSet).map(a => `<span class="text-slate-200 block font-bold tracking-widest">${getAirportStr(a)}</span>`).join('')}
+                                </div>
+                            </div>`;
+                        }
+                        enrouteVisualHtml += `</div>`;
+                    }
+
                     const visualHtml = `
                         <!-- 基本資訊區塊 -->
                         <div class="bg-slate-800/40 rounded-xl border border-slate-700/60 overflow-hidden mb-6">
@@ -592,17 +629,13 @@
                                     <span class="text-slate-200 font-bold tracking-widest">${getAirportStr(dest)}</span>
                                 </div>
                                 ${destAltnAirports.length > 0 ? `
-                                <div>
+                                <div class="md:col-span-2">
                                     <span class="text-slate-400 block text-xs mb-1">DESTINATION ALTERNATE</span>
-                                    ${destAltnAirports.map(a => `<span class="text-slate-200 block font-bold tracking-widest">${getAirportStr(a)}</span>`).join('')}
-                                </div>` : ''}
-                                ${enrouteAirports.length > 0 ? `
-                                <div class="md:col-span-2 border-t border-slate-700/30 pt-2 mt-1">
-                                    <span class="text-slate-400 block text-xs mb-1">${isEdto ? 'SUITABLE ENROUTE AIRPORT(S)' : 'ENROUTE AIRPORT(S)'}</span>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        ${enrouteAirports.map(a => `<span class="text-slate-200 block font-bold tracking-widest">${getAirportStr(a)}</span>`).join('')}
+                                    <div class="flex flex-wrap gap-x-6 gap-y-1">
+                                        ${destAltnAirports.map(a => `<span class="text-slate-200 block font-bold tracking-widest">${getAirportStr(a)}</span>`).join('')}
                                     </div>
                                 </div>` : ''}
+                                ${enrouteVisualHtml}
                             </div>
                         </div>
 
@@ -635,7 +668,6 @@
             }
         });
 
-        // 複製按鈕：直接複製隱藏的純文字區塊
         document.getElementById('copy-btn-main').addEventListener('click', () => {
             const hiddenRaw = document.getElementById('hidden-raw-text');
             hiddenRaw.classList.remove('hidden'); 
