@@ -2,12 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA & iOS App 支援 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Flight Dispatch">
-    <meta name="theme-color" content="#f4ece4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Flight Dispatch Release & Weather - Pro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -16,8 +11,10 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f4ece4; 
-            /* 針對行動裝置優化滾動體驗 */
             -webkit-overflow-scrolling: touch;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .data-font {
@@ -52,40 +49,21 @@
         .mel-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .mel-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        /* Digital Dashboard Container */
         .app-container {
             width: 100%;
-            max-width: 1280px; 
+            max-width: 1194px; 
             margin: 0 auto;
             background: transparent;
         }
-        
-        /* Highlight specific TAF line animation */
-        @keyframes subtlePulse {
-            0% { background-color: rgba(254, 243, 199, 0.4); }
-            50% { background-color: rgba(254, 243, 199, 0.8); }
-            100% { background-color: rgba(254, 243, 199, 0.4); }
-        }
-        .taf-highlight {
-            animation: subtlePulse 3s infinite;
-            border-right: 4px solid #f59e0b;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transform: scale(1.01);
-            z-index: 10;
-            position: relative;
-        }
     </style>
 </head>
-<body class="text-stone-800 pb-12">
+<body class="text-stone-800 pt-safe pb-12">
 
     <!-- Top Input Section -->
-    <div class="w-full max-w-7xl mx-auto mt-4 md:mt-8 p-4 md:p-6 bg-white rounded-2xl shadow-lg border border-stone-200 mb-6 mx-2 md:mx-auto">
+    <div class="w-full max-w-[1194px] mx-auto mt-2 md:mt-6 p-4 md:p-6 bg-white rounded-2xl shadow-lg border border-stone-200 mb-6 mx-3 md:mx-auto">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <h1 class="text-xl md:text-2xl font-bold text-stone-800 flex items-center gap-2">
-                ☕ 數位座艙派遣系統 (Smart Pro)
-                <span id="offline-indicator" class="hidden bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">離線模式</span>
-            </h1>
-            <button onclick="clearData()" class="w-full sm:w-auto bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-2.5 px-6 rounded-xl shadow transition duration-200 flex justify-center items-center gap-2 active:scale-95">
+            <h1 class="text-xl md:text-2xl font-bold text-stone-800 tracking-wide">☕ 數位座艙派遣系統 <span class="text-[#8b5a2b]">Pro</span></h1>
+            <button onclick="clearData()" class="w-full sm:w-auto bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-3 md:py-2.5 px-6 rounded-xl shadow transition duration-200 flex justify-center items-center gap-2 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
@@ -95,154 +73,142 @@
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div class="flex flex-col gap-2">
-                <label class="text-xs md:text-sm font-bold text-stone-600 bg-stone-100 px-3 py-1 rounded-md inline-block w-max">📄 Part 1: 基本航路與油量</label>
-                <textarea id="rawInput" class="w-full h-32 md:h-40 p-4 border border-stone-300 rounded-xl focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-xs md:text-sm bg-stone-50 transition-shadow" placeholder="在此貼上 航班 / 油量 / 機場資訊..." oninput="debouncedParseData()"></textarea>
+                <label class="text-xs md:text-sm font-bold text-stone-600 bg-stone-100 px-3 py-1.5 rounded-md inline-block w-max">📄 Part 1: 基本航路與油量</label>
+                <textarea id="rawInput" class="w-full h-32 md:h-36 p-5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-xs md:text-sm bg-stone-50 transition-shadow" placeholder="在此貼上 航班 / 油量 / 機場資訊..." oninput="debouncedParseData()"></textarea>
             </div>
             <div class="flex flex-col gap-2">
-                <label class="text-xs md:text-sm font-bold text-stone-600 bg-stone-100 px-3 py-1 rounded-md inline-block w-max">📦 Part 2: 載重與地勤 (MEL/BAY)</label>
-                <textarea id="rawInput2" class="w-full h-32 md:h-40 p-4 border border-stone-300 rounded-xl focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-xs md:text-sm bg-stone-50 transition-shadow" placeholder="在此貼上 PAX / CARGO / MEL / BAY 資訊..." oninput="debouncedParseData()"></textarea>
+                <label class="text-xs md:text-sm font-bold text-stone-600 bg-stone-100 px-3 py-1.5 rounded-md inline-block w-max">📦 Part 2: 載重與地勤 (MEL/BAY)</label>
+                <textarea id="rawInput2" class="w-full h-32 md:h-36 p-5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-[#8b5a2b] focus:border-transparent data-font text-xs md:text-sm bg-stone-50 transition-shadow" placeholder="在此貼上 PAX / CARGO / MEL / BAY 資訊..." oninput="debouncedParseData()"></textarea>
             </div>
         </div>
     </div>
 
     <!-- Main Digital Dashboard -->
-    <div class="app-container px-2 md:px-6 flex flex-col gap-6">
+    <div class="app-container px-3 md:px-0 flex flex-col gap-6">
         
         <!-- SECTION: DISPATCH DATA -->
         <div class="flex flex-col gap-4 md:gap-6">
             
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
                 
                 <!-- Left Column: Flight Information -->
-                <div class="col-span-1 lg:col-span-4 flex flex-col gap-0 border border-[#8b5a2b] rounded-2xl overflow-hidden shadow-xl bg-white">
+                <div class="col-span-1 lg:col-span-5 flex flex-col gap-0 border border-[#8b5a2b] rounded-2xl overflow-hidden shadow-xl bg-white">
                     
                     <!-- Header Strip -->
-                    <div class="bg-gradient-to-r from-[#4a3627] to-[#8b5a2b] p-4 md:p-5 flex flex-row justify-between items-center text-white relative overflow-hidden">
+                    <div class="bg-gradient-to-r from-[#4a3627] to-[#8b5a2b] p-4 flex flex-row justify-between items-center text-white relative overflow-hidden">
                         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
                         <div class="relative z-10 text-left">
-                            <div class="text-[9px] md:text-[10px] text-stone-300 font-bold tracking-widest uppercase mb-0.5">Flight Number</div>
-                            <div class="text-3xl md:text-[2.75rem] font-black data-font tracking-wider leading-none" id="out-flight-no">----</div>
+                            <div class="text-[9px] md:text-[10px] text-stone-300 font-bold tracking-widest uppercase mb-0.5 flex items-center gap-2">
+                                Flight Number <span id="out-utc-date" class="bg-white/20 text-white px-1.5 py-0.5 rounded data-font shadow-sm tracking-wide">----</span>
+                            </div>
+                            <div class="text-3xl md:text-4xl font-black data-font tracking-wider leading-none whitespace-nowrap" id="out-flight-no">----</div>
                         </div>
-                        <div class="hidden sm:block h-10 md:h-12 w-px bg-white/20 relative z-10 mx-4"></div>
+                        <div class="hidden sm:block h-10 w-px bg-white/20 relative z-10 mx-2"></div>
                         <div class="relative z-10 text-right">
                             <div class="text-[9px] md:text-[10px] text-stone-300 font-bold tracking-widest uppercase mb-0.5">Aircraft Reg</div>
-                            <div class="text-xl md:text-[1.75rem] font-black data-font tracking-wider leading-none" id="out-reg">----</div>
+                            <div class="text-xl md:text-2xl font-black data-font tracking-wider leading-none whitespace-nowrap" id="out-reg">----</div>
                         </div>
                     </div>
 
                     <!-- Vertical Body -->
-                    <div class="p-4 md:p-5 flex-grow flex flex-col gap-3 md:gap-4 bg-[#fbf9f6]">
-                        
+                    <div class="p-3 md:p-4 flex-grow flex flex-col gap-3 bg-[#fbf9f6]">
                         <!-- DEPARTURE CARD -->
-                        <div class="bg-white rounded-xl border border-stone-200 p-3 md:p-4 shadow-sm relative overflow-hidden flex flex-col">
+                        <div class="bg-white rounded-xl border border-stone-200 p-3 shadow-sm relative overflow-hidden">
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#b35900]"></div>
-                            
-                            <div class="flex justify-between items-start mb-3 md:mb-4 ml-2 md:ml-3">
+                            <div class="flex justify-between items-start mb-2 ml-2">
                                 <div>
                                     <div class="text-[9px] md:text-[10px] font-bold text-stone-400 tracking-widest mb-1">DEPARTURE</div>
-                                    <div class="flex flex-wrap items-center gap-3">
-                                        <div class="text-4xl md:text-5xl font-black text-[#4a3627] data-font leading-none" id="out-dep">----</div>
-                                        <!-- Smart Weather Badge (Departure) - Light Theme & Ultra Compact -->
-                                        <div id="out-dep-wx" class="hidden flex-row items-center gap-1 px-1.5 py-0.5 bg-white/80 border border-stone-200/50 rounded shadow-sm transition-opacity duration-300 opacity-0 h-fit mt-1 backdrop-blur-sm">
-                                            <span class="text-[9px] font-black tracking-wider leading-none" id="out-dep-wx-cat">--</span>
-                                            <span class="text-[11px] leading-none" id="out-dep-wx-emoji"></span>
-                                            <span class="data-font text-[10px] font-bold text-stone-500 leading-none border-l border-stone-200 pl-1" id="out-dep-wx-temp">--°C</span>
-                                        </div>
-                                    </div>
+                                    <div class="text-4xl md:text-5xl font-black text-[#4a3627] data-font leading-none" id="out-dep">----</div>
                                 </div>
-                                <div class="text-right flex flex-row items-center gap-2">
-                                    <span class="text-[9px] md:text-[10px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded font-bold shadow-sm" id="out-dep-utc">UTC</span>
-                                    <div class="bg-[#b35900]/10 border border-[#b35900]/30 rounded-lg px-2.5 py-1 flex flex-col items-center justify-center shadow-sm">
-                                        <span class="text-[8px] md:text-[9px] font-bold text-[#b35900] leading-none mb-0.5">BAY</span>
-                                        <span class="data-font font-black text-xl md:text-2xl text-[#b35900] leading-none tracking-tight" id="out-dep-bay">--</span>
-                                    </div>
+                                <div class="text-right flex flex-col items-end gap-1">
+                                    <span class="text-[9px] md:text-[10px] bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold shadow-sm" id="out-dep-utc">UTC</span>
+                                    <span class="text-[10px] md:text-[11px] text-stone-500 font-bold">BAY <span class="text-[#b35900] text-base md:text-lg data-font font-black" id="out-dep-bay">--</span></span>
                                 </div>
                             </div>
-                            
-                            <div class="flex flex-row gap-2 md:gap-3 ml-2 md:ml-3 mt-auto">
-                                <div class="flex-1 bg-stone-100 rounded-xl px-3 py-2 md:py-3 flex flex-col shadow-inner">
-                                    <span class="text-[10px] md:text-[11px] font-bold text-stone-500">STD</span>
-                                    <div id="out-std" class="mt-auto w-full"></div>
+                            <div class="flex flex-row gap-2 ml-2">
+                                <div class="flex-1 bg-stone-100 rounded-lg px-2 py-1.5 flex flex-col justify-center">
+                                    <span class="text-[8px] md:text-[9px] font-bold text-stone-500 mb-0.5">STD</span>
+                                    <span class="data-font font-bold text-[15px] md:text-base text-stone-800 leading-none whitespace-nowrap" id="out-std">--:--</span>
                                 </div>
-                                <div class="flex-1 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2 md:py-3 flex flex-col shadow-inner">
-                                    <span class="text-[10px] md:text-[11px] font-bold text-[#b35900]">ETD</span>
-                                    <div id="out-etd" class="mt-auto w-full"></div>
+                                <div class="flex-1 bg-orange-50 border border-orange-100 rounded-lg px-2 py-1.5 flex flex-col justify-center">
+                                    <span class="text-[8px] md:text-[9px] font-bold text-[#b35900] mb-0.5">ETD</span>
+                                    <span class="data-font font-bold text-[15px] md:text-base text-[#b35900] leading-none whitespace-nowrap" id="out-etd">--:--</span>
+                                </div>
+                            </div>
+                            <!-- Simple Open Weather Capsule -->
+                            <div id="dep-simple-wx" class="hidden mt-3 bg-[#1c1c1e] rounded-[16px] p-3 flex items-center gap-3 shadow-md ml-2 border border-stone-800">
+                                <div class="text-3xl leading-none" id="dep-wx-icon">☁️</div>
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="text-[13px] font-semibold text-white tracking-wide">Departure Weather</span>
+                                    <span class="text-[12px] text-[#98989f]" id="dep-wx-desc">Loading...</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Vertical Connector -->
-                        <div class="flex justify-center -my-2 md:-my-3 relative z-10 text-[#8b5a2b] opacity-60">
-                            <svg class="w-6 h-6 md:w-8 md:h-8 rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                        <div class="flex justify-center -my-2 relative z-10 text-[#8b5a2b] opacity-60">
+                            <svg class="w-6 h-6 rotate-180" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
                         </div>
 
                         <!-- ARRIVAL CARD -->
-                        <div class="bg-white rounded-xl border border-stone-200 p-3 md:p-4 shadow-sm relative overflow-hidden flex flex-col">
+                        <div class="bg-white rounded-xl border border-stone-200 p-3 shadow-sm relative overflow-hidden">
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-stone-400"></div>
-                            
-                            <div class="flex justify-between items-start mb-3 md:mb-4 ml-2 md:ml-3">
+                            <div class="flex justify-between items-start mb-2 ml-2">
                                 <div>
                                     <div class="text-[9px] md:text-[10px] font-bold text-stone-400 tracking-widest mb-1">ARRIVAL</div>
-                                    <div class="flex flex-wrap items-center gap-3">
-                                        <div class="text-4xl md:text-5xl font-black text-[#4a3627] data-font leading-none" id="out-arr">----</div>
-                                        <!-- Smart Weather Badge (Arrival) - Light Theme & Ultra Compact -->
-                                        <div id="out-arr-wx" class="hidden flex-row items-center gap-1 px-1.5 py-0.5 bg-white/80 border border-stone-200/50 rounded shadow-sm transition-opacity duration-300 opacity-0 h-fit mt-1 backdrop-blur-sm">
-                                            <span class="text-[9px] font-black tracking-wider leading-none" id="out-arr-wx-cat">--</span>
-                                            <span class="text-[11px] leading-none" id="out-arr-wx-emoji"></span>
-                                            <span class="data-font text-[10px] font-bold text-stone-500 leading-none border-l border-stone-200 pl-1" id="out-arr-wx-temp">--°C</span>
-                                        </div>
-                                    </div>
+                                    <div class="text-4xl md:text-5xl font-black text-[#4a3627] data-font leading-none" id="out-arr">----</div>
                                 </div>
-                                <div class="text-right flex flex-row items-center gap-2">
-                                    <div class="bg-[#4a3627]/10 border border-[#4a3627]/30 rounded-lg px-2.5 py-1 flex flex-col items-center justify-center shadow-sm">
-                                        <span class="text-[8px] md:text-[9px] font-bold text-[#4a3627] leading-none mb-0.5">BAY</span>
-                                        <span class="data-font font-black text-xl md:text-2xl text-[#4a3627] leading-none tracking-tight" id="out-arr-bay">--</span>
-                                    </div>
-                                    <span class="text-[9px] md:text-[10px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded font-bold shadow-sm" id="out-arr-utc">UTC</span>
+                                <div class="text-right flex flex-col items-end gap-1">
+                                    <span class="text-[9px] md:text-[10px] bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold shadow-sm" id="out-arr-utc">UTC</span>
+                                    <span class="text-[10px] md:text-[11px] text-stone-500 font-bold">BAY <span class="text-[#b35900] text-base md:text-lg data-font font-black" id="out-arr-bay">--</span></span>
                                 </div>
                             </div>
-                            
-                            <div class="flex ml-2 md:ml-3 mt-auto">
-                                <div class="flex-1 bg-stone-100 rounded-xl px-3 py-2 md:py-3 flex flex-col shadow-inner">
-                                    <span class="text-[10px] md:text-[11px] font-bold text-stone-500">STA</span>
-                                    <div id="out-sta" class="mt-auto w-full"></div>
+                            <div class="flex ml-2">
+                                <div class="flex-1 bg-stone-100 rounded-lg px-2 py-1.5 flex flex-col justify-center">
+                                    <span class="text-[8px] md:text-[9px] font-bold text-stone-500 mb-0.5">STA</span>
+                                    <span class="data-font font-bold text-[15px] md:text-base text-stone-800 leading-none whitespace-nowrap" id="out-sta">--:--</span>
+                                </div>
+                            </div>
+                            <!-- Simple Open Weather Capsule -->
+                            <div id="arr-simple-wx" class="hidden mt-3 bg-[#1c1c1e] rounded-[16px] p-3 flex items-center gap-3 shadow-md ml-2 border border-stone-800">
+                                <div class="text-3xl leading-none" id="arr-wx-icon">☁️</div>
+                                <div class="flex flex-col gap-0.5">
+                                    <span class="text-[13px] font-semibold text-white tracking-wide">Arrival Weather</span>
+                                    <span class="text-[12px] text-[#98989f]" id="arr-wx-desc">Loading...</span>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- Middle Column: Route & Weather & New Enroute Data -->
-                <div class="col-span-1 lg:col-span-5 flex flex-col gap-4 md:gap-6">
-                    <!-- Route -->
+                <!-- Middle Column: Route & Enroute Data & Weights -->
+                <div class="col-span-1 lg:col-span-4 flex flex-col gap-4 md:gap-5">
                     <div class="border border-[#e8dfd5] rounded-2xl overflow-hidden flex-grow flex flex-col shadow-md bg-white">
-                        <div class="bg-[#5c4033] text-[#f7f4f0] text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 md:py-3 flex justify-between items-center">
+                        <div class="bg-[#5c4033] text-[#f7f4f0] text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 md:py-2.5 flex justify-between items-center">
                             <span>ATC Clearance Route</span>
                             <div class="flex gap-1.5 md:gap-2">
-                                <span class="bg-[#3a2a1f] px-1.5 md:px-2 py-0.5 rounded text-[#d4c3b3] data-font text-[9px] md:text-[10px] shadow-inner flex items-center">OFP: <span id="out-ofp" class="text-white font-bold ml-1 flex items-center">--</span></span>
-                                <span class="bg-[#3a2a1f] px-1.5 md:px-2 py-0.5 rounded text-[#d4c3b3] data-font text-[9px] md:text-[10px] shadow-inner">EFB: <span id="out-efb" class="text-white font-bold ml-1">--</span></span>
+                                <span class="bg-[#3a2a1f] px-1.5 md:px-2 py-0.5 rounded text-[#d4c3b3] data-font text-[9px] shadow-inner">OFP:<span id="out-ofp" class="text-white font-bold ml-1">--</span></span>
+                                <span class="bg-[#3a2a1f] px-1.5 md:px-2 py-0.5 rounded text-[#d4c3b3] data-font text-[9px] shadow-inner">EFB:<span id="out-efb" class="text-white font-bold ml-1">--</span></span>
                             </div>
                         </div>
                         <div class="p-4 md:p-5 flex-grow flex flex-col justify-center">
-                            <div class="data-font text-sm md:text-[1.1rem] leading-relaxed text-[#3a2a1f] tracking-wide break-words" id="out-route">
+                            <div class="data-font text-sm md:text-base leading-relaxed text-[#3a2a1f] tracking-wide break-words" id="out-route">
                                 NO ROUTE DATA
                             </div>
                         </div>
-                        <!-- Embedded CRZ and FLIGHT TIME footer inside Route Block -->
+                        <!-- Embedded CRZ and FLIGHT TIME -->
                         <div class="flex flex-row border-t border-stone-200 bg-[#fbf9f6] divide-x divide-stone-200">
                             <div class="flex-1 p-2 md:p-3 flex flex-col md:flex-row justify-center md:justify-between items-center bg-[#2c3e50] gap-1 md:gap-0">
                                 <span class="text-[9px] md:text-[10px] font-bold text-stone-400 uppercase tracking-widest text-center md:text-left">Flight Time</span>
-                                <span class="data-font font-black text-lg md:text-xl text-amber-400 tracking-wider" id="out-ete">--:--</span>
+                                <span class="data-font font-black text-lg md:text-xl text-amber-400 tracking-wider whitespace-nowrap" id="out-ete">--:--</span>
                             </div>
                             <div class="flex-1 p-2 md:p-3 flex flex-col md:flex-row justify-center md:justify-between items-center bg-amber-50 gap-1 md:gap-0">
                                 <span class="text-[9px] md:text-[10px] font-bold text-[#8b5a2b] uppercase tracking-widest text-center md:text-left">CRZ Alt/Temp</span>
-                                <span class="data-font font-black text-lg md:text-xl text-[#b35900]" id="out-cruise-alt-temp">---</span>
+                                <span class="data-font font-black text-lg md:text-xl text-[#b35900] whitespace-nowrap" id="out-cruise-alt-temp">---</span>
                             </div>           
                         </div>
                     </div>
 
-                    <!-- Enroute Data (Grid trimmed down to W/C and MXSH) -->
                     <div class="grid grid-cols-2 gap-3 md:gap-4">
                         <div class="border border-[#e8dfd5] rounded-xl p-3 md:p-4 bg-white shadow-sm flex flex-col justify-center">
                             <div class="text-[9px] md:text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1">Wind Component</div>
@@ -253,44 +219,52 @@
                             <div class="data-font font-bold text-lg md:text-xl text-[#d97706]" id="out-mxsh">---</div>
                         </div>
                     </div>
+                    
+                    <!-- Moved TOW & LDW Here -->
+                    <div class="grid grid-cols-2 gap-3 md:gap-4">
+                        <div class="border border-[#e8dfd5] rounded-xl p-3 md:p-4 bg-white shadow-sm flex justify-between items-center">
+                            <span class="text-[9px] md:text-[10px] text-stone-500 font-bold uppercase tracking-wider">TOW</span>
+                            <span class="data-font font-bold text-xl md:text-2xl text-[#4a3627]" id="out-tow">--.-</span>
+                        </div>
+                        <div class="border border-[#e8dfd5] rounded-xl p-3 md:p-4 bg-white shadow-sm flex justify-between items-center">
+                            <span class="text-[9px] md:text-[10px] text-stone-500 font-bold uppercase tracking-wider">LDW</span>
+                            <span class="data-font font-bold text-xl md:text-2xl text-[#4a3627]" id="out-ldw">--.-</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Right Column: Fuel Distribution -->
-                <div class="col-span-1 lg:col-span-3 flex flex-col gap-4 md:gap-6">
-                    <!-- Fuel -->
+                <div class="col-span-1 lg:col-span-3 flex flex-col gap-4 md:gap-5">
                     <div class="border border-[#d4c3b3] rounded-2xl overflow-hidden flex-grow flex flex-col shadow-md bg-white">
-                        <div class="bg-[#b37a4c] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 md:py-3">Fuel Distribution</div>
+                        <div class="bg-[#b37a4c] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 md:py-2.5">Fuel Distribution</div>
                         <div class="p-3 md:p-4 bg-[#fdfaf6] flex flex-col gap-2 md:gap-3 flex-grow">
-                            <!-- Total Fuel -->
                             <div class="flex justify-between md:block items-end md:items-stretch">
                                 <div class="text-xs md:text-sm text-[#8b5a2b] font-bold mb-1">Total Fuel</div>
                                 <div class="data-font font-black text-2xl md:text-3xl text-[#6e4620] md:text-right" id="out-total-fuel">----</div>
                             </div>
                             <div class="w-full h-px bg-[#e8dfd5] my-1 md:my-0"></div>
                             
-                            <!-- Division & Spare Row on Mobile, Stacked on Desktop -->
-                            <div class="flex justify-between md:flex-col gap-2 md:gap-0 items-end md:items-stretch">
+                            <div class="flex justify-between md:flex-col gap-2 md:gap-0">
                                 <div class="flex-1 md:w-full">
-                                    <div class="text-[10px] md:text-[11px] text-[#8c6b5d] mb-1 font-bold leading-tight" id="label-div-fuel">Division Fuel <span class="bg-stone-200 text-stone-700 px-1.5 py-0.5 rounded shadow-sm text-[10px] md:text-xs tracking-wider">ALTN+FRF</span></div>
+                                    <div class="text-[10px] md:text-xs text-[#8c6b5d] mb-0.5 md:mb-1 font-bold leading-tight" id="label-div-fuel">Division Fuel</div>
                                     <div class="data-font font-bold text-lg md:text-xl text-[#5c4033] md:text-right" id="out-div-fuel">----</div>
                                 </div>
                                 <div class="hidden md:block w-full h-px bg-[#e8dfd5] my-2"></div>
                                 <div class="flex-1 md:w-full text-right md:text-left">
-                                    <div class="text-[10px] md:text-[11px] text-[#8c6b5d] mb-1 font-bold md:text-left text-right">Spare Fuel</div>
+                                    <div class="text-[10px] md:text-xs text-[#8c6b5d] mb-0.5 md:mb-1 font-bold md:text-left text-right">Spare Fuel</div>
                                     <div class="data-font font-bold text-lg md:text-xl text-[#4b6b3e] md:text-right" id="out-spare-fuel">----</div>
                                 </div>
                             </div>
                             
-                            <!-- Spare Breakdown -->
-                            <div class="pl-2 md:pl-3 border-l-2 border-[#d4c3b3] flex flex-col gap-1 md:gap-1.5 mt-2 flex-grow justify-center">
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">ADD WXX</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-add-wxx">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">ADD OPN</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-add-opn">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">ADD ATC</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-add-atc">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">ADD DEV</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-add-dev">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">CONT</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-cont">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-crit-fuel">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">TANKERING</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-tankering">--</span></div>
-                                <div class="flex justify-between items-center"><span class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider">EXTRA</span><span class="data-font text-xs md:text-sm font-bold text-stone-700" id="out-extra">--</span></div>
+                            <div class="pl-2 md:pl-3 border-l-2 border-[#d4c3b3] flex flex-col gap-1 mt-2 flex-grow justify-center">
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">ADD WXX</span><span class="data-font text-xs font-bold text-stone-700" id="out-add-wxx">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">ADD OPN</span><span class="data-font text-xs font-bold text-stone-700" id="out-add-opn">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">ADD ATC</span><span class="data-font text-xs font-bold text-stone-700" id="out-add-atc">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">ADD DEV</span><span class="data-font text-xs font-bold text-stone-700" id="out-add-dev">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">CONT</span><span class="data-font text-xs font-bold text-stone-700" id="out-cont">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><span class="data-font text-xs font-bold text-stone-700" id="out-crit-fuel">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">TANKERING</span><span class="data-font text-xs font-bold text-stone-700" id="out-tankering">--</span></div>
+                                <div class="flex justify-between items-center"><span class="text-[9px] text-stone-500 font-bold tracking-wider">EXTRA</span><span class="data-font text-xs font-bold text-stone-700" id="out-extra">--</span></div>
                             </div>
                         </div>
                     </div>
@@ -298,44 +272,28 @@
             </div>
 
             <!-- Bottom Row: Payload & Ground Remarks -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 mt-4 md:mt-2">
-                <!-- Payload & Weights -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 mt-2">
+                <!-- Payload & Cabin (Weights moved up) -->
                 <div class="col-span-1 lg:col-span-6 flex flex-col gap-4">
-                    <!-- Weights row -->
-                    <div class="grid grid-cols-2 gap-3 md:gap-4">
-                        <div class="border border-[#e8dfd5] rounded-xl p-3 bg-white shadow-sm flex justify-between items-center">
-                            <span class="text-[9px] md:text-[10px] text-stone-500 font-bold uppercase tracking-wider">TOW</span>
-                            <span class="data-font font-bold text-xl md:text-2xl text-[#4a3627]" id="out-tow">--.-</span>
-                        </div>
-                        <div class="border border-[#e8dfd5] rounded-xl p-3 bg-white shadow-sm flex justify-between items-center">
-                            <span class="text-[9px] md:text-[10px] text-stone-500 font-bold uppercase tracking-wider">LDW</span>
-                            <span class="data-font font-bold text-xl md:text-2xl text-[#4a3627]" id="out-ldw">--.-</span>
-                        </div>
-                    </div>
-
-                    <!-- Payload row -->
-                    <div class="border border-[#e8dfd5] rounded-xl overflow-hidden flex flex-col shadow-sm bg-white">
+                    <div class="border border-[#e8dfd5] rounded-xl overflow-hidden flex flex-col shadow-sm bg-white h-full justify-center">
                         <div class="bg-[#7a5c43] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2">Payload & Cabin</div>
                         <div class="p-3 md:p-4 grid grid-cols-2 md:flex md:justify-between items-center gap-3 md:gap-4">
-                            <!-- PAX -->
                             <div class="text-center flex-1">
                                 <div class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider mb-0.5">TOTAL PAX</div>
                                 <div class="data-font font-black text-2xl md:text-3xl text-[#b35900]" id="out-pax">---</div>
                             </div>
                             <div class="hidden md:block w-px h-10 bg-stone-200"></div>
-                            <!-- CARGO / FCST Stacked -->
                             <div class="flex flex-col justify-center gap-1.5 text-center md:text-left flex-1">
                                 <div>
                                     <div class="text-[8px] md:text-[9px] text-stone-400 font-bold tracking-wider leading-none">CARGO(KG)</div>
-                                    <div class="data-font font-bold text-sm text-stone-700 leading-none mt-1" id="out-cargo">----</div>
+                                    <div class="data-font font-bold text-sm md:text-[15px] text-stone-700 leading-none mt-1" id="out-cargo">----</div>
                                 </div>
                                 <div>
                                     <div class="text-[8px] md:text-[9px] text-stone-400 font-bold tracking-wider leading-none">FCST PLD</div>
-                                    <div class="data-font font-bold text-sm text-stone-700 leading-none mt-1" id="out-fcst">----</div>
+                                    <div class="data-font font-bold text-sm md:text-[15px] text-stone-700 leading-none mt-1" id="out-fcst">----</div>
                                 </div>
                             </div>
                             <div class="hidden md:block w-px h-10 bg-stone-200"></div>
-                            <!-- WATER -->
                             <div class="text-center col-span-2 md:col-span-1 flex-1 bg-blue-50/50 md:bg-transparent rounded-lg py-2 md:py-0">
                                 <div class="text-[9px] md:text-[10px] text-stone-500 font-bold tracking-wider mb-0.5">WATER</div>
                                 <div class="data-font font-black text-2xl md:text-3xl text-blue-600" id="out-water">--%</div>
@@ -346,10 +304,10 @@
 
                 <!-- Ground Remarks (MEL) -->
                 <div class="col-span-1 lg:col-span-6 border border-[#e8dfd5] rounded-xl overflow-hidden flex flex-col shadow-md bg-white">
-                    <div class="bg-[#5c4033] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 md:py-3 flex justify-between items-center">
+                    <div class="bg-[#5c4033] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 flex justify-between items-center">
                         <span>MEL / Dispatch Remarks</span>
                     </div>
-                    <div class="p-3 md:p-4 bg-white flex flex-col flex-grow text-xs md:text-sm data-font text-stone-700 mel-scroll overflow-y-auto max-h-[150px] md:max-h-[180px]" id="out-mel-container">
+                    <div class="p-3 md:p-4 bg-white flex flex-col flex-grow text-xs md:text-[13.5px] data-font text-stone-700 mel-scroll overflow-y-auto max-h-[150px] md:max-h-[170px]" id="out-mel-container">
                         <div class="text-emerald-600 font-bold text-2xl md:text-3xl tracking-widest text-center my-auto py-4">NIL</div>
                     </div>
                 </div>
@@ -358,22 +316,31 @@
         </div>
 
         <!-- SECTION: AVIATION WEATHER -->
-        <div class="flex flex-col border border-stone-200 rounded-2xl overflow-hidden shadow-lg bg-white mt-2">
+        <div class="flex flex-col border border-stone-200 rounded-2xl overflow-hidden shadow-lg bg-white mt-4 md:mt-2">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-[#3b4c59] to-[#2c3e50] p-4 md:p-5 flex justify-between items-center text-white">
+            <div class="bg-gradient-to-r from-[#3b4c59] to-[#2c3e50] p-4 flex justify-between items-center text-white">
                 <div>
-                    <h1 class="text-lg md:text-2xl font-bold tracking-wider mb-0.5 md:mb-1">AVIATION WEATHER</h1>
-                    <p class="text-[9px] md:text-xs text-stone-300 tracking-widest uppercase font-semibold">METAR & TAF Reports</p>
+                    <h1 class="text-lg md:text-xl font-bold tracking-wider mb-0.5 flex items-center gap-2">
+                        AVIATION WEATHER
+                        <span id="wx-utc-date" class="text-[10px] md:text-xs bg-[#1f2b38] border border-[#4a6b8c] px-2 py-0.5 rounded shadow-inner font-bold data-font tracking-wide">----</span>
+                    </h1>
+                    <p class="text-[9px] md:text-[10px] text-stone-300 tracking-widest uppercase font-semibold">METAR & TAF Reports</p>
                 </div>
-                <div class="text-right">
-                    <div class="text-[9px] md:text-xs text-stone-400 uppercase font-semibold mb-0.5">Sync Status</div>
-                    <div id="global-wx-sync" class="text-xs md:text-sm font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded">Standby</div>
+                <div class="flex items-center gap-3">
+                    <!-- 新增的重新整理按鈕 -->
+                    <button onclick="refreshWeather()" class="bg-stone-700 hover:bg-stone-600 text-stone-200 p-2 rounded-lg transition-colors active:scale-95 shadow-sm" title="Refresh METAR/TAF">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                    <div class="text-right flex flex-col items-end">
+                        <div class="text-[9px] md:text-[10px] text-stone-400 uppercase font-semibold mb-0.5">Sync Status</div>
+                        <div id="global-wx-sync" class="text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded">Standby</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Weather Blocks Container -->
-            <div id="weather-blocks-container" class="p-3 md:p-5 flex flex-col gap-3 md:gap-4 bg-[#fbf9f6] min-h-[150px]">
-                <div class="flex items-center justify-center h-full text-sm text-stone-400 font-bold py-10 text-center">
+            <div id="weather-blocks-container" class="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 p-3 md:p-5 bg-[#fbf9f6] min-h-[150px]">
+                <div class="col-span-1 lg:col-span-2 flex items-center justify-center h-full text-sm text-stone-400 font-bold py-10 text-center">
                     請於上方輸入區貼上含有「機場資訊」之資料，系統將自動擷取氣象。
                 </div>
             </div>
@@ -383,97 +350,87 @@
 
     <script>
         // ==========================================
-        // 核心資料庫與全域狀態
+        // 全域變數定義
         // ==========================================
-        window.flightTargetTimes = { dep: { icao: '', time: '' }, arr: { icao: '', time: '' } };
+        let currentDepICAO = '----';
+        let currentArrICAO = '----';
+        let currentDepUTC = '';
+        let currentArrUTC = '';
+        let currentIcaosToFetch = [];
+        let currentDateUTC = '----';
 
+        // ==========================================
+        // 核心資料解析系統
+        // ==========================================
         const tzMapping = {
-            'RCTP': 'Asia/Taipei', 'TPE': 'Asia/Taipei', 'RCKH': 'Asia/Taipei', 'KHH': 'Asia/Taipei',
-            'RCSS': 'Asia/Taipei', 'TSA': 'Asia/Taipei', 'RCMQ': 'Asia/Taipei', 'RMQ': 'Asia/Taipei',
-            'RJAA': 'Asia/Tokyo', 'NRT': 'Asia/Tokyo', 'RJTT': 'Asia/Tokyo', 'HND': 'Asia/Tokyo',
-            'RJBB': 'Asia/Tokyo', 'KIX': 'Asia/Tokyo', 'RJBE': 'Asia/Tokyo', 'UKB': 'Asia/Tokyo',
-            'RJGG': 'Asia/Tokyo', 'NGO': 'Asia/Tokyo', 'RJFF': 'Asia/Tokyo', 'FUK': 'Asia/Tokyo',
-            'RJFT': 'Asia/Tokyo', 'KMJ': 'Asia/Tokyo', 'RJFK': 'Asia/Tokyo', 'KOJ': 'Asia/Tokyo',
-            'RJCC': 'Asia/Tokyo', 'CTS': 'Asia/Tokyo', 'RJCH': 'Asia/Tokyo', 'HKD': 'Asia/Tokyo',
-            'RJSS': 'Asia/Tokyo', 'SDJ': 'Asia/Tokyo', 'ROAH': 'Asia/Tokyo', 'OKA': 'Asia/Tokyo',
+            'RCTP': 'Asia/Taipei', 'TPE': 'Asia/Taipei',
+            'RCKH': 'Asia/Taipei', 'KHH': 'Asia/Taipei',
+            'RCSS': 'Asia/Taipei', 'TSA': 'Asia/Taipei',
+            'RCMQ': 'Asia/Taipei', 'RMQ': 'Asia/Taipei',
+            'RJAA': 'Asia/Tokyo', 'NRT': 'Asia/Tokyo',
+            'RJTT': 'Asia/Tokyo', 'HND': 'Asia/Tokyo',
+            'RJBB': 'Asia/Tokyo', 'KIX': 'Asia/Tokyo',
+            'RJBE': 'Asia/Tokyo', 'UKB': 'Asia/Tokyo',
+            'RJGG': 'Asia/Tokyo', 'NGO': 'Asia/Tokyo',
+            'RJFF': 'Asia/Tokyo', 'FUK': 'Asia/Tokyo',
+            'RJFT': 'Asia/Tokyo', 'KMJ': 'Asia/Tokyo',
+            'RJFK': 'Asia/Tokyo', 'KOJ': 'Asia/Tokyo',
+            'RJCC': 'Asia/Tokyo', 'CTS': 'Asia/Tokyo',
+            'RJCH': 'Asia/Tokyo', 'HKD': 'Asia/Tokyo',
+            'RJSS': 'Asia/Tokyo', 'SDJ': 'Asia/Tokyo',
+            'ROAH': 'Asia/Tokyo', 'OKA': 'Asia/Tokyo',
             'RORS': 'Asia/Tokyo', 'SHI': 'Asia/Tokyo',
-            'VHHH': 'Asia/Hong_Kong', 'HKG': 'Asia/Hong_Kong', 'VMMC': 'Asia/Macau', 'MFM': 'Asia/Macau',
-            'VVTS': 'Asia/Ho_Chi_Minh', 'SGN': 'Asia/Ho_Chi_Minh', 'VVNB': 'Asia/Ho_Chi_Minh', 'HAN': 'Asia/Ho_Chi_Minh',
-            'VVDN': 'Asia/Ho_Chi_Minh', 'DAD': 'Asia/Ho_Chi_Minh', 'VVPQ': 'Asia/Ho_Chi_Minh', 'PQC': 'Asia/Ho_Chi_Minh',
-            'VTBS': 'Asia/Bangkok', 'BKK': 'Asia/Bangkok', 'VTBD': 'Asia/Bangkok', 'DMK': 'Asia/Bangkok',
+            'VHHH': 'Asia/Hong_Kong', 'HKG': 'Asia/Hong_Kong',
+            'VMMC': 'Asia/Macau', 'MFM': 'Asia/Macau',
+            'VVTS': 'Asia/Ho_Chi_Minh', 'SGN': 'Asia/Ho_Chi_Minh',
+            'VVNB': 'Asia/Ho_Chi_Minh', 'HAN': 'Asia/Ho_Chi_Minh',
+            'VVDN': 'Asia/Ho_Chi_Minh', 'DAD': 'Asia/Ho_Chi_Minh',
+            'VVPQ': 'Asia/Ho_Chi_Minh', 'PQC': 'Asia/Ho_Chi_Minh',
+            'VTBS': 'Asia/Bangkok', 'BKK': 'Asia/Bangkok',
+            'VTBD': 'Asia/Bangkok', 'DMK': 'Asia/Bangkok',
             'VTCC': 'Asia/Bangkok', 'CNX': 'Asia/Bangkok',
-            'WMKK': 'Asia/Kuala_Lumpur', 'KUL': 'Asia/Kuala_Lumpur', 'WBKK': 'Asia/Kuala_Lumpur', 'BKI': 'Asia/Kuala_Lumpur',
-            'WSSS': 'Asia/Singapore', 'SIN': 'Asia/Singapore', 'WIII': 'Asia/Jakarta', 'CGK': 'Asia/Jakarta',
-            'RPLL': 'Asia/Manila', 'MNL': 'Asia/Manila', 'RPVM': 'Asia/Manila', 'CEB': 'Asia/Manila', 'RPLC': 'Asia/Manila', 'CRK': 'Asia/Manila',
-            'KLAX': 'America/Los_Angeles', 'LAX': 'America/Los_Angeles', 'KSFO': 'America/Los_Angeles', 'SFO': 'America/Los_Angeles',
-            'KONT': 'America/Los_Angeles', 'ONT': 'America/Los_Angeles', 'KSEA': 'America/Los_Angeles', 'SEA': 'America/Los_Angeles',
+            'WMKK': 'Asia/Kuala_Lumpur', 'KUL': 'Asia/Kuala_Lumpur',
+            'WBKK': 'Asia/Kuala_Lumpur', 'BKI': 'Asia/Kuala_Lumpur',
+            'WSSS': 'Asia/Singapore', 'SIN': 'Asia/Singapore',
+            'WIII': 'Asia/Jakarta', 'CGK': 'Asia/Jakarta',
+            'RPLL': 'Asia/Manila', 'MNL': 'Asia/Manila',
+            'RPVM': 'Asia/Manila', 'CEB': 'Asia/Manila',
+            'RPLC': 'Asia/Manila', 'CRK': 'Asia/Manila',
+            'KLAX': 'America/Los_Angeles', 'LAX': 'America/Los_Angeles',
+            'KSFO': 'America/Los_Angeles', 'SFO': 'America/Los_Angeles',
+            'KONT': 'America/Los_Angeles', 'ONT': 'America/Los_Angeles',
+            'KSEA': 'America/Los_Angeles', 'SEA': 'America/Los_Angeles',
             'KPHX': 'America/Phoenix', 'PHX': 'America/Phoenix',
-            'ZSPD': 'Asia/Shanghai', 'PVG': 'Asia/Shanghai', 'ZBAA': 'Asia/Shanghai', 'PEK': 'Asia/Shanghai',
-            'ZGGG': 'Asia/Shanghai', 'CAN': 'Asia/Shanghai', 'ZBTJ': 'Asia/Shanghai', 'TSN': 'Asia/Shanghai',
-            'RKSI': 'Asia/Seoul', 'ICN': 'Asia/Seoul', 'RKSS': 'Asia/Seoul', 'GMP': 'Asia/Seoul', 'RKPC': 'Asia/Seoul', 'CJU': 'Asia/Seoul',
-            'KJFK': 'America/New_York', 'JFK': 'America/New_York', 'KEWR': 'America/New_York', 'EWR': 'America/New_York',
-            'KORD': 'America/Chicago', 'ORD': 'America/Chicago', 'EGLL': 'Europe/London', 'LHR': 'Europe/London',
-            'EHAM': 'Europe/Amsterdam', 'AMS': 'Europe/Amsterdam', 'EDDF': 'Europe/Berlin', 'FRA': 'Europe/Berlin',
-            'LFPG': 'Europe/Paris', 'CDG': 'Europe/Paris', 'OMDB': 'Asia/Dubai', 'DXB': 'Asia/Dubai',
-            'OTHH': 'Asia/Qatar', 'DOH': 'Asia/Qatar', 'YSSY': 'Australia/Sydney', 'SYD': 'Australia/Sydney',
-            'YMML': 'Australia/Melbourne', 'MEL': 'Australia/Melbourne', 'YBBN': 'Australia/Brisbane', 'BNE': 'Australia/Brisbane'
+            'ZSPD': 'Asia/Shanghai', 'PVG': 'Asia/Shanghai',
+            'ZBAA': 'Asia/Shanghai', 'PEK': 'Asia/Shanghai',
+            'ZGGG': 'Asia/Shanghai', 'CAN': 'Asia/Shanghai',
+            'ZBTJ': 'Asia/Shanghai', 'TSN': 'Asia/Shanghai',
+            'RKSI': 'Asia/Seoul', 'ICN': 'Asia/Seoul',
+            'RKSS': 'Asia/Seoul', 'GMP': 'Asia/Seoul',
+            'RKPC': 'Asia/Seoul', 'CJU': 'Asia/Seoul',
+            'KJFK': 'America/New_York', 'JFK': 'America/New_York',
+            'KEWR': 'America/New_York', 'EWR': 'America/New_York',
+            'KORD': 'America/Chicago', 'ORD': 'America/Chicago',
+            'EGLL': 'Europe/London', 'LHR': 'Europe/London',
+            'EHAM': 'Europe/Amsterdam', 'AMS': 'Europe/Amsterdam',
+            'EDDF': 'Europe/Berlin', 'FRA': 'Europe/Berlin',
+            'LFPG': 'Europe/Paris', 'CDG': 'Europe/Paris',
+            'OMDB': 'Asia/Dubai', 'DXB': 'Asia/Dubai',
+            'OTHH': 'Asia/Qatar', 'DOH': 'Asia/Qatar',
+            'YSSY': 'Australia/Sydney', 'SYD': 'Australia/Sydney',
+            'YMML': 'Australia/Melbourne', 'MEL': 'Australia/Melbourne',
+            'YBBN': 'Australia/Brisbane', 'BNE': 'Australia/Brisbane'
         };
 
-        // ==========================================
-        // 生命週期與本機記憶 (Local Storage)
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', () => {
-            updateNetworkStatus();
-            window.addEventListener('online', updateNetworkStatus);
-            window.addEventListener('offline', updateNetworkStatus);
+        // 常見機場經緯度備援 (提升開源 API 的穩定性)
+        const airportCoordsFallback = {
+            'RCTP': {lat: 25.0797, lon: 121.2342}, 'RCKH': {lat: 22.5771, lon: 120.3500},
+            'RCSS': {lat: 25.0697, lon: 121.5525}, 'RCMQ': {lat: 24.2646, lon: 120.6200},
+            'VHHH': {lat: 22.3089, lon: 113.9146}, 'VMMC': {lat: 22.1496, lon: 113.5915},
+            'RJAA': {lat: 35.7647, lon: 140.3863}, 'RJTT': {lat: 35.5522, lon: 139.7796},
+            'RJBB': {lat: 34.4273, lon: 135.2440}, 'ROAH': {lat: 26.1958, lon: 127.6458}
+        };
 
-            const savedInput1 = localStorage.getItem('flightDataPart1');
-            const savedInput2 = localStorage.getItem('flightDataPart2');
-            
-            if (savedInput1) document.getElementById('rawInput').value = savedInput1;
-            if (savedInput2) document.getElementById('rawInput2').value = savedInput2;
-            
-            if (savedInput1 || savedInput2) {
-                parseData(); 
-            }
-        });
-
-        function updateNetworkStatus() {
-            const indicator = document.getElementById('offline-indicator');
-            if (!navigator.onLine) {
-                indicator.classList.remove('hidden');
-                indicator.classList.add('inline-block');
-            } else {
-                indicator.classList.add('hidden');
-                indicator.classList.remove('inline-block');
-            }
-        }
-
-        function saveToStorage() {
-            const input1 = document.getElementById('rawInput').value;
-            const input2 = document.getElementById('rawInput2').value;
-            localStorage.setItem('flightDataPart1', input1);
-            localStorage.setItem('flightDataPart2', input2);
-        }
-
-        function clearData() {
-            document.getElementById('rawInput').value = '';
-            document.getElementById('rawInput2').value = '';
-            
-            localStorage.removeItem('flightDataPart1');
-            localStorage.removeItem('flightDataPart2');
-            
-            document.getElementById('out-dep-wx').classList.add('hidden');
-            document.getElementById('out-dep-wx').classList.remove('flex');
-            document.getElementById('out-arr-wx').classList.add('hidden');
-            document.getElementById('out-arr-wx').classList.remove('flex');
-
-            parseData(); 
-        }
-
-        // ==========================================
-        // 資料解析工具
-        // ==========================================
         function extractData(text, keyword) {
             const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             let regexStr = `${escapedKeyword}\\s*:\\s*(.+)`;
@@ -484,63 +441,36 @@
             return match ? match[1].trim() : 'N/A';
         }
 
-        function formatTimeData(zuluTimeStr, icaoCode) {
-            if (!zuluTimeStr || zuluTimeStr === 'N/A' || zuluTimeStr === '') return null;
+        function extractZuluOnly(zuluTimeStr) {
+            if (!zuluTimeStr || zuluTimeStr === 'N/A' || zuluTimeStr === '') return '';
             const cleanStr = zuluTimeStr.replace(/[^0-9]/g, '');
-            if (cleanStr.length < 4) return { z: zuluTimeStr, l: '' }; 
+            if (cleanStr.length >= 4) return `${cleanStr.substring(0, 4)}Z`;
+            return '';
+        }
+
+        function convertToZuluLocalStr(zuluTimeStr, icaoCode) {
+            if (!zuluTimeStr || zuluTimeStr === 'N/A' || zuluTimeStr === '') return '----';
+            const cleanStr = zuluTimeStr.replace(/[^0-9]/g, '');
+            if (cleanStr.length < 4) return zuluTimeStr; 
 
             const hh = parseInt(cleanStr.substring(0, 2), 10);
             const mm = parseInt(cleanStr.substring(2, 4), 10);
             const tz = tzMapping[icaoCode];
             
-            if (!tz) return { z: `${cleanStr}Z`, l: '' };
+            if (!tz) return `${cleanStr}Z`;
 
             const today = new Date();
             const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), hh, mm));
 
             try {
-                const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+                const formatter = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
+                });
                 const localStr = formatter.format(d).replace(':', '');
-                return { z: `${cleanStr}Z`, l: `${localStr}L` };
+                return `${cleanStr}Z / ${localStr}L`;
             } catch (e) {
-                return { z: `${cleanStr}Z`, l: '' };
+                return `${cleanStr}Z`;
             }
-        }
-
-        function renderTimeBlock(elId, timeData, isOrange = false) {
-            const el = document.getElementById(elId);
-            const mainColor = isOrange ? 'text-[#b35900]' : 'text-stone-800';
-            const subColor = isOrange ? 'text-[#b35900]/70' : 'text-stone-500';
-            const subLColor = isOrange ? 'text-[#b35900]/50' : 'text-stone-400';
-            const borderClass = isOrange ? 'border-orange-200/60' : 'border-stone-200';
-
-            if (!timeData) {
-                el.innerHTML = `<div class="data-font font-bold text-xl text-stone-400 mt-2">--:--</div>`;
-                return;
-            }
-            
-            let html = `<div class="flex flex-col gap-1 w-full mt-1.5">`;
-            const zTime = timeData.z.replace('Z', '');
-            html += `
-                <div class="flex items-baseline justify-between">
-                    <div class="flex items-baseline gap-0.5">
-                        <span class="data-font font-black text-2xl md:text-3xl ${mainColor} leading-none tracking-tight">${zTime}</span>
-                        <span class="font-bold text-[10px] md:text-[11px] ${subColor} leading-none">Z</span>
-                    </div>
-                </div>
-            `;
-            
-            if (timeData.l) {
-                const lTime = timeData.l.replace('L', '');
-                html += `
-                    <div class="flex items-baseline gap-1 border-t ${borderClass} pt-1.5 w-full">
-                        <span class="data-font font-bold text-sm md:text-base ${subColor} leading-none tracking-tight">${lTime}</span>
-                        <span class="font-bold text-[9px] md:text-[10px] ${subLColor} leading-none">L</span>
-                    </div>
-                `;
-            }
-            html += `</div>`;
-            el.innerHTML = html;
         }
         
         function getUtcOffsetString(icaoCode) {
@@ -557,36 +487,123 @@
             }
         }
 
+        function clearData() {
+            document.getElementById('rawInput').value = '';
+            document.getElementById('rawInput2').value = '';
+            document.getElementById('dep-simple-wx').classList.add('hidden');
+            document.getElementById('arr-simple-wx').classList.add('hidden');
+            currentIcaosToFetch = [];
+            currentDateUTC = '----';
+            document.getElementById('out-utc-date').textContent = '----';
+            document.getElementById('wx-utc-date').textContent = '----';
+            parseData(); 
+        }
+
         let parseTimer;
         function debouncedParseData() {
-            saveToStorage(); 
             clearTimeout(parseTimer);
             parseTimer = setTimeout(parseData, 800);
+        }
+
+        // 獨立呼叫的開源天氣模組 (Open-Meteo)
+        async function fetchSimpleWeather(icao, prefix) {
+            const container = document.getElementById(`${prefix}-simple-wx`);
+            const descEl = document.getElementById(`${prefix}-wx-desc`);
+            const iconEl = document.getElementById(`${prefix}-wx-icon`);
+            
+            if (icao === '----' || !icao) return;
+
+            try {
+                container.classList.remove('hidden');
+                descEl.innerText = "Fetching data...";
+                
+                let lat, lon;
+                if (airportCoordsFallback[icao]) {
+                    lat = airportCoordsFallback[icao].lat;
+                    lon = airportCoordsFallback[icao].lon;
+                } else {
+                    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${icao}&count=1`);
+                    const geoData = await geoRes.json();
+                    if (!geoData.results || geoData.results.length === 0) throw new Error("Location not found");
+                    lat = geoData.results[0].latitude;
+                    lon = geoData.results[0].longitude;
+                }
+                
+                const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const wxData = await wxRes.json();
+                
+                const temp = Math.round(wxData.current_weather.temperature);
+                const code = wxData.current_weather.weathercode;
+                
+                const wmoMap = {
+                    0: {desc: 'Clear sky', icon: '☀️'},
+                    1: {desc: 'Mainly clear', icon: '🌤️'},
+                    2: {desc: 'Partly cloudy', icon: '⛅'},
+                    3: {desc: 'Overcast', icon: '☁️'},
+                    45: {desc: 'Fog', icon: '🌫️'},
+                    48: {desc: 'Depositing rime fog', icon: '🌫️'},
+                    51: {desc: 'Light drizzle', icon: '🌧️'},
+                    53: {desc: 'Moderate drizzle', icon: '🌧️'},
+                    55: {desc: 'Dense drizzle', icon: '🌧️'},
+                    61: {desc: 'Slight rain', icon: '🌦️'},
+                    63: {desc: 'Moderate rain', icon: '🌧️'},
+                    65: {desc: 'Heavy rain', icon: '🌧️'},
+                    71: {desc: 'Slight snow', icon: '🌨️'},
+                    73: {desc: 'Moderate snow', icon: '🌨️'},
+                    75: {desc: 'Heavy snow', icon: '❄️'},
+                    80: {desc: 'Slight rain showers', icon: '🌦️'},
+                    81: {desc: 'Moderate rain showers', icon: '🌧️'},
+                    82: {desc: 'Violent rain showers', icon: '⛈️'},
+                    95: {desc: 'Thunderstorm', icon: '🌩️'},
+                    96: {desc: 'Thunderstorm with hail', icon: '⛈️'},
+                    99: {desc: 'Heavy thunderstorm', icon: '⛈️'}
+                };
+                
+                const condition = wmoMap[code] || {desc: 'Unknown', icon: '☁️'};
+                
+                descEl.innerText = `${temp}°C and ${condition.desc.toLowerCase()}`;
+                iconEl.innerText = condition.icon;
+                
+            } catch (e) {
+                descEl.innerText = "Weather unavailable";
+                iconEl.innerText = "☁️";
+            }
         }
 
         function parseData() {
             const rawText = document.getElementById('rawInput').value;
             const rawText2 = document.getElementById('rawInput2').value || '';
 
-            // ==========================================
-            // 處理 Part 1
-            // ==========================================
+            // Part 1
             const routeStr = extractData(rawText, '出發地/目的地');
-            let depICAO = '----', arrICAO = '----';
+            currentDepICAO = '----'; currentArrICAO = '----';
             if (routeStr !== 'N/A' && routeStr.includes('/')) {
-                depICAO = routeStr.split('/')[0].trim();
-                arrICAO = routeStr.split('/')[1].trim();
+                currentDepICAO = routeStr.split('/')[0].trim();
+                currentArrICAO = routeStr.split('/')[1].trim();
             }
-            document.getElementById('out-dep').textContent = depICAO;
-            document.getElementById('out-arr').textContent = arrICAO;
+            document.getElementById('out-dep').textContent = currentDepICAO;
+            document.getElementById('out-arr').textContent = currentArrICAO;
 
-            document.getElementById('out-dep-utc').textContent = getUtcOffsetString(depICAO);
-            document.getElementById('out-arr-utc').textContent = getUtcOffsetString(arrICAO);
+            document.getElementById('out-dep-utc').textContent = getUtcOffsetString(currentDepICAO);
+            document.getElementById('out-arr-utc').textContent = getUtcOffsetString(currentArrICAO);
 
-            const rawStd = extractData(rawText, 'STD').replace(/[^0-9]/g, '');
-            const rawSta = extractData(rawText, 'STA').replace(/[^0-9]/g, '');
-            window.flightTargetTimes.dep = { icao: depICAO, time: rawStd.length >= 4 ? rawStd : '' };
-            window.flightTargetTimes.arr = { icao: arrICAO, time: rawSta.length >= 4 ? rawSta : '' };
+            // Extract Date (e.g., 2026-APR-22 or 22APR26)
+            let dateMatch = rawText.match(/\b(\d{4}-[A-Z]{3}-\d{2}|\d{2}[A-Z]{3}\d{2,4}|\d{2}-[A-Z]{3}-\d{4})\b/i);
+            let extractedDate = '----';
+            if (dateMatch) {
+                extractedDate = dateMatch[0].toUpperCase();
+            } else {
+                let d = extractData(rawText, '日期');
+                if (d === 'N/A') d = extractData(rawText, 'Date');
+                if (d !== 'N/A' && d !== '') extractedDate = d;
+            }
+            currentDateUTC = extractedDate;
+            document.getElementById('out-utc-date').textContent = currentDateUTC;
+            document.getElementById('wx-utc-date').textContent = currentDateUTC;
+
+            // Fetch Simple Weather Capsules
+            if (currentDepICAO !== '----') fetchSimpleWeather(currentDepICAO, 'dep');
+            if (currentArrICAO !== '----') fetchSimpleWeather(currentArrICAO, 'arr');
 
             const mapping = [
                 { id: 'out-flight-no', key: 'Flight number' },
@@ -600,6 +617,7 @@
                 { id: 'out-tow', key: 'TOW' },
                 { id: 'out-ldw', key: 'LDW' },
                 { id: 'out-total-fuel', key: 'Total Fuel' },
+                { id: 'out-div-fuel', key: 'Division Fuel' },
                 { id: 'out-spare-fuel', key: 'SPARE Fuel' },
                 { id: 'out-add-wxx', key: 'ADD WXX' },
                 { id: 'out-add-opn', key: 'ADD OPN' },
@@ -623,31 +641,22 @@
                 }
             });
 
-            // 套用全新立體化時間模組
-            renderTimeBlock('out-std', formatTimeData(extractData(rawText, 'STD'), depICAO));
-            renderTimeBlock('out-etd', formatTimeData(extractData(rawText, 'ETD'), depICAO), true);
-            renderTimeBlock('out-sta', formatTimeData(extractData(rawText, 'STA'), arrICAO));
+            // Parse and store UTC times for Weather headers
+            const stdStr = extractData(rawText, 'STD');
+            const staStr = extractData(rawText, 'STA');
+            currentDepUTC = extractZuluOnly(stdStr);
+            currentArrUTC = extractZuluOnly(staStr);
+
+            document.getElementById('out-std').textContent = convertToZuluLocalStr(stdStr, currentDepICAO);
+            document.getElementById('out-etd').textContent = convertToZuluLocalStr(extractData(rawText, 'ETD'), currentDepICAO);
+            document.getElementById('out-sta').textContent = convertToZuluLocalStr(staStr, currentArrICAO);
             
-            // Division Fuel 專屬高亮標籤 (精準切割，僅高亮機場代碼)
             const divFuelLabel = document.getElementById('label-div-fuel');
             const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:/i);
             if (divMatch) {
-                const innerContent = divMatch[1].toUpperCase();
-                const plusIndex = innerContent.indexOf('+');
-                let altnPort = innerContent;
-                let restPart = '';
-                if (plusIndex !== -1) {
-                    altnPort = innerContent.substring(0, plusIndex);
-                    restPart = innerContent.substring(plusIndex);
-                }
-                
-                if (altnPort === 'ALTN') {
-                    divFuelLabel.innerHTML = `Division Fuel <span class="text-stone-500 font-medium">(${innerContent})</span>`;
-                } else {
-                    divFuelLabel.innerHTML = `Division Fuel <span class="text-stone-500 font-medium">(</span><span class="bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded shadow-sm text-[10px] md:text-xs tracking-wider">${altnPort}</span><span class="text-stone-500 font-medium">${restPart})</span>`;
-                }
+                divFuelLabel.textContent = `Division Fuel (${divMatch[1].toUpperCase()})`;
             } else {
-                divFuelLabel.innerHTML = `Division Fuel <span class="text-stone-500 font-medium">(ALTN+FRF)</span>`;
+                divFuelLabel.textContent = `Division Fuel (ALTN+FRF)`;
             }
 
             const routeEl = document.getElementById('out-route');
@@ -655,30 +664,30 @@
                 routeEl.textContent = routeEl.textContent.toUpperCase();
             }
 
-            // ==========================================
-            // 處理 Part 2
-            // ==========================================
+            // Part 2
             const paxMatch = rawText2.match(/PAX\s*:\s*(\d+)\/(\d+)/i);
-            document.getElementById('out-pax').textContent = paxMatch ? (parseInt(paxMatch[1], 10) + parseInt(paxMatch[2], 10)) : '---';
+            if (paxMatch) {
+                document.getElementById('out-pax').textContent = parseInt(paxMatch[1], 10) + parseInt(paxMatch[2], 10);
+            } else {
+                document.getElementById('out-pax').textContent = '---';
+            }
+
             const cargoMatch = rawText2.match(/CARGO\s*:\s*(.+)/i);
             document.getElementById('out-cargo').textContent = cargoMatch ? cargoMatch[1].trim() : '----';
+
             const fcstMatch = rawText2.match(/FCST PLD\s*:\s*(.+)/i);
             document.getElementById('out-fcst').textContent = fcstMatch ? fcstMatch[1].trim() : '----';
+
             const waterMatch = rawText2.match(/POTABLE WATER QUANTITY\s*:\s*(.+)/i);
             document.getElementById('out-water').textContent = waterMatch ? waterMatch[1].trim() : '--%';
 
-            // OFP 同步檢驗 (如果相同則顯示 ✅)
             let ofp1 = extractData(rawText, 'OFP 號碼');
             let ofp2 = '----';
             const ofp2Match = rawText2.match(/OFP\s*:\s*(.+)/i);
             if (ofp2Match) ofp2 = ofp2Match[1].trim();
 
-            if (ofp1 !== 'N/A' && ofp1 !== '----' && ofp2 !== '----') {
-                if (ofp1 === ofp2) {
-                    document.getElementById('out-ofp').innerHTML = `${ofp1} <span class="text-emerald-500 inline-block ml-1">✅</span>`;
-                } else {
-                    document.getElementById('out-ofp').textContent = `${ofp1} / ${ofp2}`;
-                }
+            if (ofp1 !== 'N/A' && ofp1 !== '----' && ofp2 !== '----' && ofp1 !== ofp2) {
+                document.getElementById('out-ofp').textContent = `${ofp1} / ${ofp2}`;
             } else if (ofp1 !== 'N/A' && ofp1 !== '----') {
                 document.getElementById('out-ofp').textContent = ofp1;
             } else if (ofp2 !== '----') {
@@ -690,20 +699,24 @@
             let depBay = '--', arrBay = '--';
             const bayMatch = rawText2.match(/BAY:\s*([^]+?)(?=\(\d+\)|ADD OPN|$)/i);
             const rawBayText = bayMatch ? bayMatch[1].trim() : '';
+            
             if (rawBayText) {
                 const bays = rawBayText.split(',').map(s => s.trim());
                 const payloadRouteMatch = rawText2.match(/([A-Z]{3,4})\s*\/\s*([A-Z]{3,4})/i);
-                const payloadDep = payloadRouteMatch ? payloadRouteMatch[1] : depICAO;
-                const payloadArr = payloadRouteMatch ? payloadRouteMatch[2] : arrICAO;
+                const payloadDep = payloadRouteMatch ? payloadRouteMatch[1] : currentDepICAO;
+                const payloadArr = payloadRouteMatch ? payloadRouteMatch[2] : currentArrICAO;
 
                 bays.forEach((b, index) => {
                     const parts = b.split('/');
                     if (parts.length >= 2) {
                         const code = parts[0].trim().toUpperCase();
                         const gate = parts[1].trim();
-                        if (depICAO.includes(code) || payloadDep.includes(code)) depBay = gate;
-                        else if (arrICAO.includes(code) || payloadArr.includes(code)) arrBay = gate;
-                        else {
+                        
+                        if (currentDepICAO.includes(code) || payloadDep.includes(code)) {
+                            depBay = gate;
+                        } else if (currentArrICAO.includes(code) || payloadArr.includes(code)) {
+                            arrBay = gate;
+                        } else {
                             if (index === 0 && depBay === '--') depBay = gate;
                             if (index === 1 && arrBay === '--') arrBay = gate;
                         }
@@ -723,6 +736,7 @@
                 const regRegex = /\bB-?\d{5}\b/gi;
                 let cleanedMel = melText.replace(regRegex, '').trim();
                 const lines = cleanedMel.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                
                 let htmlObj = '<div class="flex flex-col gap-2">';
                 lines.forEach(line => {
                     let cleanLine = line.replace(/\s{2,}/g, ' ');
@@ -741,185 +755,54 @@
                 melContainer.innerHTML = htmlObj;
             }
 
-            // ==========================================
-            // 氣象觸發
-            // ==========================================
+            // Weather Fetching
             if(rawText.trim() === '') {
-                document.getElementById('weather-blocks-container').innerHTML = `<div class="flex items-center justify-center h-full text-sm text-stone-400 font-bold py-10 text-center">請於上方輸入區貼上含有「機場資訊」之資料，系統將自動擷取氣象。</div>`;
+                document.getElementById('weather-blocks-container').innerHTML = `<div class="col-span-1 lg:col-span-2 flex items-center justify-center h-full text-sm text-stone-400 font-bold py-10 text-center">請於上方輸入區貼上含有「機場資訊」之資料，系統將自動擷取氣象。</div>`;
                 document.getElementById('global-wx-sync').textContent = "Standby";
-                document.getElementById('global-wx-sync').className = "text-xs md:text-sm font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded";
+                document.getElementById('global-wx-sync').className = "text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded";
                 return;
             }
 
-            if (!navigator.onLine) {
-                document.getElementById('global-wx-sync').textContent = "OFFLINE";
-                document.getElementById('global-wx-sync').className = "text-xs md:text-sm font-bold text-red-300 bg-red-900/50 px-2 py-1 rounded";
-                return;
-            }
-
-            let icaosToFetch = [];
+            currentIcaosToFetch = [];
             const wxSection = rawText.split(/機場資訊[：:]/i)[1];
+            
             if (wxSection) {
                 const matches = wxSection.matchAll(/\b([A-Z]{4})\/[A-Z]{3}\b/g);
                 for (const match of matches) {
-                    if (!icaosToFetch.includes(match[1])) icaosToFetch.push(match[1]);
+                    if (!currentIcaosToFetch.includes(match[1])) currentIcaosToFetch.push(match[1]);
                 }
             }
-            if (icaosToFetch.length === 0 && depICAO !== '----') {
-                if (depICAO !== '----') icaosToFetch.push(depICAO);
-                if (arrICAO !== '----') icaosToFetch.push(arrICAO);
+            
+            if (currentIcaosToFetch.length === 0 && currentDepICAO !== '----') {
+                if (currentDepICAO !== '----') currentIcaosToFetch.push(currentDepICAO);
+                if (currentArrICAO !== '----') currentIcaosToFetch.push(currentArrICAO);
             }
 
-            if(icaosToFetch.length > 0) fetchAllWeather(icaosToFetch);
-        }
-
-        // ==========================================
-        // 氣象分析核心
-        // ==========================================
-        function getActiveTafLineIndices(lines, targetTimeStr, rawTaf) {
-            if (!targetTimeStr || targetTimeStr.length < 4) return [];
-            let targetHH = parseInt(targetTimeStr.substring(0, 2), 10);
-            
-            let issueMatch = rawTaf.match(/\b(\d{2})(\d{2})\d{2}Z\b/);
-            let issueDD = issueMatch ? parseInt(issueMatch[1], 10) : new Date().getUTCDate();
-            let issueHH = issueMatch ? parseInt(issueMatch[2], 10) : new Date().getUTCHours();
-            
-            let targetDD = issueDD;
-            if (targetHH < issueHH - 4) targetDD += 1; 
-            let targetVal = targetDD * 100 + targetHH;
-
-            let activeIndices = [];
-            let prevailingIndex = 0;
-            let prevailingStartVal = 0;
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
-                let fmMatch = line.match(/^FM(\d{2})(\d{2})/);
-                if (fmMatch) {
-                    let startVal = parseInt(fmMatch[1], 10) * 100 + parseInt(fmMatch[2], 10);
-                    if (startVal <= targetVal && startVal >= prevailingStartVal) {
-                        prevailingIndex = i;
-                        prevailingStartVal = startVal;
-                    }
-                }
-
-                let modMatch = line.match(/(?:TEMPO|BECMG|PROB\d{2})\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
-                if (modMatch) {
-                    let sd = parseInt(modMatch[1], 10), sh = parseInt(modMatch[2], 10);
-                    let ed = parseInt(modMatch[3], 10), eh = parseInt(modMatch[4], 10);
-                    let sVal = sd * 100 + sh;
-                    let eVal = ed * 100 + eh;
-                    if (eVal < sVal) eVal += 3000; 
-                    let tCheck = targetVal;
-                    if (tCheck < sVal && sd > 25 && targetDD < 5) tCheck += 3000; 
-
-                    if (tCheck >= sVal && tCheck < eVal) {
-                        activeIndices.push(i);
-                    }
-                }
+            if(currentIcaosToFetch.length > 0) {
+                fetchAllWeather(currentIcaosToFetch);
             }
-            activeIndices.push(prevailingIndex);
-            return [...new Set(activeIndices)];
         }
 
-        function extractMetarTemp(rawMetar) {
-            let tempMatch = rawMetar.match(/\s(M?\d{2})\/(?:M?\d{2})?\s/);
-            return tempMatch ? tempMatch[1].replace('M', '-') + '°C' : '--°C';
+        function refreshWeather() {
+            const syncLabel = document.getElementById('global-wx-sync');
+            if (currentIcaosToFetch && currentIcaosToFetch.length > 0) {
+                fetchAllWeather(currentIcaosToFetch);
+                
+                // Refresh capsule weather as well
+                if (currentDepICAO !== '----') fetchSimpleWeather(currentDepICAO, 'dep');
+                if (currentArrICAO !== '----') fetchSimpleWeather(currentArrICAO, 'arr');
+            } else {
+                syncLabel.textContent = "NO DATA";
+                syncLabel.className = "text-[10px] md:text-xs font-bold text-red-300 bg-red-900/50 px-2 py-1 rounded";
+            }
         }
 
-        function updateWeatherSummary(type, rawMetar, rawTaf, activeIndices) {
-            const container = document.getElementById(`out-${type}-wx`);
-            const catEl = document.getElementById(`out-${type}-wx-cat`);
-            const emojiEl = document.getElementById(`out-${type}-wx-emoji`);
-            const tempEl = document.getElementById(`out-${type}-wx-temp`);
-
-            if (!rawMetar || !rawTaf) return;
-
-            tempEl.textContent = extractMetarTemp(rawMetar);
-
-            const catColors = { vfr: '#2ecc71', mvfr: '#3498db', ifr: '#e74c3c', lifr: '#9b59b6', unk: '#95a5a6' };
-            const catPriority = { lifr: 4, ifr: 3, mvfr: 2, vfr: 1, unk: 0 };
-            
-            let worstCat = 'unk';
-            let finalEmojis = new Set();
-            const flatTaf = rawTaf.replace(/\s+/g, ' ').trim();
-            const lines = flatTaf.replace(/\b(TEMPO|BECMG|FM[0-9]{6}|PROB[0-9]{2})\b/g, '|||$1').split('|||');
-
-            activeIndices.forEach(idx => {
-                if(lines[idx]) {
-                    let current = parseWeatherElements(lines[idx], 999, 99999);
-                    let cat = getFlightCategory(current.vis, current.ceil);
-                    if (catPriority[cat] > catPriority[worstCat]) worstCat = cat;
-                    
-                    let emojis = getWeatherEmojis(lines[idx]);
-                    if(emojis) emojis.split(' ').forEach(e => finalEmojis.add(e));
-                }
-            });
-
-            if (worstCat === 'unk' && activeIndices.length === 0) worstCat = 'vfr';
-
-            // 套用淺色風格徽章設定
-            catEl.textContent = worstCat.toUpperCase();
-            catEl.style.color = catColors[worstCat]; 
-            emojiEl.textContent = Array.from(finalEmojis).join(' ');
-
-            container.classList.remove('hidden');
-            container.classList.add('flex');
-            setTimeout(() => container.classList.remove('opacity-0'), 100);
-        }
-
-        function formatColorTAFWithHighlight(rawTaf, targetTimeStr) {
-            if (!rawTaf) return { html: `<div class="bg-amber-50 p-2 md:p-3 rounded-md text-xs md:text-[13.5px] text-amber-700 data-font border-l-4 border-amber-500 font-bold">⚠️ 無有效 TAF 預報資料</div>`, activeIndices: [] };
-            const catColors = { vfr: '#2ecc71', mvfr: '#3498db', ifr: '#e74c3c', lifr: '#9b59b6', unk: '#95a5a6' };
-            
-            const flatTaf = rawTaf.replace(/\s+/g, ' ').trim();
-            const markedTaf = flatTaf.replace(/\b(TEMPO|BECMG|FM[0-9]{6}|PROB[0-9]{2})\b/g, '|||$1');
-            const lines = markedTaf.split('|||');
-
-            let activeIndices = getActiveTafLineIndices(lines, targetTimeStr, rawTaf);
-            let prevailingVis = 999; let prevailingCeil = 99999;
-            let htmlOutput = `<div style="background-color: #f8fafc; padding: 8px 12px; border-radius: 6px; text-align: left;">`;
-
-            lines.forEach((line, index) => {
-                const cleanLine = line.trim();
-                if (!cleanLine) return;
-
-                let current = parseWeatherElements(cleanLine, prevailingVis, prevailingCeil);
-                const cat = getFlightCategory(current.vis, current.ceil);
-                const color = catColors[cat];
-                const catLabel = cat.toUpperCase();
-                const emojis = getWeatherEmojis(cleanLine);
-                const emojiHtml = emojis ? `<span style="font-size: 13px; margin-right: 6px; vertical-align: middle;">${emojis}</span>` : '';
-
-                if (index === 0 || cleanLine.startsWith('FM') || cleanLine.startsWith('BECMG')) {
-                    prevailingVis = current.vis; prevailingCeil = current.ceil;
-                }
-
-                let isHighlighted = activeIndices.includes(index);
-                let highlightClass = isHighlighted ? 'taf-highlight' : '';
-                let paddingAdj = isHighlighted ? 'padding-right: 8px;' : '';
-
-                htmlOutput += `
-                    <div class="${highlightClass}" style="border-left: 4px solid ${color}; padding-left: 8px; margin-bottom: 6px; line-height: 1.5; ${paddingAdj} border-radius: 2px;">
-                        <span style="display: inline-block; background-color: ${color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: ${emojis ? '4px' : '6px'}; vertical-align: middle;">${catLabel}</span>
-                        ${emojiHtml}
-                        <span class="data-font ${isHighlighted ? 'font-bold text-[#b35900]' : 'text-[#2c3e50]'}" style="font-size: 12px; vertical-align: middle;">${cleanLine}</span>
-                    </div>
-                `;
-            });
-            htmlOutput += `</div>`;
-            return { html: htmlOutput, activeIndices: activeIndices };
-        }
-
-        // ==========================================
-        // 網路擷取與非同步調度
-        // ==========================================
         async function fetchAllWeather(icaos) {
             const container = document.getElementById('weather-blocks-container');
             container.innerHTML = '';
             const syncLabel = document.getElementById('global-wx-sync');
             syncLabel.textContent = "SYNCING...";
-            syncLabel.className = "text-xs md:text-sm font-bold text-blue-300 bg-blue-900/50 px-2 py-1 rounded animate-pulse";
+            syncLabel.className = "text-[10px] md:text-xs font-bold text-blue-300 bg-blue-900/50 px-2 py-1 rounded animate-pulse";
             
             for (const icao of icaos) {
                 container.innerHTML += createWeatherBlockHTML(icao);
@@ -929,22 +812,25 @@
             await Promise.allSettled(fetchPromises);
             
             syncLabel.textContent = "SYNCED";
-            syncLabel.className = "text-xs md:text-sm font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded";
+            syncLabel.className = "text-[10px] md:text-xs font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded";
         }
 
         function createWeatherBlockHTML(icao) {
-            let targetLabel = '';
-            if (icao === window.flightTargetTimes.dep.icao) targetLabel = '<span class="ml-2 text-[9px] bg-orange-500 text-white px-1.5 py-0.5 rounded shadow">DEPARTURE</span>';
-            if (icao === window.flightTargetTimes.arr.icao) targetLabel = '<span class="ml-2 text-[9px] bg-sky-600 text-white px-1.5 py-0.5 rounded shadow">ARRIVAL</span>';
+            let timeTag = '';
+            if (icao === currentDepICAO && currentDepUTC) {
+                timeTag = `<span class="bg-[#e8dfd5] text-[#8b5a2b] px-2 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 tracking-wide">DEP: ${currentDepUTC}</span>`;
+            } else if (icao === currentArrICAO && currentArrUTC) {
+                timeTag = `<span class="bg-[#e8dfd5] text-[#8b5a2b] px-2 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 tracking-wide">ARR: ${currentArrUTC}</span>`;
+            }
 
             return `
             <div class="weather-block border border-stone-200 rounded-xl overflow-hidden shadow-sm bg-white">
                 <div class="bg-stone-100/50 text-[#3b4c59] px-3 md:px-4 py-2 border-b border-stone-200 flex justify-between items-center">
                     <div class="flex items-center">
                         <span class="text-lg md:text-xl font-bold tracking-widest data-font">${icao}</span>
-                        ${targetLabel}
+                        ${timeTag}
                     </div>
-                    <span id="sync-${icao}" class="text-[10px] md:text-xs px-2 py-0.5 rounded bg-stone-300 text-stone-600 font-bold tracking-wider shadow-sm">Loading...</span>
+                    <span id="sync-${icao}" class="text-[10px] px-2 py-0.5 rounded bg-stone-300 text-stone-600 font-bold tracking-wider shadow-sm">Loading...</span>
                 </div>
                 <div class="p-3 md:p-4 flex flex-col gap-3 md:gap-4">
                     <div>
@@ -968,61 +854,177 @@
             `;
         }
 
+        function getWeatherEmojis(text) {
+            if (!text) return '';
+            let emojis = [];
+            const tokens = text.split(/\s+/);
+            let hasTSWS = false, hasRA = false, hasSN = false, hasGust = false;
+
+            const tsRegex = /^[+-]?(?:VC)?TS(?:RA|SN|GR|GS|DZ|PL)?$|^RETS$/;
+            const raRegex = /^[+-]?(?:VC)?(?:SH|TS|FZ)?RA$|^RERA$/;
+            const snRegex = /^[+-]?(?:VC)?(?:SH|TS|FZ|BL|DR|MI)?SN$|^RESN$/;
+
+            for (let token of tokens) {
+                if (token === 'WS' || /^WS\d{3}\//.test(token) || tsRegex.test(token)) hasTSWS = true;
+                if (raRegex.test(token)) hasRA = true;
+                if (snRegex.test(token)) hasSN = true;
+                if (/G\d{2,}/.test(token) && (token.includes('KT') || token.includes('MPS') || token.includes('KMH'))) hasGust = true;
+            }
+            if (hasTSWS) emojis.push('🚨');
+            if (hasRA) emojis.push('☔️');
+            if (hasSN) emojis.push('☃️');
+            if (hasGust) emojis.push('⚠️');
+            return emojis.join(' ');
+        }
+
+        function parseWeatherElements(text, prevVis, prevCeil) {
+            let vis = prevVis; let ceil = prevCeil;
+            if (/\b(CAVOK|SKC|CLR|NSC)\b/.test(text)) {
+                if (/\bCAVOK\b/.test(text)) vis = 10;
+                ceil = 99999;
+            }
+            const metricMatch = text.match(/(?:\s|^)([0-9]{4})(?:NDV)?(?:\s|$)/);
+            if (metricMatch) {
+                const meters = parseInt(metricMatch[1], 10);
+                vis = meters === 9999 ? 10 : meters / 1609.34;
+            }
+            const smMatch = text.match(/(?:\s|^)(P|M)?(\d+)?\s?(\d+\/\d+)?SM(?:\s|$)/);
+            if (smMatch) {
+                let val = 0;
+                if (smMatch[2]) val += parseInt(smMatch[2], 10);
+                if (smMatch[3]) {
+                    const [num, den] = smMatch[3].split('/');
+                    val += parseInt(num, 10) / parseInt(den, 10);
+                }
+                if (val === 0 && smMatch[1] === 'M') val = 0.25;
+                if (val === 0 && smMatch[1] === 'P') val = 6.0;
+                vis = val;
+            }
+            const cloudMatches = text.match(/(BKN|OVC|VV)(\d{3})/g);
+            if (cloudMatches) {
+                const bases = cloudMatches.map(c => parseInt(c.slice(3, 6), 10) * 100);
+                ceil = Math.min(...bases);
+            }
+            return { vis, ceil };
+        }
+
+        function getFlightCategory(vis, ceil) {
+            if (ceil < 500 || vis < 1) return "lifr";
+            if (ceil < 1000 || vis < 3) return "ifr";
+            if (ceil <= 3000 || vis <= 5) return "mvfr";
+            return "vfr";
+        }
+
+        function calculateReportAge(rawText) {
+            if (!rawText) return "";
+            const match = rawText.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+            if (!match) return "";
+
+            const repDay = parseInt(match[1], 10);
+            const repHour = parseInt(match[2], 10);
+            const repMin = parseInt(match[3], 10);
+
+            const now = new Date();
+            const currDay = now.getUTCDate();
+            let targetMonth = now.getUTCMonth();
+            let targetYear = now.getUTCFullYear();
+
+            if (repDay > currDay + 5) { 
+                targetMonth -= 1;
+                if (targetMonth < 0) { targetMonth = 11; targetYear -= 1; }
+            }
+
+            const reportDate = new Date(Date.UTC(targetYear, targetMonth, repDay, repHour, repMin));
+            const diffMs = now.getTime() - reportDate.getTime();
+            const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+
+            if (diffMins < 60) {
+                return `(已發佈 ${diffMins} 分鐘)`;
+            } else {
+                const h = Math.floor(diffMins / 60);
+                const m = diffMins % 60;
+                return `(已發佈 ${h} 小時 ${m} 分鐘)`;
+            }
+        }
+
+        function formatColorTAF(rawTaf) {
+            if (!rawTaf) return `<div style="background-color: #f8fafc; padding: 12px; border-radius: 6px; text-align: left; border-left: 4px solid #95a5a6;">目前無有效 TAF 報文</div>`;
+            const catColors = { vfr: '#2ecc71', mvfr: '#3498db', ifr: '#e74c3c', lifr: '#9b59b6', unk: '#95a5a6' };
+            
+            const flatTaf = rawTaf.replace(/\s+/g, ' ').trim();
+            const markedTaf = flatTaf.replace(/\b(TEMPO|BECMG|FM[0-9]{6}|PROB[0-9]{2})\b/g, '|||$1');
+            const lines = markedTaf.split('|||');
+
+            let prevailingVis = 999; let prevailingCeil = 99999;
+            let htmlOutput = `<div style="background-color: #f8fafc; padding: 8px 12px; border-radius: 6px; text-align: left;">`;
+
+            lines.forEach((line, index) => {
+                const cleanLine = line.trim();
+                if (!cleanLine) return;
+
+                let current = parseWeatherElements(cleanLine, prevailingVis, prevailingCeil);
+                const cat = getFlightCategory(current.vis, current.ceil);
+                const color = catColors[cat];
+                const catLabel = cat.toUpperCase();
+                
+                const emojis = getWeatherEmojis(cleanLine);
+                const emojiHtml = emojis ? `<span style="font-size: 13px; margin-right: 6px; vertical-align: middle;">${emojis}</span>` : '';
+
+                if (index === 0 || cleanLine.startsWith('FM') || cleanLine.startsWith('BECMG')) {
+                    prevailingVis = current.vis; prevailingCeil = current.ceil;
+                }
+
+                htmlOutput += `
+                    <div style="border-left: 4px solid ${color}; padding-left: 8px; margin-bottom: 6px; line-height: 1.5;">
+                        <span style="display: inline-block; background-color: ${color}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-right: ${emojis ? '4px' : '6px'}; vertical-align: middle;">${catLabel}</span>
+                        ${emojiHtml}
+                        <span class="data-font" style="font-size: 12px; color: #2c3e50; vertical-align: middle;">${cleanLine}</span>
+                    </div>
+                `;
+            });
+            htmlOutput += `</div>`;
+            return htmlOutput;
+        }
+
         async function fetchAWCData(type, icao) {
+            const cleanUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}&format=json`;
             const textUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}`;
-            const jsonUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}&format=json`;
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000); 
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-            const validateData = (data) => {
-                if (!data || typeof data !== 'string' || data.includes('<html') || data.length < 10) {
-                    throw new Error('Invalid Data');
-                }
-                return data.trim();
-            };
-
-            const fetchDirectText = async () => {
-                const res = await fetch(textUrl, { signal: controller.signal, cache: "no-store" });
-                if (!res.ok) throw new Error('Direct Text HTTP Error');
-                return validateData(await res.text());
-            };
-
-            const fetchDirectJSON = async () => {
-                const res = await fetch(jsonUrl, { signal: controller.signal, cache: "no-store" });
-                if (!res.ok) throw new Error('Direct JSON HTTP Error');
+            const fetchJSON = async (url) => {
+                const res = await fetch(url, { signal: controller.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                if (!data || data.length === 0) throw new Error('Empty JSON');
-                const raw = type === 'metar' ? (data[0].rawOb || data[0].raw) : (data[0].rawTAF || data[0].rawTaf || data[0].raw);
-                return validateData(raw);
+                if (!data || data.length === 0) throw new Error('Data Empty');
+                return type === 'metar' ? (data[0].rawOb || data[0].raw) : (data[0].rawTAF || data[0].raw);
             };
 
-            const fetchProxyAllOrigins = async () => {
-                const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(textUrl)}`, { signal: controller.signal, cache: "no-store" });
-                if (!res.ok) throw new Error('AllOrigins Failed');
-                return validateData(await res.text());
+            const fetchText = async (url) => {
+                const res = await fetch(url, { signal: controller.signal });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const text = await res.text();
+                if (!text || text.trim() === '' || text.includes('<html>')) throw new Error('Invalid Text');
+                return text.trim();
             };
 
-            const fetchProxyCodeTabs = async () => {
-                const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(textUrl)}`, { signal: controller.signal, cache: "no-store" });
-                if (!res.ok) throw new Error('CodeTabs Failed');
-                return validateData(await res.text());
-            };
-            
-            const fetchProxyCorsProxyIo = async () => {
-                const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(textUrl)}`, { signal: controller.signal, cache: "no-store" });
-                if (!res.ok) throw new Error('CorsProxyIo Failed');
-                return validateData(await res.text());
-            };
-
-            const racers = [fetchDirectText(), fetchDirectJSON(), fetchProxyAllOrigins(), fetchProxyCodeTabs(), fetchProxyCorsProxyIo()];
+            const racers = [
+                fetchJSON(cleanUrl), 
+                fetchText(textUrl),  
+                fetchJSON(`https://api.allorigins.win/raw?url=${encodeURIComponent(cleanUrl)}`), 
+                fetchText(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(textUrl)}`) 
+            ];
 
             if (type === 'metar') {
-                racers.push((async () => {
-                    const res = await fetch(`https://metar.vatsim.net/metar.php?id=${icao}`, { signal: controller.signal, cache: "no-store" });
-                    if (!res.ok) throw new Error('VATSIM Failed');
-                    return validateData(await res.text());
-                })());
+                const fetchVatsim = async () => {
+                    const res = await fetch(`https://metar.vatsim.net/metar.php?id=${icao}`, { signal: controller.signal });
+                    if (!res.ok) throw new Error('VATSIM fail');
+                    const text = await res.text();
+                    if (!text || text.length < 10) throw new Error('Invalid VATSIM');
+                    return text.trim();
+                };
+                racers.push(fetchVatsim());
             }
 
             try {
@@ -1039,59 +1041,54 @@
             const metarContent = document.getElementById(`metar-content-${icao}`);
             const metarHeader = document.getElementById(`metar-header-${icao}`);
             const metarAge = document.getElementById(`metar-age-${icao}`);
+            
             const tafContent = document.getElementById(`taf-content-${icao}`);
             const tafAge = document.getElementById(`taf-age-${icao}`);
             const syncStatus = document.getElementById(`sync-${icao}`);
 
             try {
                 const [metarResult, tafResult] = await Promise.allSettled([
-                    fetchAWCData('metar', icao), fetchAWCData('taf', icao)
+                    fetchAWCData('metar', icao),
+                    fetchAWCData('taf', icao)
                 ]);
 
-                let rawMetar = null, rawTaf = null;
-
                 if (metarResult.status === 'fulfilled' && metarResult.value) {
-                    rawMetar = metarResult.value;
+                    const rawMetar = metarResult.value;
                     const parsed = parseWeatherElements(rawMetar, 999, 99999);
                     const cat = getFlightCategory(parsed.vis, parsed.ceil);
                     const emojis = getWeatherEmojis(rawMetar);
+
                     metarContent.innerText = rawMetar;
                     metarContent.className = `raw-text border-${cat} text-xs md:text-[13.5px]`;
                     metarHeader.innerHTML = `METAR <span class="badge bg-${cat}">${cat.toUpperCase()}</span> ${emojis ? `<span style="font-size: 13px; margin-left: 4px; vertical-align: middle;">${emojis}</span>` : ''}`;
                     metarAge.innerText = calculateReportAge(rawMetar);
                 } else {
-                    metarContent.innerText = "⚠️ 無有效 METAR 報文 (可能未發布)";
-                    metarContent.className = "raw-text border-unk text-amber-600 font-bold text-xs md:text-[13.5px]";
+                    metarContent.innerText = "❌ 無有效 METAR 報文";
+                    metarContent.className = "raw-text border-unk text-red-500 font-bold text-xs md:text-[13.5px]";
                 }
 
-                let activeTafIndices = [];
                 if (tafResult.status === 'fulfilled' && tafResult.value) {
-                    rawTaf = tafResult.value;
-                    let targetTime = null;
-                    if (icao === window.flightTargetTimes.dep.icao) targetTime = window.flightTargetTimes.dep.time;
-                    else if (icao === window.flightTargetTimes.arr.icao) targetTime = window.flightTargetTimes.arr.time;
-
-                    const tafResultObj = formatColorTAFWithHighlight(rawTaf, targetTime);
-                    tafContent.innerHTML = tafResultObj.html;
-                    activeTafIndices = tafResultObj.activeIndices;
+                    const rawTaf = tafResult.value;
+                    tafContent.innerHTML = formatColorTAF(rawTaf);
                     tafAge.innerText = calculateReportAge(rawTaf);
                 } else {
-                    tafContent.innerHTML = `<div class="bg-amber-50 p-2 md:p-3 rounded-md text-xs md:text-[13.5px] text-amber-700 data-font border-l-4 border-amber-500 font-bold">⚠️ 無有效 TAF 預報資料 (可能未發布或暫時無法取得)</div>`;
+                    tafContent.innerHTML = `<div class="bg-red-50 p-2 md:p-3 rounded-md text-xs md:text-[13.5px] text-red-600 data-font border-l-4 border-red-500 font-bold">❌ 無有效 TAF 預報資料</div>`;
                 }
 
-                if (icao === window.flightTargetTimes.dep.icao) updateWeatherSummary('dep', rawMetar, rawTaf, activeTafIndices);
-                if (icao === window.flightTargetTimes.arr.icao) updateWeatherSummary('arr', rawMetar, rawTaf, activeTafIndices);
-
                 if (metarResult.status === 'rejected' && tafResult.status === 'rejected') {
-                    syncStatus.innerText = "OFFLINE"; syncStatus.className = "text-[10px] md:text-xs px-2 py-0.5 rounded bg-red-500 text-white shadow font-bold tracking-widest";
+                    syncStatus.innerText = "OFFLINE";
+                    syncStatus.className = "text-[10px] px-2 py-0.5 rounded bg-red-500 text-white shadow font-bold tracking-widest";
                 } else if (metarResult.status === 'rejected' || tafResult.status === 'rejected') {
-                    syncStatus.innerText = "DEGRADED"; syncStatus.className = "text-[10px] md:text-xs px-2 py-0.5 rounded bg-amber-500 text-white shadow font-bold tracking-widest";
+                    syncStatus.innerText = "DEGRADED";
+                    syncStatus.className = "text-[10px] px-2 py-0.5 rounded bg-amber-500 text-white shadow font-bold tracking-widest";
                 } else {
-                    syncStatus.innerText = "SYNCED"; syncStatus.className = "text-[10px] md:text-xs px-2 py-0.5 rounded bg-emerald-500 text-white shadow font-bold tracking-widest";
+                    syncStatus.innerText = "SYNCED";
+                    syncStatus.className = "text-[10px] px-2 py-0.5 rounded bg-emerald-500 text-white shadow font-bold tracking-widest";
                 }
 
             } catch (error) {
-                syncStatus.innerText = "ERROR"; syncStatus.className = "text-[10px] md:text-xs px-2 py-0.5 rounded bg-red-500 text-white shadow font-bold tracking-widest";
+                syncStatus.innerText = "ERROR";
+                syncStatus.className = "text-[10px] px-2 py-0.5 rounded bg-red-500 text-white shadow font-bold tracking-widest";
             }
         }
         
