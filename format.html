@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Flight Dispatch Release & Weather - Pro Edition</title>
+    <title>Flight Dispatch Release & Weather - Pro Edition (Offline Support)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
@@ -55,12 +55,31 @@
             margin: 0 auto;
             background: transparent;
         }
+        
+        /* Offline Banner */
+        #offline-banner {
+            display: none;
+            background-color: #e74c3c;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body class="text-stone-800 pt-safe pb-12">
 
+    <!-- Offline Notification Banner -->
+    <div id="offline-banner">⚠️ 目前處於離線模式。顯示資料為系統最後一次快取紀錄。</div>
+
     <!-- Top Input Section -->
-    <div class="w-full max-w-[1194px] mx-auto mt-2 md:mt-6 p-4 md:p-6 bg-white rounded-2xl shadow-lg border border-stone-200 mb-6 mx-3 md:mx-auto">
+    <div class="w-full max-w-[1194px] mx-auto mt-2 md:mt-6 p-4 md:p-6 bg-white rounded-2xl shadow-lg border border-stone-200 mb-6 mx-3 md:mx-auto relative">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <h1 class="text-xl md:text-2xl font-bold text-stone-800 tracking-wide">☕ 數位座艙派遣系統 <span class="text-[#8b5a2b]">Pro</span></h1>
             <button onclick="clearData()" class="w-full sm:w-auto bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-3 md:py-2.5 px-6 rounded-xl shadow transition duration-200 flex justify-center items-center gap-2 active:scale-95">
@@ -205,7 +224,7 @@
                             <div class="flex-1 p-2 md:p-3 flex flex-col md:flex-row justify-center md:justify-between items-center bg-amber-50 gap-1 md:gap-0">
                                 <span class="text-[9px] md:text-[10px] font-bold text-[#8b5a2b] uppercase tracking-widest text-center md:text-left">CRZ Alt/Temp</span>
                                 <span class="data-font font-black text-lg md:text-xl text-[#b35900] whitespace-nowrap" id="out-cruise-alt-temp">---</span>
-                            </div>           
+                            </div>            
                         </div>
                     </div>
 
@@ -220,7 +239,6 @@
                         </div>
                     </div>
                     
-                    <!-- Moved TOW & LDW Here -->
                     <div class="grid grid-cols-2 gap-3 md:gap-4">
                         <div class="border border-[#e8dfd5] rounded-xl p-3 md:p-4 bg-white shadow-sm flex justify-between items-center">
                             <span class="text-[9px] md:text-[10px] text-stone-500 font-bold uppercase tracking-wider">TOW</span>
@@ -273,7 +291,6 @@
 
             <!-- Bottom Row: Payload & Ground Remarks -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 mt-2">
-                <!-- Payload & Cabin (Weights moved up) -->
                 <div class="col-span-1 lg:col-span-6 flex flex-col gap-4">
                     <div class="border border-[#e8dfd5] rounded-xl overflow-hidden flex flex-col shadow-sm bg-white h-full justify-center">
                         <div class="bg-[#7a5c43] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2">Payload & Cabin</div>
@@ -302,7 +319,6 @@
                     </div>
                 </div>
 
-                <!-- Ground Remarks (MEL) -->
                 <div class="col-span-1 lg:col-span-6 border border-[#e8dfd5] rounded-xl overflow-hidden flex flex-col shadow-md bg-white">
                     <div class="bg-[#5c4033] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 flex justify-between items-center">
                         <span>MEL / Dispatch Remarks</span>
@@ -327,13 +343,12 @@
                     <p class="text-[9px] md:text-[10px] text-stone-300 tracking-widest uppercase font-semibold">METAR & TAF Reports</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- 新增的重新整理按鈕 -->
                     <button onclick="refreshWeather()" class="bg-stone-700 hover:bg-stone-600 text-stone-200 p-2 rounded-lg transition-colors active:scale-95 shadow-sm" title="Refresh METAR/TAF">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     </button>
                     <div class="text-right flex flex-col items-end">
                         <div class="text-[9px] md:text-[10px] text-stone-400 uppercase font-semibold mb-0.5">Sync Status</div>
-                        <div id="global-wx-sync" class="text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded">Standby</div>
+                        <div id="global-wx-sync" class="text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded transition-colors">Standby</div>
                     </div>
                 </div>
             </div>
@@ -358,6 +373,40 @@
         let currentArrUTC = '';
         let currentIcaosToFetch = [];
         let currentDateUTC = '----';
+
+        // ==========================================
+        // 初始化與離線狀態監聽
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            // 讀取 Local Storage 資料
+            const savedInput1 = localStorage.getItem('dispatch_rawInput_1');
+            const savedInput2 = localStorage.getItem('dispatch_rawInput_2');
+            
+            if (savedInput1) document.getElementById('rawInput').value = savedInput1;
+            if (savedInput2) document.getElementById('rawInput2').value = savedInput2;
+            
+            checkNetworkStatus();
+            if (savedInput1 || savedInput2) {
+                parseData();
+            }
+        });
+
+        window.addEventListener('online', checkNetworkStatus);
+        window.addEventListener('offline', checkNetworkStatus);
+
+        function checkNetworkStatus() {
+            const banner = document.getElementById('offline-banner');
+            const syncStatus = document.getElementById('global-wx-sync');
+            
+            if (!navigator.onLine) {
+                banner.style.display = 'block';
+                syncStatus.textContent = "OFFLINE";
+                syncStatus.className = "text-[10px] md:text-xs font-bold text-red-100 bg-red-800 px-2 py-1 rounded";
+            } else {
+                banner.style.display = 'none';
+                if (currentIcaosToFetch.length > 0) refreshWeather();
+            }
+        }
 
         // ==========================================
         // 核心資料解析系統
@@ -422,7 +471,6 @@
             'YBBN': 'Australia/Brisbane', 'BNE': 'Australia/Brisbane'
         };
 
-        // 常見機場經緯度備援 (提升開源 API 的穩定性)
         const airportCoordsFallback = {
             'RCTP': {lat: 25.0797, lon: 121.2342}, 'RCKH': {lat: 22.5771, lon: 120.3500},
             'RCSS': {lat: 25.0697, lon: 121.5525}, 'RCMQ': {lat: 24.2646, lon: 120.6200},
@@ -488,10 +536,21 @@
         }
 
         function clearData() {
+            // 清空畫面
             document.getElementById('rawInput').value = '';
             document.getElementById('rawInput2').value = '';
             document.getElementById('dep-simple-wx').classList.add('hidden');
             document.getElementById('arr-simple-wx').classList.add('hidden');
+            
+            // 清除本地暫存
+            localStorage.removeItem('dispatch_rawInput_1');
+            localStorage.removeItem('dispatch_rawInput_2');
+            
+            // 移除所有氣象快取
+            Object.keys(localStorage).forEach(key => {
+                if(key.startsWith('wx_cache_')) localStorage.removeItem(key);
+            });
+
             currentIcaosToFetch = [];
             currentDateUTC = '----';
             document.getElementById('out-utc-date').textContent = '----';
@@ -505,18 +564,32 @@
             parseTimer = setTimeout(parseData, 800);
         }
 
-        // 獨立呼叫的開源天氣模組 (Open-Meteo)
+        // 開源天氣模組 (Open-Meteo) 具備離線快取
         async function fetchSimpleWeather(icao, prefix) {
             const container = document.getElementById(`${prefix}-simple-wx`);
             const descEl = document.getElementById(`${prefix}-wx-desc`);
             const iconEl = document.getElementById(`${prefix}-wx-icon`);
+            const cacheKey = `wx_cache_simple_${icao}`;
             
             if (icao === '----' || !icao) return;
 
+            container.classList.remove('hidden');
+
+            if (!navigator.onLine) {
+                const cachedData = localStorage.getItem(cacheKey);
+                if (cachedData) {
+                    const parsed = JSON.parse(cachedData);
+                    descEl.innerText = `${parsed.temp}°C and ${parsed.desc.toLowerCase()}`;
+                    iconEl.innerText = parsed.icon;
+                } else {
+                    descEl.innerText = "Offline (無快取)";
+                    iconEl.innerText = "☁️";
+                }
+                return;
+            }
+
             try {
-                container.classList.remove('hidden');
                 descEl.innerText = "Fetching data...";
-                
                 let lat, lon;
                 if (airportCoordsFallback[icao]) {
                     lat = airportCoordsFallback[icao].lat;
@@ -536,26 +609,16 @@
                 const code = wxData.current_weather.weathercode;
                 
                 const wmoMap = {
-                    0: {desc: 'Clear sky', icon: '☀️'},
-                    1: {desc: 'Mainly clear', icon: '🌤️'},
-                    2: {desc: 'Partly cloudy', icon: '⛅'},
-                    3: {desc: 'Overcast', icon: '☁️'},
-                    45: {desc: 'Fog', icon: '🌫️'},
-                    48: {desc: 'Depositing rime fog', icon: '🌫️'},
-                    51: {desc: 'Light drizzle', icon: '🌧️'},
-                    53: {desc: 'Moderate drizzle', icon: '🌧️'},
-                    55: {desc: 'Dense drizzle', icon: '🌧️'},
-                    61: {desc: 'Slight rain', icon: '🌦️'},
-                    63: {desc: 'Moderate rain', icon: '🌧️'},
-                    65: {desc: 'Heavy rain', icon: '🌧️'},
-                    71: {desc: 'Slight snow', icon: '🌨️'},
-                    73: {desc: 'Moderate snow', icon: '🌨️'},
-                    75: {desc: 'Heavy snow', icon: '❄️'},
-                    80: {desc: 'Slight rain showers', icon: '🌦️'},
-                    81: {desc: 'Moderate rain showers', icon: '🌧️'},
-                    82: {desc: 'Violent rain showers', icon: '⛈️'},
-                    95: {desc: 'Thunderstorm', icon: '🌩️'},
-                    96: {desc: 'Thunderstorm with hail', icon: '⛈️'},
+                    0: {desc: 'Clear sky', icon: '☀️'}, 1: {desc: 'Mainly clear', icon: '🌤️'},
+                    2: {desc: 'Partly cloudy', icon: '⛅'}, 3: {desc: 'Overcast', icon: '☁️'},
+                    45: {desc: 'Fog', icon: '🌫️'}, 48: {desc: 'Depositing rime fog', icon: '🌫️'},
+                    51: {desc: 'Light drizzle', icon: '🌧️'}, 53: {desc: 'Moderate drizzle', icon: '🌧️'},
+                    55: {desc: 'Dense drizzle', icon: '🌧️'}, 61: {desc: 'Slight rain', icon: '🌦️'},
+                    63: {desc: 'Moderate rain', icon: '🌧️'}, 65: {desc: 'Heavy rain', icon: '🌧️'},
+                    71: {desc: 'Slight snow', icon: '🌨️'}, 73: {desc: 'Moderate snow', icon: '🌨️'},
+                    75: {desc: 'Heavy snow', icon: '❄️'}, 80: {desc: 'Slight rain showers', icon: '🌦️'},
+                    81: {desc: 'Moderate rain showers', icon: '🌧️'}, 82: {desc: 'Violent rain showers', icon: '⛈️'},
+                    95: {desc: 'Thunderstorm', icon: '🌩️'}, 96: {desc: 'Thunderstorm with hail', icon: '⛈️'},
                     99: {desc: 'Heavy thunderstorm', icon: '⛈️'}
                 };
                 
@@ -564,6 +627,8 @@
                 descEl.innerText = `${temp}°C and ${condition.desc.toLowerCase()}`;
                 iconEl.innerText = condition.icon;
                 
+                // 寫入快取
+                localStorage.setItem(cacheKey, JSON.stringify({ temp, desc: condition.desc, icon: condition.icon }));
             } catch (e) {
                 descEl.innerText = "Weather unavailable";
                 iconEl.innerText = "☁️";
@@ -573,6 +638,10 @@
         function parseData() {
             const rawText = document.getElementById('rawInput').value;
             const rawText2 = document.getElementById('rawInput2').value || '';
+            
+            // 寫入持久化記憶體
+            localStorage.setItem('dispatch_rawInput_1', rawText);
+            localStorage.setItem('dispatch_rawInput_2', rawText2);
 
             // Part 1
             const routeStr = extractData(rawText, '出發地/目的地');
@@ -606,26 +675,16 @@
             if (currentArrICAO !== '----') fetchSimpleWeather(currentArrICAO, 'arr');
 
             const mapping = [
-                { id: 'out-flight-no', key: 'Flight number' },
-                { id: 'out-reg', key: '機號' },
-                { id: 'out-ete', key: 'ETE' },
-                { id: 'out-cruise-alt-temp', key: '巡航高度' },
-                { id: 'out-efb', key: 'EFB 版本' },
-                { id: 'out-route', key: 'Route' },
-                { id: 'out-wc', key: 'W/C' },
-                { id: 'out-mxsh', key: 'MXSH' },
-                { id: 'out-tow', key: 'TOW' },
-                { id: 'out-ldw', key: 'LDW' },
-                { id: 'out-total-fuel', key: 'Total Fuel' },
-                { id: 'out-div-fuel', key: 'Division Fuel' },
-                { id: 'out-spare-fuel', key: 'SPARE Fuel' },
-                { id: 'out-add-wxx', key: 'ADD WXX' },
-                { id: 'out-add-opn', key: 'ADD OPN' },
-                { id: 'out-add-atc', key: 'ADD ATC' },
-                { id: 'out-add-dev', key: 'ADD DEV' },
-                { id: 'out-cont', key: 'CONT' },
-                { id: 'out-crit-fuel', key: 'CRIT FUEL' },
-                { id: 'out-tankering', key: 'TANKERING' },
+                { id: 'out-flight-no', key: 'Flight number' }, { id: 'out-reg', key: '機號' },
+                { id: 'out-ete', key: 'ETE' }, { id: 'out-cruise-alt-temp', key: '巡航高度' },
+                { id: 'out-efb', key: 'EFB 版本' }, { id: 'out-route', key: 'Route' },
+                { id: 'out-wc', key: 'W/C' }, { id: 'out-mxsh', key: 'MXSH' },
+                { id: 'out-tow', key: 'TOW' }, { id: 'out-ldw', key: 'LDW' },
+                { id: 'out-total-fuel', key: 'Total Fuel' }, { id: 'out-div-fuel', key: 'Division Fuel' },
+                { id: 'out-spare-fuel', key: 'SPARE Fuel' }, { id: 'out-add-wxx', key: 'ADD WXX' },
+                { id: 'out-add-opn', key: 'ADD OPN' }, { id: 'out-add-atc', key: 'ADD ATC' },
+                { id: 'out-add-dev', key: 'ADD DEV' }, { id: 'out-cont', key: 'CONT' },
+                { id: 'out-crit-fuel', key: 'CRIT FUEL' }, { id: 'out-tankering', key: 'TANKERING' },
                 { id: 'out-extra', key: 'EXTRA' }
             ];
 
@@ -759,7 +818,7 @@
             if(rawText.trim() === '') {
                 document.getElementById('weather-blocks-container').innerHTML = `<div class="col-span-1 lg:col-span-2 flex items-center justify-center h-full text-sm text-stone-400 font-bold py-10 text-center">請於上方輸入區貼上含有「機場資訊」之資料，系統將自動擷取氣象。</div>`;
                 document.getElementById('global-wx-sync').textContent = "Standby";
-                document.getElementById('global-wx-sync').className = "text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded";
+                document.getElementById('global-wx-sync').className = "text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded transition-colors";
                 return;
             }
 
@@ -785,15 +844,18 @@
 
         function refreshWeather() {
             const syncLabel = document.getElementById('global-wx-sync');
+            if (!navigator.onLine) {
+                checkNetworkStatus(); // 再次觸發離線 UI
+                return;
+            }
+
             if (currentIcaosToFetch && currentIcaosToFetch.length > 0) {
                 fetchAllWeather(currentIcaosToFetch);
-                
-                // Refresh capsule weather as well
                 if (currentDepICAO !== '----') fetchSimpleWeather(currentDepICAO, 'dep');
                 if (currentArrICAO !== '----') fetchSimpleWeather(currentArrICAO, 'arr');
             } else {
                 syncLabel.textContent = "NO DATA";
-                syncLabel.className = "text-[10px] md:text-xs font-bold text-red-300 bg-red-900/50 px-2 py-1 rounded";
+                syncLabel.className = "text-[10px] md:text-xs font-bold text-red-300 bg-red-900/50 px-2 py-1 rounded transition-colors";
             }
         }
 
@@ -801,8 +863,14 @@
             const container = document.getElementById('weather-blocks-container');
             container.innerHTML = '';
             const syncLabel = document.getElementById('global-wx-sync');
-            syncLabel.textContent = "SYNCING...";
-            syncLabel.className = "text-[10px] md:text-xs font-bold text-blue-300 bg-blue-900/50 px-2 py-1 rounded animate-pulse";
+            
+            if (navigator.onLine) {
+                syncLabel.textContent = "SYNCING...";
+                syncLabel.className = "text-[10px] md:text-xs font-bold text-blue-300 bg-blue-900/50 px-2 py-1 rounded animate-pulse transition-colors";
+            } else {
+                syncLabel.textContent = "OFFLINE CACHE";
+                syncLabel.className = "text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded transition-colors";
+            }
             
             for (const icao of icaos) {
                 container.innerHTML += createWeatherBlockHTML(icao);
@@ -811,8 +879,10 @@
             const fetchPromises = icaos.map(icao => fetchSingleAirportWeather(icao));
             await Promise.allSettled(fetchPromises);
             
-            syncLabel.textContent = "SYNCED";
-            syncLabel.className = "text-[10px] md:text-xs font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded";
+            if (navigator.onLine) {
+                syncLabel.textContent = "SYNCED";
+                syncLabel.className = "text-[10px] md:text-xs font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded transition-colors";
+            }
         }
 
         function createWeatherBlockHTML(icao) {
@@ -987,6 +1057,15 @@
         }
 
         async function fetchAWCData(type, icao) {
+            const cacheKey = `wx_cache_${type}_${icao}`;
+            
+            // 離線狀態處理
+            if (!navigator.onLine) {
+                const cachedData = localStorage.getItem(cacheKey);
+                if (cachedData) return cachedData;
+                throw new Error('Offline and no cached data');
+            }
+
             const cleanUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}&format=json`;
             const textUrl = `https://aviationweather.gov/api/data/${type}?ids=${icao}`;
 
@@ -1030,6 +1109,8 @@
             try {
                 const result = await Promise.any(racers);
                 clearTimeout(timeoutId);
+                // 成功抓取後，存入快取記憶體
+                localStorage.setItem(cacheKey, result);
                 return result;
             } catch (error) {
                 clearTimeout(timeoutId);
@@ -1075,7 +1156,10 @@
                     tafContent.innerHTML = `<div class="bg-red-50 p-2 md:p-3 rounded-md text-xs md:text-[13.5px] text-red-600 data-font border-l-4 border-red-500 font-bold">❌ 無有效 TAF 預報資料</div>`;
                 }
 
-                if (metarResult.status === 'rejected' && tafResult.status === 'rejected') {
+                if (!navigator.onLine) {
+                    syncStatus.innerText = "CACHED";
+                    syncStatus.className = "text-[10px] px-2 py-0.5 rounded bg-stone-500 text-white shadow font-bold tracking-widest";
+                } else if (metarResult.status === 'rejected' && tafResult.status === 'rejected') {
                     syncStatus.innerText = "OFFLINE";
                     syncStatus.className = "text-[10px] px-2 py-0.5 rounded bg-red-500 text-white shadow font-bold tracking-widest";
                 } else if (metarResult.status === 'rejected' || tafResult.status === 'rejected') {
