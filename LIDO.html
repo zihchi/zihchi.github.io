@@ -376,7 +376,7 @@
                     let enrouteAirports = Array.from(enrouteSet);
                     const isEdto = rawTexts['OFP'] && /EDTO|ETOPS/.test(rawTexts['OFP']);
 
-                    let alt1Rwy = 'N/A', alt2Rwy = 'N/A';
+                    let alt1Rwy = 'N/A', alt2Rwy = 'N/A', alt3Rwy = 'N/A';
                     if (destAltnAirports.length > 0) {
                         const alt1Icao = destAltnAirports[0];
                         alt1Rwy = alt1Icao;
@@ -391,6 +391,14 @@
                         if (rawTexts['OFP']) {
                             const rwyMatch = rawTexts['OFP'].match(new RegExp(`\\b${alt2Icao}/([0-9]{2}[LRC]?)\\b`));
                             if (rwyMatch) alt2Rwy = `${alt2Icao}/${rwyMatch[1]}`;
+                        }
+                    }
+                    if (destAltnAirports.length > 2) {
+                        const alt3Icao = destAltnAirports[2];
+                        alt3Rwy = alt3Icao;
+                        if (rawTexts['OFP']) {
+                            const rwyMatch = rawTexts['OFP'].match(new RegExp(`\\b${alt3Icao}/([0-9]{2}[LRC]?)\\b`));
+                            if (rwyMatch) alt3Rwy = `${alt3Icao}/${rwyMatch[1]}`;
                         }
                     }
 
@@ -422,7 +430,6 @@
                     let totalFuel = 'N/A', divFuelCalc = 'N/A', spareFuelCalc = 'N/A';
                     let f_addWxx = 0, f_addOpn = 0, f_addAtc = 0, f_addDev = 0, f_cont = 0, f_crit = 0, f_tank = 0, f_extra = 0;
                     
-                    // ★ EDTO 座標陣列
                     let edtoData = [];
 
                     if (rawTexts['OFP']) {
@@ -488,7 +495,6 @@
                         const f_spare = f_addWxx + f_addOpn + f_addAtc + f_addDev + f_cont + f_crit + f_tank + f_extra;
                         spareFuelCalc = f_spare.toString();
                         
-                        // ★ EDTO 座標萃取邏輯
                         if (/EDTO|ETOPS|E\.ENT/.test(ofpText)) {
                             let entMatch = ofpText.match(/E\.ENT[\s\S]{0,150}?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
                             if (!entMatch) entMatch = ofpText.match(/EDTO ENTRY.*?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
@@ -527,7 +533,6 @@
                         if (satMatch) raimSatellites = satMatch[1];
                     }
 
-                    // 處理純文字 EDTO 顯示
                     let edtoRawStr = edtoData.length > 0 ? edtoData.join('\n') : 'non-EDTO';
 
                     let rawBlock = `基本資訊：\n`;
@@ -542,6 +547,9 @@
                     rawBlock += `巡航高度: ${cruiseAltStr}\n`;
                     rawBlock += `起飛跑道: ${depRwy}\n`;
                     rawBlock += `落地跑道: ${destRwy}\n`;
+                    rawBlock += `第一備降機場/跑道: ${alt1Rwy}\n`;
+                    if (alt2Rwy !== 'N/A') rawBlock += `第二備降機場/跑道: ${alt2Rwy}\n`;
+                    if (alt3Rwy !== 'N/A') rawBlock += `第三備降機場/跑道: ${alt3Rwy}\n`;
                     rawBlock += `------------------------------------------------------\n`;
                     
                     rawBlock += `航路資訊：\n`;
@@ -618,7 +626,6 @@
                         enrouteVisualHtml += `</div>`;
                     }
 
-                    // 視覺版 EDTO HTML
                     let edtoVisualHtml = edtoData.length > 0 
                         ? edtoData.map(item => {
                             let parts = item.split(': ');
@@ -665,6 +672,9 @@
                                 ${renderRow('巡航高度', cruiseAltStr)}
                                 ${renderRow('起飛跑道', depRwy)}
                                 ${renderRow('落地跑道', destRwy)}
+                                ${renderRow('第一備降機場/跑道', alt1Rwy)}
+                                ${alt2Rwy !== 'N/A' ? renderRow('第二備降機場/跑道', alt2Rwy) : ''}
+                                ${alt3Rwy !== 'N/A' ? renderRow('第三備降機場/跑道', alt3Rwy) : ''}
                             </div>
                         </div>
 
@@ -685,7 +695,6 @@
                                     <span class="text-slate-400 block mb-1">Route:</span>
                                     <span class="text-slate-300 block leading-relaxed tracking-wide bg-slate-900/50 p-3 rounded border border-slate-700/50">${flightRoute}</span>
                                 </div>
-                                <!-- ★ 新增 EDTO 座標區塊 -->
                                 <div class="mt-2 pt-2 border-t border-slate-700/50">
                                     <span class="text-slate-400 block mb-1">EDTO 座標:</span>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 w-full bg-slate-900/50 p-3 rounded border border-slate-700/50 font-mono text-xs">
