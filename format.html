@@ -764,6 +764,24 @@
             localStorage.setItem('dispatch_rawInput_1', rawText);
             localStorage.setItem('dispatch_rawInput_2', rawText2);
 
+            // 解析起降跑道資訊並存入 runwayMap
+            runwayMap = {};
+            
+            // 智慧全域捕捉：自動擷取所有可能的「機場/跑道」組合 (包含主降場與所有可能的第二、第三備降場)
+            // 這個強大的正規表達式會找出如 RCTP/05R, VTBU/18, VMMC/33L 這樣格式的資料
+            const allRwyMatches = combinedText.matchAll(/\b([A-Z]{4})\/(0[1-9]|[1-2][0-9]|3[0-6])[LCR]?\b/g);
+            for (const match of allRwyMatches) {
+                // match[1] = ICAO, match[0].split('/')[1] = Runway (避免漏掉 L/C/R)
+                runwayMap[match[1].toUpperCase()] = match[0].split('/')[1].toUpperCase();
+            }
+
+            // 防呆機制：相容傳統無斜線的寫法（若未來有這類格式出現）
+            const depRwyMatch = rawText.match(/起飛跑道\s*:\s*[A-Z]{4}\/([A-Z0-9]+)/i);
+            if (depRwyMatch && extractData(rawText, '出發地/目的地').split('/')[0]) runwayMap[extractData(rawText, '出發地/目的地').split('/')[0].trim()] = depRwyMatch[1];
+            
+            const arrRwyMatch = rawText.match(/落地跑道\s*:\s*[A-Z]{4}\/([A-Z0-9]+)/i);
+            if (arrRwyMatch && extractData(rawText, '出發地/目的地').split('/')[1]) runwayMap[extractData(rawText, '出發地/目的地').split('/')[1].trim()] = arrRwyMatch[1];
+
             // Part 1
             const routeStr = extractData(rawText, '出發地/目的地');
             currentDepICAO = '----'; currentArrICAO = '----';
@@ -858,14 +876,6 @@
             document.getElementById('out-etd').textContent = convertToZuluLocalStr(extractData(rawText, 'ETD'), currentDepICAO);
             document.getElementById('out-sta').textContent = convertToZuluLocalStr(staStr, currentArrICAO);
             
-            // 解析起降跑道資訊並存入 runwayMap
-            runwayMap = {};
-            const depRwyMatch = rawText.match(/起飛跑道\s*:\s*[A-Z]{4}\/([A-Z0-9]+)/i);
-            if (depRwyMatch && currentDepICAO !== '----') runwayMap[currentDepICAO] = depRwyMatch[1];
-            
-            const arrRwyMatch = rawText.match(/落地跑道\s*:\s*[A-Z]{4}\/([A-Z0-9]+)/i);
-            if (arrRwyMatch && currentArrICAO !== '----') runwayMap[currentArrICAO] = arrRwyMatch[1];
-
             // 修正 Division Fuel 顯示邏輯：去除 ALTN 前綴，分離 +FRF，並萃取備降場跑道
             const divFuelLabel = document.getElementById('label-div-fuel');
             const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:/i);
@@ -883,12 +893,6 @@
                     const parts = rawDiv.split('+');
                     divBase = parts[0].trim();
                     suffix = '+' + parts.slice(1).join('+').trim();
-                }
-
-                // 若備降場包含跑道資訊 (如 VTBU/18)，存入 runwayMap
-                if (divBase.includes('/')) {
-                    const [divIcao, divRwy] = divBase.split('/');
-                    if (divIcao && divRwy) runwayMap[divIcao.trim()] = divRwy.trim();
                 }
 
                 if (divBase !== 'N/A' && divBase !== 'FRF') {
@@ -1045,6 +1049,11 @@
                     if (!currentIcaosToFetch.includes(match[1])) currentIcaosToFetch.push(match[1]);
                 }
             }
+
+            // 將所有捕捉到的跑道機場 (含第二、第三備降場) 加入天氣擷取排程
+            Object.keys(runwayMap).forEach(icao => {
+                if (!currentIcaosToFetch.includes(icao)) currentIcaosToFetch.push(icao);
+            });
             
             if (currentIcaosToFetch.length === 0 && currentDepICAO !== '----') {
                 if (currentDepICAO !== '----') currentIcaosToFetch.push(currentDepICAO);
