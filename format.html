@@ -367,6 +367,42 @@
             </div>
         </div>
 
+        <!-- SECTION: VERTICAL PROFILE & EDTO -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 mt-4 md:mt-2">
+            <!-- Vertical Profile (Left 8 cols) -->
+            <div class="col-span-1 lg:col-span-8 border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col">
+                <div class="bg-gradient-to-r from-slate-600 to-slate-700 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 flex justify-between items-center">
+                    <span class="flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+                        Vertical Flight Profile
+                    </span>
+                    <button onclick="clearProfileImage()" class="text-slate-300 hover:text-white transition-colors" title="Clear Profile Image">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+                <div class="p-3 md:p-4 bg-[#f8fafc] flex-grow flex items-center justify-center min-h-[250px] relative" id="profile-container">
+                    <div id="profile-placeholder" class="text-slate-400 font-bold text-sm tracking-wide border-2 border-dashed border-slate-300 rounded-xl w-full h-full flex flex-col items-center justify-center hover:bg-slate-50 transition-colors p-8" tabindex="0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>點擊此處並貼上 (Ctrl+V / Cmd+V) 剖面圖</span>
+                    </div>
+                    <img id="profile-image" src="" alt="Vertical Profile" class="hidden max-w-full max-h-[600px] object-contain rounded-lg shadow-sm border border-slate-200">
+                </div>
+            </div>
+
+            <!-- EDTO Coordinates (Right 4 cols) -->
+            <div class="col-span-1 lg:col-span-4 border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col">
+                <div class="bg-[#2c3e50] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 md:px-4 py-2 flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    EDTO / ETOPS Coordinates
+                </div>
+                <div class="p-3 md:p-4 bg-white flex-grow flex flex-col justify-center min-h-[250px]">
+                    <div id="out-edto-container" class="w-full">
+                        <div class="text-emerald-600 font-black text-xl md:text-2xl tracking-widest text-center my-auto py-8 bg-emerald-50/50 rounded-xl border-2 border-dashed border-emerald-200">Non-EDTO Flight</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -388,9 +424,11 @@
             // 讀取 Local Storage 資料
             const savedInput1 = localStorage.getItem('dispatch_rawInput_1');
             const savedInput2 = localStorage.getItem('dispatch_rawInput_2');
+            const savedProfile = localStorage.getItem('dispatch_profile_image');
             
             if (savedInput1) document.getElementById('rawInput').value = savedInput1;
             if (savedInput2) document.getElementById('rawInput2').value = savedInput2;
+            if (savedProfile) showProfileImage(savedProfile);
             
             checkNetworkStatus();
             if (savedInput1 || savedInput2) {
@@ -413,6 +451,47 @@
                 banner.style.display = 'none';
                 if (currentIcaosToFetch.length > 0) refreshWeather();
             }
+        }
+
+        // ==========================================
+        // 圖片貼上攔截系統 (Vertical Profile)
+        // ==========================================
+        window.addEventListener('paste', function(e) {
+            // 避免在文字輸入框中貼上圖片時觸發
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.includes('image/')) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const dataUrl = event.target.result;
+                        showProfileImage(dataUrl);
+                        localStorage.setItem('dispatch_profile_image', dataUrl); // 儲存至本地記憶體
+                    };
+                    reader.readAsDataURL(blob);
+                    e.preventDefault();
+                }
+            }
+        });
+
+        function showProfileImage(dataUrl) {
+            const placeholder = document.getElementById('profile-placeholder');
+            const profileImage = document.getElementById('profile-image');
+            placeholder.classList.add('hidden');
+            profileImage.src = dataUrl;
+            profileImage.classList.remove('hidden');
+        }
+
+        function clearProfileImage() {
+            const placeholder = document.getElementById('profile-placeholder');
+            const profileImage = document.getElementById('profile-image');
+            localStorage.removeItem('dispatch_profile_image');
+            profileImage.src = '';
+            profileImage.classList.add('hidden');
+            placeholder.classList.remove('hidden');
         }
 
         // ==========================================
@@ -580,6 +659,7 @@
             document.getElementById('dep-simple-wx').classList.add('hidden');
             document.getElementById('arr-simple-wx').classList.add('hidden');
             document.getElementById('turbli-link').classList.add('hidden');
+            clearProfileImage();
             
             // 清除本地暫存
             localStorage.removeItem('dispatch_rawInput_1');
@@ -678,6 +758,7 @@
         function parseData() {
             const rawText = document.getElementById('rawInput').value;
             const rawText2 = document.getElementById('rawInput2').value || '';
+            const combinedText = rawText + '\n' + rawText2;
             
             // 寫入持久化記憶體
             localStorage.setItem('dispatch_rawInput_1', rawText);
@@ -920,6 +1001,31 @@
                 });
                 htmlObj += '</div>';
                 melContainer.innerHTML = htmlObj;
+            }
+
+            // EDTO Coordinates 擷取系統
+            const edtoMatches = combinedText.match(/^E\.(ENT|ETP\d*|EXT)\s*:.*$/gmi);
+            const edtoContainer = document.getElementById('out-edto-container');
+            
+            if (edtoMatches && edtoMatches.length > 0) {
+                let htmlObj = '<div class="flex flex-col gap-1.5 data-font text-sm md:text-[14px] text-stone-700">';
+                edtoMatches.forEach(line => {
+                    const parts = line.split(':');
+                    if (parts.length >= 2) {
+                        const label = parts[0].trim();
+                        const coords = parts.slice(1).join(':').trim();
+                        htmlObj += `
+                            <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm hover:border-slate-300 transition-colors">
+                                <span class="font-bold text-indigo-400 text-xs md:text-sm tracking-wider w-16">${label}</span>
+                                <span class="font-black text-slate-700 tracking-widest flex-1 text-right">${coords}</span>
+                            </div>
+                        `;
+                    }
+                });
+                htmlObj += '</div>';
+                edtoContainer.innerHTML = htmlObj;
+            } else {
+                edtoContainer.innerHTML = `<div class="text-emerald-600 font-black text-xl md:text-2xl tracking-widest text-center my-auto py-8 bg-emerald-50/50 rounded-xl border-2 border-dashed border-emerald-200">Non-EDTO Flight</div>`;
             }
 
             // Weather Fetching
