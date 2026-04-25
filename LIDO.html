@@ -85,7 +85,7 @@
                         </span>
                         <button id="copy-btn-main" class="flex items-center text-xs font-bold text-emerald-400 hover:text-white bg-emerald-900/30 hover:bg-emerald-600 px-3 py-1.5 rounded transition-colors hidden border border-emerald-700/50">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                            複製純文字 (Word)
+                            複製文字 (Word)
                         </button>
                     </div>
                     
@@ -114,8 +114,8 @@
 
     <script>
         const getSecKey = () => [49, 48, 52, 55, 56, 56].map(c => String.fromCharCode(c)).join('');
-        // ★ 請務必貼上您重新部署後的 GAS 網址 ★
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzMbB36SdcqP56CaHlfbRuAE28ozPldpSmw85wC1e3WVPFtQRLCCH48_5LnSmoBBlxjZw/exec'; 
+        // ★ 確保這裡是您部署的有效 GAS 網址 ★
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyLBXn_g6i-syghx1B3j-Ehz9mPuW1ByAGWc7j2rm45g6EGG3zbSLSoVvqudNpMG0E5-w/exec'; 
 
         const airportMap = {
             'RCTP':'TPE', 'RCKH':'KHH', 'RCSS':'TSA', 'RMQ':'RMQ',
@@ -139,11 +139,11 @@
         const pagePwdInput = document.getElementById('page-password');
         const toast = document.getElementById('toast');
 
-        function showToast(msg, isError = false) {
+        function showToast(msg, isError = false, duration = 3000) {
             toast.textContent = msg;
             toast.className = `fixed top-5 right-5 transform transition-transform duration-300 shadow-lg z-50 px-6 py-3 rounded text-white ${isError ? 'bg-red-600' : 'bg-blue-600'}`;
             toast.classList.remove('translate-x-full', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-x-full', 'opacity-0'), 3000);
+            setTimeout(() => toast.classList.add('translate-x-full', 'opacity-0'), duration);
         }
 
         function attemptUnlock() {
@@ -187,7 +187,6 @@
             showToast('已斷開連線，憑證清除完畢');
         });
 
-        // 轉換航空時間格式 (HHMMZ)
         function formatAviationTime(ms) {
             if (!ms) return 'N/A';
             const d = new Date(ms);
@@ -196,7 +195,6 @@
             return `${hh}${mm}Z`;
         }
 
-        // ★ 新增：轉換航空日期格式 (YYYY-MMM-DD)
         function formatAviationDate(ms) {
             if (!ms) return 'N/A';
             const d = new Date(ms);
@@ -225,6 +223,33 @@
                         <span class="${valColor} text-right">${value}</span>
                     </div>`;
         }
+
+        window.copyVertProf = () => {
+            const img = document.getElementById('vertprof-img');
+            if (!img || !img.src) return;
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                
+                canvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        showToast('剖面圖已成功轉譯並複製至剪貼簿！');
+                    } catch (e) {
+                        showToast('安全性限制：請直接在圖片上按右鍵「複製圖片」', true, 4000);
+                    }
+                }, 'image/png');
+            } catch (e) {
+                showToast('轉譯失敗，請直接右鍵複製圖片', true);
+            }
+        };
 
         const fetchBtn = document.getElementById('fetch-data-btn');
         fetchBtn.addEventListener('click', async () => {
@@ -369,8 +394,7 @@
                         }
                     }
 
-                    // --- 擷取航空日期與時間 ---
-                    const flightDateStr = formatAviationDate(leg.scheduledDepartureTime); // ★ 動態萃取任務日期
+                    const flightDateStr = formatAviationDate(leg.scheduledDepartureTime); 
                     const stdStr = formatAviationTime(leg.scheduledDepartureTime);
                     const staStr = formatAviationTime(leg.scheduledTimeOfArrival);
                     const etdStr = formatAviationTime(leg.estimatedDepartureTime);
@@ -397,6 +421,9 @@
                     let cruiseAltStr = 'N/A', wc = 'N/A', mxsh = 'N/A';
                     let totalFuel = 'N/A', divFuelCalc = 'N/A', spareFuelCalc = 'N/A';
                     let f_addWxx = 0, f_addOpn = 0, f_addAtc = 0, f_addDev = 0, f_cont = 0, f_crit = 0, f_tank = 0, f_extra = 0;
+                    
+                    // ★ EDTO 座標陣列
+                    let edtoData = [];
 
                     if (rawTexts['OFP']) {
                         const ofpText = rawTexts['OFP'];
@@ -460,6 +487,35 @@
                         
                         const f_spare = f_addWxx + f_addOpn + f_addAtc + f_addDev + f_cont + f_crit + f_tank + f_extra;
                         spareFuelCalc = f_spare.toString();
+                        
+                        // ★ EDTO 座標萃取邏輯
+                        if (/EDTO|ETOPS|E\.ENT/.test(ofpText)) {
+                            let entMatch = ofpText.match(/E\.ENT[\s\S]{0,150}?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
+                            if (!entMatch) entMatch = ofpText.match(/EDTO ENTRY.*?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
+                            if (entMatch) edtoData.push(`E.ENT: ${entMatch[1].replace(/\s+/g, ' ')}`);
+
+                            let etpIndex = 1;
+                            while (true) {
+                                let specificEtpRegex = new RegExp(`E\\.ETP${etpIndex}[\\s\\S]{0,150}?([NS]\\d{4}\\.\\d\\s+[EW]\\d{4,5}\\.\\d)`);
+                                let etpMatch = ofpText.match(specificEtpRegex);
+                                if (etpMatch) {
+                                    edtoData.push(`E.ETP${etpIndex}: ${etpMatch[1].replace(/\s+/g, ' ')}`);
+                                    etpIndex++;
+                                } else {
+                                    if (etpIndex === 1) {
+                                        let singleEtpMatch = ofpText.match(/E\.ETP\b[\s\S]{0,150}?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
+                                        if (singleEtpMatch) {
+                                            edtoData.push(`E.ETP: ${singleEtpMatch[1].replace(/\s+/g, ' ')}`);
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+
+                            let extMatch = ofpText.match(/E\.EXT[\s\S]{0,150}?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
+                            if (!extMatch) extMatch = ofpText.match(/EDTO EXIT.*?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
+                            if (extMatch) edtoData.push(`E.EXT: ${extMatch[1].replace(/\s+/g, ' ')}`);
+                        }
                     }
 
                     let raimOutage = 'RAIM not satisfied', raimSatellites = 'N/A';
@@ -471,11 +527,11 @@
                         if (satMatch) raimSatellites = satMatch[1];
                     }
 
-                    // ==============================================
-                    // 3. 組合「隱藏的」純文字區塊 (專門供 Word 複製)
-                    // ==============================================
+                    // 處理純文字 EDTO 顯示
+                    let edtoRawStr = edtoData.length > 0 ? edtoData.join('\n') : 'non-EDTO';
+
                     let rawBlock = `基本資訊：\n`;
-                    rawBlock += `日期: ${flightDateStr}\n`; // ★ 日期輸出
+                    rawBlock += `日期: ${flightDateStr}\n`;
                     rawBlock += `Flight number: ${flightNo}\n`;
                     rawBlock += `機號: ${reg}\n`;
                     rawBlock += `出發地/目的地: ${dep}/${dest}\n`;
@@ -494,6 +550,7 @@
                     rawBlock += `Route: ${flightRoute}\n`;
                     rawBlock += `W/C: ${wc}\n`;
                     rawBlock += `MXSH: ${mxsh}\n`;
+                    rawBlock += `EDTO 座標:\n${edtoRawStr}\n`;
                     rawBlock += `------------------------------------------------------\n`;
                     
                     rawBlock += `性能資訊：\n`;
@@ -561,9 +618,34 @@
                         enrouteVisualHtml += `</div>`;
                     }
 
-                    // ==============================================
-                    // 4. 構建「高科技動態儀表板」視覺 HTML
-                    // ==============================================
+                    // 視覺版 EDTO HTML
+                    let edtoVisualHtml = edtoData.length > 0 
+                        ? edtoData.map(item => {
+                            let parts = item.split(': ');
+                            return `<div class="flex justify-between"><span class="text-slate-400">${parts[0]}:</span><span class="text-emerald-400 font-bold">${parts[1]}</span></div>`;
+                        }).join('')
+                        : `<div class="col-span-full"><span class="text-slate-500 font-bold">non-EDTO</span></div>`;
+
+                    let vertProfVisualHtml = '';
+                    if (rawTexts['VERTPROF'] && rawTexts['VERTPROF'].startsWith('data:image')) {
+                        vertProfVisualHtml = `
+                        <div class="bg-slate-800/40 rounded-xl border border-slate-700/60 overflow-hidden mb-6">
+                            <div class="bg-slate-800/80 px-4 py-2 border-b border-slate-700/60 flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="w-2 h-2 rounded-full bg-indigo-500 mr-2"></div>
+                                    <h3 class="text-indigo-400 font-bold tracking-widest text-xs">垂直剖面圖 (Vertical Profile)</h3>
+                                </div>
+                                <button onclick="copyVertProf()" class="text-xs font-bold text-indigo-400 hover:text-white bg-indigo-900/30 hover:bg-indigo-600 px-2 py-1 rounded transition-colors border border-indigo-700/50 flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    複製圖片
+                                </button>
+                            </div>
+                            <div class="p-4 flex justify-center bg-slate-900/50">
+                                <img id="vertprof-img" src="${rawTexts['VERTPROF']}" alt="Vertical Profile" class="max-w-full rounded border border-slate-700/50 shadow-md">
+                            </div>
+                        </div>`;
+                    }
+
                     const visualHtml = `
                         <!-- 基本資訊區塊 -->
                         <div class="bg-slate-800/40 rounded-xl border border-slate-700/60 overflow-hidden mb-6">
@@ -572,7 +654,7 @@
                                 <h3 class="text-blue-400 font-bold tracking-widest text-xs">基本資訊</h3>
                             </div>
                             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
-                                ${renderRow('日期', flightDateStr, true)} <!-- ★ 視覺化日期輸出 -->
+                                ${renderRow('日期', flightDateStr, true)}
                                 ${renderRow('Flight number', flightNo, true)}
                                 ${renderRow('機號', reg)}
                                 ${renderRow('出發地/目的地', `${dep}/${dest}`)}
@@ -602,6 +684,13 @@
                                 <div class="mt-2 pt-2 border-t border-slate-700/50">
                                     <span class="text-slate-400 block mb-1">Route:</span>
                                     <span class="text-slate-300 block leading-relaxed tracking-wide bg-slate-900/50 p-3 rounded border border-slate-700/50">${flightRoute}</span>
+                                </div>
+                                <!-- ★ 新增 EDTO 座標區塊 -->
+                                <div class="mt-2 pt-2 border-t border-slate-700/50">
+                                    <span class="text-slate-400 block mb-1">EDTO 座標:</span>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 w-full bg-slate-900/50 p-3 rounded border border-slate-700/50 font-mono text-xs">
+                                        ${edtoVisualHtml}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -659,6 +748,8 @@
                                 ${enrouteVisualHtml}
                             </div>
                         </div>
+                        
+                        ${vertProfVisualHtml}
 
                         <!-- 其他資訊區塊 -->
                         <div class="bg-slate-800/40 rounded-xl border border-slate-700/60 overflow-hidden">
@@ -696,7 +787,7 @@
             document.execCommand('copy');
             window.getSelection().removeAllRanges();
             hiddenRaw.classList.add('hidden'); 
-            showToast('已複製勤務專屬純文字至剪貼簿');
+            showToast('已複製勤務專屬純文字！剖面圖請另行點擊圖片上方的複製按鈕。', false, 4000);
         });
 
         document.getElementById('copy-btn-atc').addEventListener('click', () => {
