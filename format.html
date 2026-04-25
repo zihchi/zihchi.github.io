@@ -380,12 +380,27 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                 </div>
+                <!-- iPad 優化：新增專屬按鈕與長按貼上區塊 -->
                 <div class="p-3 md:p-4 bg-[#f8fafc] flex-grow flex items-center justify-center min-h-[250px] relative" id="profile-container">
-                    <div id="profile-placeholder" class="text-slate-400 font-bold text-sm tracking-wide border-2 border-dashed border-slate-300 rounded-xl w-full h-full flex flex-col items-center justify-center hover:bg-slate-50 transition-colors p-8" tabindex="0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                        <span>點擊此處並貼上 (Ctrl+V / Cmd+V) 剖面圖</span>
+                    <div id="profile-placeholder" class="text-slate-400 font-bold text-sm tracking-wide border-2 border-dashed border-slate-300 rounded-xl w-full h-full flex flex-col items-center justify-center p-4 md:p-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 mb-4 w-full max-w-sm">
+                            <button onclick="document.getElementById('profile-upload').click()" class="flex-1 bg-white border border-slate-300 text-slate-600 px-4 py-2.5 rounded-xl shadow-sm hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                📁 選擇相簿圖片
+                            </button>
+                            <button onclick="pasteFromClipboard()" class="flex-1 bg-indigo-50 border border-indigo-200 text-indigo-600 px-4 py-2.5 rounded-xl shadow-sm hover:bg-indigo-100 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                📋 一鍵貼上截圖
+                            </button>
+                        </div>
+                        
+                        <div class="text-[10px] md:text-xs text-slate-400 font-normal flex flex-col md:flex-row items-center gap-2 mt-2">
+                            <span>或點擊右方輸入框長按貼上：</span>
+                            <input type="text" placeholder="👉 長按貼上圖片" class="border border-slate-300 rounded-lg px-3 py-1.5 w-32 text-center text-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 bg-white shadow-inner" oninput="this.value=''">
+                        </div>
                     </div>
                     <img id="profile-image" src="" alt="Vertical Profile" class="hidden max-w-full max-h-[600px] object-contain rounded-lg shadow-sm border border-slate-200">
+                    <input type="file" id="profile-upload" accept="image/*" class="hidden" onchange="handleProfileUpload(event)">
                 </div>
             </div>
 
@@ -454,13 +469,17 @@
         }
 
         // ==========================================
-        // 圖片貼上攔截系統 (Vertical Profile)
+        // 圖片貼上與 iPad 點擊檔案上傳攔截系統 (Vertical Profile)
         // ==========================================
         window.addEventListener('paste', function(e) {
-            // 避免在文字輸入框中貼上圖片時觸發
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+            // 允許特定輸入框攔截 paste 事件 (原本會擋掉 INPUT/TEXTAREA)
+            if ((e.target.tagName === 'TEXTAREA' && !e.target.placeholder.includes('長按貼上')) || 
+                (e.target.tagName === 'INPUT' && !e.target.placeholder.includes('長按貼上'))) {
+                return;
+            }
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            let imageFound = false;
             for (let index in items) {
                 const item = items[index];
                 if (item.kind === 'file' && item.type.includes('image/')) {
@@ -473,9 +492,75 @@
                     };
                     reader.readAsDataURL(blob);
                     e.preventDefault();
+                    imageFound = true;
                 }
             }
+
+            if (e.target.tagName === 'INPUT' && e.target.placeholder.includes('長按貼上')) {
+                setTimeout(() => e.target.value = '', 10); // 清空輸入框防止文字殘留
+            }
         });
+
+        // 專為 iPad 設計的剪貼簿讀取 API (需瀏覽器支援 Clipboard API)
+        async function pasteFromClipboard() {
+            try {
+                if (!navigator.clipboard || !navigator.clipboard.read) {
+                    showToastMessage('此瀏覽器不支援一鍵貼上，請使用下方「長按輸入框」');
+                    return;
+                }
+                const clipboardItems = await navigator.clipboard.read();
+                for (const clipboardItem of clipboardItems) {
+                    const imageTypes = clipboardItem.types.filter(type => type.startsWith('image/'));
+                    if (imageTypes.length > 0) {
+                        const blob = await clipboardItem.getType(imageTypes[0]);
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const dataUrl = e.target.result;
+                            showProfileImage(dataUrl);
+                            localStorage.setItem('dispatch_profile_image', dataUrl);
+                        };
+                        reader.readAsDataURL(blob);
+                        return;
+                    }
+                }
+                showToastMessage('剪貼簿中未偵測到圖片！請先截圖或複製。');
+            } catch (err) {
+                console.error('剪貼簿讀取失敗:', err);
+                showToastMessage('無法讀取剪貼簿，請嘗試下方「長按輸入框貼上」');
+            }
+        }
+
+        // 自訂提示訊息 (Toast)，避免使用被阻擋的 alert
+        function showToastMessage(msg) {
+            let toast = document.getElementById('toast-msg');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-msg';
+                toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-5 py-2.5 rounded-full shadow-2xl z-[100] transition-opacity duration-300 opacity-0 pointer-events-none font-bold text-sm tracking-wide text-center w-max max-w-[90vw] border border-slate-700';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // 專為 iPad 與行動裝置設計的檔案上傳接口
+        function handleProfileUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const dataUrl = e.target.result;
+                    showProfileImage(dataUrl);
+                    localStorage.setItem('dispatch_profile_image', dataUrl);
+                };
+                reader.readAsDataURL(file);
+            }
+            // 重置 input，確保使用者清除後還能重新選取同一張圖
+            event.target.value = '';
+        }
 
         function showProfileImage(dataUrl) {
             const placeholder = document.getElementById('profile-placeholder');
