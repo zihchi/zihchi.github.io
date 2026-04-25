@@ -15,6 +15,8 @@
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
         ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+        /* 確保 iOS 上可以長按圖片 */
+        #vertprof-img { -webkit-touch-callout: default; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-200 min-h-screen font-sans flex items-center justify-center p-2 md:p-4">
@@ -114,7 +116,6 @@
 
     <script>
         const getSecKey = () => [49, 48, 52, 55, 56, 56].map(c => String.fromCharCode(c)).join('');
-        // ★ 確保這裡是您部署的有效 GAS 網址 ★
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyLBXn_g6i-syghx1B3j-Ehz9mPuW1ByAGWc7j2rm45g6EGG3zbSLSoVvqudNpMG0E5-w/exec'; 
 
         const airportMap = {
@@ -224,7 +225,8 @@
                     </div>`;
         }
 
-        window.copyVertProf = () => {
+        // ★ iPad Safari 專屬修正：利用 Promise 直接包裹 Blob，防護「使用者手勢」授權失效
+        window.copyVertProf = async () => {
             const img = document.getElementById('vertprof-img');
             if (!img || !img.src) return;
             try {
@@ -236,18 +238,17 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
                 
-                canvas.toBlob(async (blob) => {
-                    try {
-                        await navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]);
-                        showToast('剖面圖已成功轉譯並複製至剪貼簿！');
-                    } catch (e) {
-                        showToast('安全性限制：請直接在圖片上按右鍵「複製圖片」', true, 4000);
-                    }
-                }, 'image/png');
+                const blobPromise = new Promise(resolve => {
+                    canvas.toBlob(blob => resolve(blob), 'image/png');
+                });
+                
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blobPromise })
+                ]);
+                showToast('剖面圖已成功轉譯並複製至剪貼簿！');
             } catch (e) {
-                showToast('轉譯失敗，請直接右鍵複製圖片', true);
+                console.error(e);
+                showToast('受限於 iOS 安全性，請直接「長按圖片」選擇拷貝', true, 4000);
             }
         };
 
