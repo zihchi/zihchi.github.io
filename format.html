@@ -340,7 +340,13 @@
                         AVIATION WEATHER
                         <span id="wx-utc-date" class="text-[10px] md:text-xs bg-[#1f2b38] border border-[#4a6b8c] px-2 py-0.5 rounded shadow-inner font-bold data-font tracking-wide">----</span>
                     </h1>
-                    <p class="text-[9px] md:text-[10px] text-stone-300 tracking-widest uppercase font-semibold">METAR & TAF Reports</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <p class="text-[9px] md:text-[10px] text-stone-300 tracking-widest uppercase font-semibold">METAR & TAF Reports</p>
+                        <a id="turbli-link" href="#" target="_blank" class="hidden bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-400/50 text-indigo-200 text-[9px] md:text-[10px] px-2 py-0.5 rounded shadow-sm transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                            Turbli 亂流預測
+                        </a>
+                    </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="refreshWeather()" class="bg-stone-700 hover:bg-stone-600 text-stone-200 p-2 rounded-lg transition-colors active:scale-95 shadow-sm" title="Refresh METAR/TAF">
@@ -536,12 +542,44 @@
             }
         }
 
+        function formatTurbliDate(dateStr) {
+            if (!dateStr || dateStr === '----') return '';
+            const months = {JAN:'01', FEB:'02', MAR:'03', APR:'04', MAY:'05', JUN:'06', JUL:'07', AUG:'08', SEP:'09', OCT:'10', NOV:'11', DEC:'12'};
+            
+            // 格式處理：YYYY-MMM-DD (例: 2026-APR-24)
+            let m = dateStr.match(/(\d{4})-([A-Z]{3})-(\d{2})/i);
+            if (m) return `${m[1]}-${months[m[2].toUpperCase()]}-${m[3]}`;
+            
+            // 格式處理：DD-MMM-YYYY (例: 24-APR-2026)
+            m = dateStr.match(/(\d{2})-([A-Z]{3})-(\d{4})/i);
+            if (m) return `${m[3]}-${months[m[2].toUpperCase()]}-${m[1]}`;
+
+            // 格式處理：DDMMMYY 或 DDMMMYYYY (例: 24APR26 或 24APR2026)
+            m = dateStr.match(/(\d{2})([A-Z]{3})(\d{2,4})/i);
+            if (m) {
+                let year = m[3];
+                if (year.length === 2) year = '20' + year;
+                return `${year}-${months[m[2].toUpperCase()]}-${m[1]}`;
+            }
+            return '';
+        }
+
+        function formatTurbliFlight(flightStr) {
+            if (!flightStr || flightStr === '----') return '';
+            if (flightStr.includes('-')) return flightStr.toUpperCase();
+            // JX745 轉換為 JX-745
+            const match = flightStr.match(/^([A-Za-z]+)(\d+[A-Za-z]*)$/);
+            if (match) return `${match[1].toUpperCase()}-${match[2]}`;
+            return flightStr.toUpperCase();
+        }
+
         function clearData() {
             // 清空畫面
             document.getElementById('rawInput').value = '';
             document.getElementById('rawInput2').value = '';
             document.getElementById('dep-simple-wx').classList.add('hidden');
             document.getElementById('arr-simple-wx').classList.add('hidden');
+            document.getElementById('turbli-link').classList.add('hidden');
             
             // 清除本地暫存
             localStorage.removeItem('dispatch_rawInput_1');
@@ -690,17 +728,44 @@
                 { id: 'out-extra', key: 'EXTRA' }
             ];
 
+            let valFlight = '----';
+
             mapping.forEach(item => {
                 const el = document.getElementById(item.id);
                 if (el) {
                     let val = extractData(rawText, item.key);
                     if (item.key === 'Flight number' && val !== 'N/A') {
                         val = val.replace(/^SJX/i, 'JX');
+                        valFlight = val;
                     }
                     if(val === 'N/A' || val === '') val = '----';
                     el.textContent = val;
                 }
             });
+
+            // 萃取 IATA 代碼以供 Turbli 連結使用 (從機場資訊區塊抓取)
+            let depIATA = currentDepICAO;
+            let arrIATA = currentArrICAO;
+            if (currentDepICAO !== '----') {
+                const dMatch = rawText.match(new RegExp(`${currentDepICAO}\\/([A-Z]{3})(?![A-Z])`, 'i'));
+                if (dMatch) depIATA = dMatch[1].toUpperCase();
+            }
+            if (currentArrICAO !== '----') {
+                const aMatch = rawText.match(new RegExp(`${currentArrICAO}\\/([A-Z]{3})(?![A-Z])`, 'i'));
+                if (aMatch) arrIATA = aMatch[1].toUpperCase();
+            }
+
+            // 更新 Turbli 連結
+            const turbliLink = document.getElementById('turbli-link');
+            const tDate = formatTurbliDate(currentDateUTC);
+            const tFlight = formatTurbliFlight(valFlight);
+            
+            if (depIATA !== '----' && arrIATA !== '----' && tDate && tFlight && tFlight !== '----') {
+                turbliLink.href = `https://turbli.com/${depIATA}/${arrIATA}/${tDate}/${tFlight}/`;
+                turbliLink.classList.remove('hidden');
+            } else {
+                turbliLink.classList.add('hidden');
+            }
 
             // Parse and store UTC times for Weather headers
             const stdStr = extractData(rawText, 'STD');
