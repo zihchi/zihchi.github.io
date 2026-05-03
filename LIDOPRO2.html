@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- PWA 支援核心 Meta Tags -->
+    <meta name="theme-color" content="#4a3627">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Briefing Pro">
     <title>個人專屬 - 航班擷取與簡報系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -78,7 +83,6 @@
             background-color: #f4ece4 !important;
         }
 
-        /* 強制將戰情板擴展到固定寬度，避免行動版尺寸導致排版被壓縮 */
         .capture-mode #dashboard-content {
             width: 1200px !important;
             max-width: none !important;
@@ -89,7 +93,6 @@
             border-radius: 0 !important;
         }
 
-        /* 關鍵修正：將所有捲軸區塊展開到最大高度 */
         .capture-mode .mel-scroll,
         .capture-mode #out-mel-container,
         .capture-mode textarea {
@@ -113,25 +116,16 @@
     <div id="toast" class="fixed top-5 right-5 transform transition-transform translate-x-full opacity-0 bg-[#4a3627] text-white px-6 py-3 rounded-xl shadow-2xl z-[500] font-bold tracking-wide border border-[#8b5a2b]/30 no-print">訊息提示</div>
     <div id="offline-banner" class="fixed top-0 left-0 w-full hidden no-print">⚠️ 目前處於離線模式。顯示資料為系統最後一次快取紀錄。</div>
 
-    <!-- 登入與鎖定畫面 -->
+    <!-- 登入與鎖定畫面 (已移除第一層密碼鎖) -->
     <div id="login-wrapper" class="flex flex-col min-h-screen items-center justify-center p-4 relative no-print">
-        <!-- 返回按鈕 -->
         <a href="index.html" class="absolute top-6 left-6 md:top-8 md:left-8 p-2.5 bg-white/40 hover:bg-white/80 backdrop-blur-md text-stone-700 rounded-xl transition-all shadow-sm border border-white/60 flex items-center justify-center hover:scale-105 active:scale-95 z-50" title="返回上一頁">
             <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
         </a>
 
-        <!-- 第一層：網頁密碼鎖 -->
-        <div id="lock-screen" class="w-full max-w-md glass-panel p-8 rounded-3xl shadow-xl text-center transition-opacity duration-500">
-            <svg class="w-16 h-16 mx-auto mb-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            <h2 class="text-2xl font-bold mb-6 tracking-wider text-stone-700">系統已鎖定</h2>
-            <input type="password" id="page-password" placeholder="請輸入網頁密碼" class="w-full px-4 py-3 mb-4 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8b5a2b] text-center tracking-[0.5em] transition-all shadow-inner text-stone-700">
-            <button id="unlock-btn" class="w-full px-4 py-3 bg-[#4a3627] hover:bg-[#5c4033] text-white font-bold rounded-xl transition-colors shadow-md active:scale-95">解鎖系統</button>
-        </div>
-
-        <!-- 第二層：Lido 伺服器驗證 -->
-        <div id="lido-login-screen" class="w-full max-w-md glass-panel p-8 rounded-3xl shadow-xl text-center transition-opacity duration-500 hidden">
+        <!-- Lido 伺服器驗證 -->
+        <div id="lido-login-screen" class="w-full max-w-md glass-panel p-8 rounded-3xl shadow-xl text-center transition-opacity duration-500">
             <svg class="w-16 h-16 mx-auto mb-4 text-[#8b5a2b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <h2 class="text-2xl font-bold mb-4 tracking-wider text-stone-700">伺服器驗證</h2>
             <p class="text-xs text-stone-500 mb-6 font-medium">請輸入帳密，系統將於背景保持連線狀態。</p>
@@ -159,7 +153,7 @@
             </div>
             <div class="flex gap-3 items-center w-full sm:w-auto">
                 <button onclick="clearData()" class="flex-1 sm:flex-none text-sm text-red-600 bg-red-50 hover:bg-red-100 font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm">🧹 歸零清理</button>
-                <button id="lock-again-btn" class="flex-1 sm:flex-none text-sm text-stone-600 bg-stone-100 hover:bg-stone-200 font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm border border-stone-200">🔒 鎖定系統</button>
+                <button id="lock-again-btn" class="flex-1 sm:flex-none text-sm text-stone-600 bg-stone-100 hover:bg-stone-200 font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm border border-stone-200">🔒 登出系統</button>
             </div>
         </div>
          
@@ -247,27 +241,27 @@
                                 </div>
                             </div>
                             
-                          <!-- 核心飛行時間與巡航高度 (縮小緊湊版) -->
-<div class="flex flex-row bg-gradient-to-b from-[#3b4c59] to-[#2c3e50] rounded-xl shadow-md overflow-hidden relative z-10 border border-stone-300 mx-2 md:mx-3">
-    <!-- 裝飾背景圖形 (圖示等比例調小) -->
+                         <!-- 核心飛行時間與巡航高度 (微型極致版) -->
+<div class="flex flex-row bg-gradient-to-b from-[#3b4c59] to-[#2c3e50] rounded-lg shadow-sm overflow-hidden relative z-10 border border-stone-300 mx-2 md:mx-3">
+    <!-- 裝飾背景圖形 (圖示進一步縮小為 w-8 / md:w-12) -->
     <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/10 z-0">
-        <svg class="w-12 h-12 md:w-16 md:h-16 rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+        <svg class="w-8 h-8 md:w-12 md:h-12 rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
     </div>
     
-    <!-- 左側面板 (留白從 p-4 縮減為 p-3) -->
-    <div class="flex-1 p-3 md:p-4 flex flex-col items-center justify-center relative z-10">
-        <span class="text-[9px] md:text-[10px] font-bold text-stone-300 uppercase tracking-widest mb-1 drop-shadow-md">Flight Time</span>
-        <!-- 數據字體從 3xl/5xl 調降為 2xl/4xl -->
-        <span class="data-font font-black text-2xl md:text-4xl text-amber-400 leading-none tracking-wider drop-shadow-lg" id="out-ete-center">--:--</span>
+    <!-- 左側面板 (留白從 p-3 縮減為 p-2，間距 mb-1 縮減為 mb-0.5) -->
+    <div class="flex-1 p-2 md:p-3 flex flex-col items-center justify-center relative z-10">
+        <span class="text-[8px] md:text-[9px] font-bold text-stone-300 uppercase tracking-widest mb-0.5 drop-shadow-sm">Flight Time</span>
+        <!-- 數據字體從 2xl/4xl 調降為 xl/3xl -->
+        <span class="data-font font-black text-xl md:text-3xl text-amber-400 leading-none tracking-wider drop-shadow-md" id="out-ete-center">--:--</span>
     </div>
     
-    <!-- 中央分隔線 (上下間距微調) -->
-    <div class="w-px bg-white/20 my-3 z-10"></div>
+    <!-- 中央分隔線 (上下間距微調為 my-2) -->
+    <div class="w-px bg-white/20 my-2 z-10"></div>
     
     <!-- 右側面板 (留白與字體同步調小) -->
-    <div class="flex-1 p-3 md:p-4 flex flex-col items-center justify-center relative z-10">
-        <span class="text-[9px] md:text-[10px] font-bold text-stone-300 uppercase tracking-widest mb-1 drop-shadow-md">CRZ Alt / Temp</span>
-        <span class="data-font font-black text-2xl md:text-4xl text-sky-300 leading-none tracking-wider drop-shadow-lg" id="out-cruise-center">---</span>
+    <div class="flex-1 p-2 md:p-3 flex flex-col items-center justify-center relative z-10">
+        <span class="text-[8px] md:text-[9px] font-bold text-stone-300 uppercase tracking-widest mb-0.5 drop-shadow-sm">CRZ Alt / Temp</span>
+        <span class="data-font font-black text-xl md:text-3xl text-sky-300 leading-none tracking-wider drop-shadow-md" id="out-cruise-center">---</span>
     </div>
 </div>
 
@@ -607,9 +601,64 @@
     <!-- 腳本整合 -->
     <script>
         // ==========================================
+        // PWA 與離線支援模組 (Single-File Architecture)
+        // ==========================================
+        (function initPWA() {
+            // 1. 動態注入 Manifest (支援加入主畫面)
+            const manifest = {
+                "name": "Flight Briefing Pro",
+                "short_name": "Briefing",
+                "display": "standalone",
+                "start_url": location.pathname,
+                "background_color": "#f4ece4",
+                "theme_color": "#4a3627",
+                "icons": [{
+                    "src": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b5a2b'%3E%3Cpath d='M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z'/%3E%3C/svg%3E",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml"
+                }]
+            };
+            const manifestTag = document.createElement('link');
+            manifestTag.rel = 'manifest';
+            manifestTag.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+            document.head.appendChild(manifestTag);
+
+            // 2. 利用 Cache API 輔助快取網頁核心資源
+            if ('caches' in window) {
+                window.addEventListener('load', () => {
+                    caches.open('briefing-core-v1').then(cache => {
+                        cache.add(location.href).catch(() => {});
+                        const extRes = [
+                            'https://cdn.tailwindcss.com', 
+                            'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 
+                            'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+                        ];
+                        cache.addAll(extRes).catch(() => {});
+                    });
+                });
+            }
+
+            // 3. 建立單一檔案虛擬 Service Worker
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(res => res || fetch(e.request).catch(() => caches.match(location.origin)))
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {
+                    console.log('單一檔案模式下的 SW 註冊受限，但已透過 Cache API 提供基礎離線支援');
+                });
+            }
+        })();
+
+        // ==========================================
         // 變數與核心功能
         // ==========================================
-        const getSecKey = () => [49, 48, 52, 55, 56, 56].map(c => String.fromCharCode(c)).join('');
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzLGUt7oKbBMpcwGFkFiDWp1mMlrQiP1UND07XyWB4LTXYjq-WSkUf_zmzoAGwyLIfaTA/exec'; 
         
         let savedLidoUser = ''; let savedLidoPass = '';
@@ -656,11 +705,9 @@
         };
 
         // UI 元件
-        const lockScreen = document.getElementById('lock-screen');
         const lidoLoginScreen = document.getElementById('lido-login-screen');
         const mainApp = document.getElementById('main-app');
         const loginWrapper = document.getElementById('login-wrapper');
-        const pagePwdInput = document.getElementById('page-password');
         const toast = document.getElementById('toast');
 
         let currentDepICAO = '----', currentArrICAO = '----';
@@ -678,20 +725,6 @@
             }, duration);
         }
         function showToastMessage(msg) { showToast(msg, false, 4000); }
-
-        // 解鎖邏輯
-        function attemptUnlock() {
-            if (pagePwdInput.value === getSecKey()) {
-                lockScreen.classList.add('hidden');
-                lidoLoginScreen.classList.remove('hidden');
-                pagePwdInput.value = '';
-            } else {
-                showToast('登入授權碼無效', true);
-                pagePwdInput.value = '';
-            }
-        }
-        document.getElementById('unlock-btn').addEventListener('click', attemptUnlock);
-        pagePwdInput.addEventListener('keypress', e => { if (e.key === 'Enter') attemptUnlock(); });
 
         document.getElementById('lido-connect-btn').addEventListener('click', () => {
             const user = document.getElementById('lido-user').value.trim();
@@ -711,8 +744,7 @@
             document.getElementById('lido-pass').value = '';
             mainApp.classList.add('hidden');
             loginWrapper.classList.remove('hidden');
-            lockScreen.classList.remove('hidden');
-            lidoLoginScreen.classList.add('hidden');
+            lidoLoginScreen.classList.remove('hidden');
             clearData();
             showToast('已斷開連線，憑證清除並鎖定');
         });
@@ -901,14 +933,11 @@
                         const mxshMatch = ofpText.match(/MXSH\s+([A-Z0-9\/]+)/);
                         if (mxshMatch) {
                             mxsh = mxshMatch[1];
-                            // 智能提取航點名稱 (例如 05/TASOT 或純 TASOT)，只要連續3個以上英文字母就當作航點
                             const wptMatch = mxsh.match(/[A-Z]{3,}/);
                             if (wptMatch) {
                                 const wptName = wptMatch[0];
-                                // 動態鎖定 MAX SHEAR 的航點，往下掃描最多300字元，抓取經緯度座標前的4碼時間
                                 const wptRegex = new RegExp(`\\b${wptName}\\b[\\s\\S]{1,300}?\\b(\\d{4})\\s+[NS]\\d{2}`);
                                 const atgoMatch = ofpText.match(wptRegex);
-                                // 將時間格式化為 XXhYYm 並接在 waypoint 後面
                                 if (atgoMatch) {
                                     const timeRaw = atgoMatch[1];
                                     mxsh += `/${timeRaw.substring(0,2)}h${timeRaw.substring(2,4)}m`;
@@ -924,17 +953,14 @@
                             const altMatch = tocLine.match(/\b([2-4]\d{2})\b/);
                             if (altMatch) tocAlt = 'FL' + altMatch[1];
                             
-                            // 往下掃描最多 5 行，抓取 TOC 下一個航點的溫度
                             for (let i = tocIndex + 1; i <= Math.min(tocIndex + 5, ofpLines.length - 1); i++) {
                                 const nextLine = ofpLines[i];
-                                // 增強型溫度擷取正則：可以抓到獨立的 -46、M46 或連在風速後的 /M46
                                 const tempMatch = nextLine.match(/(?:\/|\s)([MP+-]\d{2})(?=\s|$)/i);
                                 if (tempMatch) {
                                     let tVal = tempMatch[1].toUpperCase();
-                                    // 將 M 替換成 -，將 P 替換成 + 確保符合 /-46 的格式
                                     tVal = tVal.replace('M', '-').replace('P', '+');
                                     tocTemp = '/' + tVal;
-                                    break; // 找到第一個溫度就跳出迴圈
+                                    break;
                                 }
                             }
                         }
@@ -995,7 +1021,7 @@
                         showImage(rawTexts['VERTPROF'], 'profile');
                     }
 
-                    // ★ SIGWX 陣列圖檔處理 (支援多張圖表) - 已相容 UAD 分類！
+                    // SIGWX 陣列圖檔處理
                     Object.keys(rawTexts).forEach(key => {
                         if ((key.startsWith('SIGWX') || key.startsWith('UAD')) && rawTexts[key].startsWith('data:image')) {
                             showImage(rawTexts[key], 'sigwx');
@@ -1090,10 +1116,8 @@
         }
 
        window.addEventListener('paste', function(e) {
-            // 如果焦點在一般的輸入框或文字區域，則不攔截（讓使用者能正常貼上文字）
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') { return; }
 
-            // 全域貼上快捷鍵預設將圖片放至 profile
             let prefix = 'profile'; 
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -1149,12 +1173,10 @@
         function showImage(dataUrl, prefix, skipSave = false) {
             document.getElementById(`${prefix}-placeholder`).classList.add('hidden');
             
-            // 針對 sigwx，允許堆疊插入多張圖表
             if (prefix === 'sigwx') {
                 const container = document.getElementById('sigwx-container');
                 const img = document.createElement('img');
                 img.src = dataUrl;
-                // 加入 lg:w-[calc(50%-0.5rem)] 與 lg:max-h-[350px] 確保在 iPad Pro 11 橫向(1194px)時縮小且水平排列
                 img.className = "w-full lg:w-[calc(50%-0.5rem)] h-auto max-h-[600px] lg:max-h-[350px] object-contain rounded-lg shadow-sm border border-stone-200 sigwx-img-item transition-all duration-300";
                 container.insertBefore(img, document.getElementById('sigwx-upload'));
                 
@@ -1190,11 +1212,10 @@
         }
 
         // ==========================================
-        // 核心突破點：Capture Mode 準備函式
+        // Capture Mode 準備函式
         // ==========================================
         function prepareForCapture() {
             document.body.classList.add('capture-mode');
-            // 強制展開所有 textarea 使其高度真實反映內部文字
             document.querySelectorAll('textarea').forEach(ta => {
                 ta.dataset.origHeight = ta.style.height;
                 ta.style.height = 'auto'; // Reset
@@ -1212,17 +1233,16 @@
         async function getCanvasFromDashboard() {
             const dashboard = document.getElementById('dashboard-content');
             prepareForCapture();
-            // 延遲等待瀏覽器重新渲染排版 (極為重要)
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
                 const canvas = await html2canvas(dashboard, {
-                    scale: 2, // 確保高畫質
+                    scale: 2, 
                     useCORS: true,
                     backgroundColor: '#f4ece4',
                     windowWidth: dashboard.scrollWidth,
                     windowHeight: dashboard.scrollHeight,
-                    scrollY: -window.scrollY // 修正捲軸位移造成的頂部截斷
+                    scrollY: -window.scrollY
                 });
                 return canvas;
             } finally {
@@ -1244,7 +1264,6 @@
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], `Briefing_JX${document.getElementById('out-flight-no').textContent || 'FLT'}.png`, { type: 'image/png' });
                     
-                    // 優先使用 iOS 原生分享 (Navigator Share)
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
@@ -1257,7 +1276,6 @@
                             console.log('Share API cancelled or failed:', err);
                         }
                     } else if (navigator.clipboard && window.ClipboardItem) {
-                        // 若不支援 Share，退回剪貼簿
                         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
                         showToastMessage('✅ 截圖已複製！可直接貼上至備忘錄。');
                     } else {
@@ -1281,11 +1299,9 @@
                 const canvas = await getCanvasFromDashboard();
                 const { jsPDF } = window.jspdf;
                 
-                // 將 Canvas 依照 A4 寬度(210mm)等比例計算出連續長度
                 const pdfWidth = 210; 
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                 
-                // 動態宣告 PDF 尺寸為我們算出來的長度！
                 const pdf = new jsPDF({
                     orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
                     unit: 'mm',
@@ -1296,7 +1312,6 @@
                 const pdfBlob = pdf.output('blob');
                 const file = new File([pdfBlob], `Briefing_JX${document.getElementById('out-flight-no').textContent || 'FLT'}.pdf`, { type: 'application/pdf' });
 
-                // iOS 專武：透過分享選單傳遞檔案，即可直接存入「檔案」App
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
@@ -1308,7 +1323,6 @@
                         console.log('Share API cancelled or failed:', err);
                     }
                 } else {
-                    // 若不支援 Share (如電腦版瀏覽器)，則直接下載
                     pdf.save(`Briefing_JX${document.getElementById('out-flight-no').textContent || 'FLT'}.pdf`);
                     showToastMessage('✅ 無縫 PDF 已下載！');
                 }
@@ -1584,7 +1598,6 @@
             }
             document.getElementById('out-dep-bay').textContent = depBay; document.getElementById('out-arr-bay').textContent = arrBay;
 
-            // 備降機場提取 (純供抓天氣使用，畫面區塊已移除)
             const alt1 = extractData(rawText, '第一備降機場/跑道');
             const alt2 = extractData(rawText, '第二備降機場/跑道');
             const alt3 = extractData(rawText, '第三備降機場/跑道');
