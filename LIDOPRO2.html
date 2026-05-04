@@ -10,9 +10,6 @@
     <meta name="apple-mobile-web-app-title" content="Briefing Pro">
     <title>個人專屬 - 航班擷取與簡報系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- 引入 jsPDF 用於產製無限長無縫 PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
 
@@ -74,37 +71,6 @@
             position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* ==========================================
-           無縫截圖/列印專用準備模式 (Capture Mode)
-           ========================================== */
-        body.capture-mode {
-            overflow: visible !important;
-            height: auto !important;
-            background-color: #f4ece4 !important;
-        }
-
-        .capture-mode #dashboard-content {
-            width: 1200px !important;
-            max-width: none !important;
-            margin: 0 auto !important;
-            box-shadow: none !important;
-            border: none !important;
-            padding: 40px !important;
-            border-radius: 0 !important;
-        }
-
-        .capture-mode .mel-scroll,
-        .capture-mode #out-mel-container,
-        .capture-mode textarea {
-            max-height: none !important;
-            height: auto !important;
-            overflow: visible !important;
-        }
-
-        .capture-mode .no-print {
-            display: none !important;
-        }
-
         @media print {
             .no-print { display: none !important; }
         }
@@ -116,14 +82,8 @@
     <div id="toast" class="fixed top-5 right-5 transform transition-transform translate-x-full opacity-0 bg-[#4a3627] text-white px-6 py-3 rounded-xl shadow-2xl z-[500] font-bold tracking-wide border border-[#8b5a2b]/30 no-print">訊息提示</div>
     <div id="offline-banner" class="fixed top-0 left-0 w-full hidden no-print">⚠️ 目前處於離線模式。顯示資料為系統最後一次快取紀錄。</div>
 
-    <!-- 登入與鎖定畫面 (已移除第一層密碼鎖) -->
+    <!-- 登入與鎖定畫面 -->
     <div id="login-wrapper" class="flex flex-col min-h-screen items-center justify-center p-4 relative no-print">
-        <a href="index.html" class="absolute top-6 left-6 md:top-8 md:left-8 p-2.5 bg-white/40 hover:bg-white/80 backdrop-blur-md text-stone-700 rounded-xl transition-all shadow-sm border border-white/60 flex items-center justify-center hover:scale-105 active:scale-95 z-50" title="返回上一頁">
-            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-        </a>
-
         <!-- Lido 伺服器驗證 -->
         <div id="lido-login-screen" class="w-full max-w-md glass-panel p-8 rounded-3xl shadow-xl text-center transition-opacity duration-500">
             <svg class="w-16 h-16 mx-auto mb-4 text-[#8b5a2b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -136,19 +96,14 @@
     </div>
 
     <!-- 主程式戰情室 -->
-    <div id="main-app" class="w-full max-w-[1600px] mx-auto transition-opacity duration-500 hidden flex flex-col p-3 md:p-6">
+    <div id="main-app" class="w-full max-w-[1600px] mx-auto transition-opacity duration-500 hidden flex flex-col p-3 md:p-6 pb-12">
         
         <!-- 頂部 Header -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-stone-300 pb-4 gap-4 no-print">
             <div class="flex items-center gap-3">
-                <a href="index.html" class="p-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl transition-colors shadow-sm border border-stone-200" title="返回上一頁">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                </a>
                 <h1 class="text-xl md:text-2xl font-black text-[#4a3627] tracking-wide flex items-center">
                     <svg class="w-6 h-6 mr-2 text-[#8b5a2b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Briefing
+                    Briefing Pro
                 </h1>
             </div>
             <div class="flex gap-3 items-center w-full sm:w-auto">
@@ -243,22 +198,21 @@
                             
                          <!-- 核心飛行時間與巡航高度 (微型極致版) -->
 <div class="flex flex-row bg-gradient-to-b from-[#3b4c59] to-[#2c3e50] rounded-lg shadow-sm overflow-hidden relative z-10 border border-stone-300 mx-2 md:mx-3">
-    <!-- 裝飾背景圖形 (圖示進一步縮小為 w-8 / md:w-12) -->
+    <!-- 裝飾背景圖形 -->
     <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/10 z-0">
         <svg class="w-8 h-8 md:w-12 md:h-12 rotate-90" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
     </div>
     
-    <!-- 左側面板 (留白從 p-3 縮減為 p-2，間距 mb-1 縮減為 mb-0.5) -->
+    <!-- 左側面板 -->
     <div class="flex-1 p-2 md:p-3 flex flex-col items-center justify-center relative z-10">
         <span class="text-[8px] md:text-[9px] font-bold text-stone-300 uppercase tracking-widest mb-0.5 drop-shadow-sm">Flight Time</span>
-        <!-- 數據字體從 2xl/4xl 調降為 xl/3xl -->
         <span class="data-font font-black text-xl md:text-3xl text-amber-400 leading-none tracking-wider drop-shadow-md" id="out-ete-center">--:--</span>
     </div>
     
-    <!-- 中央分隔線 (上下間距微調為 my-2) -->
+    <!-- 中央分隔線 -->
     <div class="w-px bg-white/20 my-2 z-10"></div>
     
-    <!-- 右側面板 (留白與字體同步調小) -->
+    <!-- 右側面板 -->
     <div class="flex-1 p-2 md:p-3 flex flex-col items-center justify-center relative z-10">
         <span class="text-[8px] md:text-[9px] font-bold text-stone-300 uppercase tracking-widest mb-0.5 drop-shadow-sm">CRZ Alt / Temp</span>
         <span class="data-font font-black text-xl md:text-3xl text-sky-300 leading-none tracking-wider drop-shadow-md" id="out-cruise-center">---</span>
@@ -417,7 +371,7 @@
 
                     <!-- MEL Image Block -->
                     <div class="border border-stone-200 rounded-xl overflow-hidden shadow-sm bg-white flex flex-col">
-                        <div class="bg-gradient-to-r from-stone-500 to-stone-600 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center" data-html2canvas-ignore>
+                        <div class="bg-gradient-to-r from-stone-500 to-stone-600 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                             <span class="flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 DEFECT / eLB 截圖區
@@ -427,7 +381,7 @@
                             </button>
                         </div>
                         <div class="p-4 md:p-6 bg-[#fbf9f6] flex-grow flex items-center justify-center min-h-[150px] relative">
-                            <div id="mel-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8" data-html2canvas-ignore>
+                            <div id="mel-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                 <div class="flex gap-4 mb-4 w-full max-w-[320px] no-print">
                                     <button onclick="document.getElementById('mel-upload').click()" class="flex-1 bg-white border border-stone-300 text-stone-600 py-3 rounded-xl shadow-sm hover:bg-stone-50 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">📁 相簿</button>
@@ -435,7 +389,7 @@
                                 </div>
                             </div>
                             <img id="mel-image" src="" alt="MEL Image" class="hidden w-full h-auto max-h-[600px] object-contain rounded-lg shadow-sm border border-stone-200">
-                            <input type="file" id="mel-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'mel')" data-html2canvas-ignore>
+                            <input type="file" id="mel-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'mel')">
                         </div>
                     </div>
                 </div>
@@ -478,7 +432,7 @@
                     
                     <!-- Vertical Flight Profile -->
                     <div class="border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col">
-                        <div class="bg-gradient-to-r from-stone-600 to-stone-700 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center" data-html2canvas-ignore>
+                        <div class="bg-gradient-to-r from-stone-600 to-stone-700 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                             <span class="flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
                                 Vertical Flight Profile
@@ -488,7 +442,7 @@
                             </button>
                         </div>
                         <div class="p-4 md:p-6 bg-[#fbf9f6] flex-grow flex items-center justify-center min-h-[200px] relative">
-                            <div id="profile-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8" data-html2canvas-ignore>
+                            <div id="profile-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                 <div class="flex gap-4 mb-4 w-full max-w-[320px] no-print">
                                     <button onclick="document.getElementById('profile-upload').click()" class="flex-1 bg-white border border-stone-300 text-stone-600 py-3 rounded-xl shadow-sm hover:bg-stone-50 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">📁 相簿</button>
@@ -496,14 +450,14 @@
                                 </div>                                      
                             </div>
                             <img id="profile-image" src="" alt="Vertical Profile" class="hidden w-full h-auto max-h-[600px] object-contain rounded-lg shadow-sm border border-stone-200">
-                            <input type="file" id="profile-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'profile')" data-html2canvas-ignore>
+                            <input type="file" id="profile-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'profile')">
                         </div>
                     </div>
 
                  
     <!-- SigWX With Route 修改區塊開始 -->
     <div class="border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col w-full mx-auto">
-        <div class="bg-gradient-to-r from-teal-600 to-teal-700 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center" data-html2canvas-ignore>
+        <div class="bg-gradient-to-r from-teal-600 to-teal-700 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
             <span class="flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 SigWX With Route
@@ -514,7 +468,7 @@
         </div>
         
         <div class="p-4 md:p-6 bg-[#fbf9f6] flex-grow flex flex-col lg:flex-row lg:flex-wrap items-center justify-center min-h-[200px] relative gap-4" id="sigwx-container">
-            <div id="sigwx-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full min-h-[200px] flex flex-col items-center justify-center py-8" data-html2canvas-ignore>
+            <div id="sigwx-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full min-h-[200px] flex flex-col items-center justify-center py-8">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 <div class="flex gap-4 mb-4 w-full max-w-[320px] no-print">
                     <button onclick="document.getElementById('sigwx-upload').click()" class="flex-1 bg-white border border-stone-300 text-stone-600 py-3 rounded-xl shadow-sm hover:bg-stone-50 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">📁 相簿</button>
@@ -522,7 +476,7 @@
                 </div>                                      
             </div>
             <!-- SigWX 圖檔將動態插入至此 -->
-            <input type="file" id="sigwx-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'sigwx')" data-html2canvas-ignore>
+            <input type="file" id="sigwx-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'sigwx')">
         </div>
     </div>
     <!-- SigWX With Route 修改區塊結束 -->
@@ -541,7 +495,7 @@
                     
                     <!-- WNI Image Area -->
                     <div class="border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col w-full">
-                        <div class="bg-gradient-to-r from-blue-700 to-blue-800 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center" data-html2canvas-ignore>
+                        <div class="bg-gradient-to-r from-blue-700 to-blue-800 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                             <span class="flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 WNI 氣象剖面資訊
@@ -551,7 +505,7 @@
                             </button>
                         </div>
                         <div class="p-4 md:p-6 bg-[#fbf9f6] flex-grow flex items-center justify-center min-h-[200px] relative">
-                            <div id="wni-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8" data-html2canvas-ignore>
+                            <div id="wni-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-4 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 
                                 <div class="flex gap-4 mb-4 w-full max-w-[320px] no-print">
@@ -561,7 +515,7 @@
                             </div>
                             
                             <img id="wni-image" src="" alt="WNI Image" class="hidden w-full h-auto max-h-[600px] object-contain rounded-lg shadow-sm border border-stone-200">
-                            <input type="file" id="wni-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'wni')" data-html2canvas-ignore>
+                            <input type="file" id="wni-upload" accept="image/*" class="hidden no-print" onchange="handleImageUpload(event, 'wni')">
                         </div>
                     </div>
 
@@ -581,19 +535,6 @@
                 </div>
             </div>
 
-            <!-- 匯出與截圖按鈕區域 (置底，並排或堆疊) -->
-            <div class="w-full max-w-[1194px] mx-auto flex flex-col md:flex-row justify-center items-center gap-4 pb-8 mt-6 no-print">
-                <!-- 圖片匯出/分享按鈕 -->
-                <button id="capture-btn" onclick="shareDashboardImage()" class="flex-1 w-full md:max-w-md bg-[#4a3627]/95 backdrop-blur hover:bg-[#5c4033] text-white font-bold py-4 md:py-3.5 px-6 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 text-base md:text-lg tracking-wide border-2 border-[#8b5a2b]/80">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    匯出圖片並分享 (iOS 原生)
-                </button>
-                <!-- 新增的匯出高畫質無縫 PDF 按鈕 -->
-                <button id="pdf-btn" onclick="exportContinuousPDF()" class="flex-1 w-full md:max-w-md bg-red-800/95 backdrop-blur hover:bg-red-900 text-white font-bold py-4 md:py-3.5 px-6 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 text-base md:text-lg tracking-wide border-2 border-red-700/80">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                    匯出無縫長條 PDF (供標示)
-                </button>
-            </div>
         </div>
 
     </div>
@@ -629,9 +570,7 @@
                     caches.open('briefing-core-v1').then(cache => {
                         cache.add(location.href).catch(() => {});
                         const extRes = [
-                            'https://cdn.tailwindcss.com', 
-                            'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 
-                            'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+                            'https://cdn.tailwindcss.com'
                         ];
                         cache.addAll(extRes).catch(() => {});
                     });
@@ -1209,151 +1148,6 @@
                 }
             }
             document.getElementById(`${prefix}-placeholder`).classList.remove('hidden');
-        }
-
-        // ==========================================
-        // Capture Mode 準備函式
-        // ==========================================
-        function prepareForCapture() {
-            document.body.classList.add('capture-mode');
-            document.querySelectorAll('textarea').forEach(ta => {
-                ta.dataset.origHeight = ta.style.height;
-                ta.style.height = 'auto'; // Reset
-                ta.style.height = ta.scrollHeight + 'px';
-            });
-        }
-
-        function cleanupAfterCapture() {
-            document.body.classList.remove('capture-mode');
-            document.querySelectorAll('textarea').forEach(ta => {
-                if(ta.dataset.origHeight) ta.style.height = ta.dataset.origHeight;
-            });
-        }
-
-        async function getCanvasFromDashboard() {
-            const dashboard = document.getElementById('dashboard-content');
-            prepareForCapture();
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            try {
-                const canvas = await html2canvas(dashboard, {
-                    scale: 2, 
-                    useCORS: true,
-                    backgroundColor: '#f4ece4',
-                    windowWidth: dashboard.scrollWidth,
-                    windowHeight: dashboard.scrollHeight,
-                    scrollY: -window.scrollY
-                });
-                return canvas;
-            } finally {
-                cleanupAfterCapture();
-            }
-        }
-
-        // ==========================================
-        // 原生分享與無縫 PDF 匯出
-        // ==========================================
-        async function shareDashboardImage() {
-            const btn = document.getElementById('capture-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ 正在產製高畫質圖片...';
-            
-            try {
-                const canvas = await getCanvasFromDashboard();
-                
-                canvas.toBlob(async (blob) => {
-                    const file = new File([blob], `Briefing_JX${document.getElementById('out-flight-no').textContent || 'FLT'}.png`, { type: 'image/png' });
-                    
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Flight Briefing',
-                                text: '這是您的飛航簡報圖片，可直接儲存或標示。'
-                            });
-                            showToastMessage('✅ 分享選單已開啟！請選擇儲存或標示。');
-                        } catch (err) {
-                            console.log('Share API cancelled or failed:', err);
-                        }
-                    } else if (navigator.clipboard && window.ClipboardItem) {
-                        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-                        showToastMessage('✅ 截圖已複製！可直接貼上至備忘錄。');
-                    } else {
-                        showFallbackImageModal(canvas.toDataURL('image/png'));
-                    }
-                }, 'image/png');
-            } catch (err) {
-                console.error(err);
-                showToastMessage('❌ 圖片產製失敗。');
-            } finally {
-                btn.innerHTML = originalText;
-            }
-        }
-
-        async function exportContinuousPDF() {
-            const btn = document.getElementById('pdf-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ 正在編織無縫 PDF...';
-
-            try {
-                const canvas = await getCanvasFromDashboard();
-                const { jsPDF } = window.jspdf;
-                
-                const pdfWidth = 210; 
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                
-                const pdf = new jsPDF({
-                    orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
-                    unit: 'mm',
-                    format: [pdfWidth, pdfHeight]
-                });
-
-                pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                const pdfBlob = pdf.output('blob');
-                const file = new File([pdfBlob], `Briefing_JX${document.getElementById('out-flight-no').textContent || 'FLT'}.pdf`, { type: 'application/pdf' });
-
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'Flight Briefing PDF',
-                        });
-                        showToastMessage('✅ 請在選單中點選「儲存到檔案」，即可開始標示！');
-                    } catch (err) {
-                        console.log('Share API cancelled or failed:', err);
-                    }
-                } else {
-                    pdf.save(`Briefing_JX${document.getElementById('out-flight-no').textContent || 'FLT'}.pdf`);
-                    showToastMessage('✅ 無縫 PDF 已下載！');
-                }
-            } catch (error) {
-                console.error(error);
-                showToastMessage('❌ 無縫 PDF 生成失敗');
-            } finally {
-                btn.innerHTML = originalText;
-            }
-        }
-
-        function showFallbackImageModal(dataUrl) {
-            let modal = document.getElementById('screenshot-modal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'screenshot-modal';
-                modal.className = 'fixed inset-0 z-[300] bg-black/80 flex flex-col items-center justify-center p-4 md:p-8 backdrop-blur-sm';
-                document.body.appendChild(modal);
-            }
-            modal.innerHTML = `
-                <div class="bg-white rounded-3xl p-3 md:p-5 w-full max-w-[1194px] max-h-[95vh] flex flex-col shadow-2xl">
-                    <div class="flex justify-between items-center mb-3 px-2">
-                        <span class="font-bold text-stone-700 text-sm md:text-base flex items-center gap-2">iOS/iPadOS 專用：請「長按」圖片拷貝</span>
-                        <button onclick="document.getElementById('screenshot-modal').classList.add('hidden')" class="bg-stone-200 hover:bg-stone-300 text-stone-700 px-5 py-2 rounded-xl text-sm md:text-base font-bold transition-colors">關閉</button>
-                    </div>
-                    <div class="overflow-y-auto flex-grow border-2 border-stone-200 rounded-2xl bg-[#f4ece4] p-2 relative" style="-webkit-overflow-scrolling: touch;">
-                        <img src="${dataUrl}" class="w-full h-auto rounded-xl shadow-sm" style="pointer-events: auto; user-select: auto; -webkit-touch-callout: default;">
-                    </div>
-                </div>
-            `;
-            modal.classList.remove('hidden');
         }
 
         function extractData(text, keyword) {
