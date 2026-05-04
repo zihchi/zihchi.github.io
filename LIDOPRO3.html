@@ -160,24 +160,22 @@
                 <!-- ROW 1: Super Flight Info Card (Full Width) -->
                 <div class="w-full flex flex-col border border-[#8b5a2b] rounded-2xl overflow-hidden shadow-sm bg-white">
                     <!-- Top Header: Flight, Date, OFP, EFB, Reg -->
-                    <div class="bg-gradient-to-r from-[#4a3627] to-[#8b5a2b] p-4 flex flex-col md:flex-row justify-between items-start md:items-center text-white relative overflow-hidden gap-4">
+                    <div class="bg-gradient-to-r from-[#4a3627] to-[#8b5a2b] p-4 md:p-5 flex flex-col md:flex-row justify-between items-start md:items-center text-white relative overflow-hidden gap-4">
                         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
                         
-                        <div class="relative z-10 flex flex-col text-left">
-                            <div class="text-[10px] md:text-xs text-stone-300 font-bold tracking-widest uppercase mb-0.5 flex items-center gap-2">
-                                <span id="out-utc-date" class="bg-white/20 text-white px-1.5 py-0.5 rounded data-font shadow-sm tracking-wide">----</span>
-                            </div>
-                            <div class="text-3xl md:text-5xl font-black data-font tracking-wider leading-none whitespace-nowrap" id="out-flight-no">----</div>
+                        <div class="relative z-10 flex flex-col text-left justify-center">
+                            <span id="out-utc-date" class="bg-white/20 text-white px-2 py-0.5 rounded text-[10px] md:text-[11px] data-font shadow-sm tracking-widest w-max mb-1.5">----</span>
+                            <div class="text-4xl md:text-[3.5rem] font-black data-font tracking-wider leading-none whitespace-nowrap drop-shadow-sm" id="out-flight-no">----</div>
                         </div>
 
                         <div class="relative z-10 flex flex-row gap-4 items-center self-end md:self-auto">
                             <!-- OFP & EFB Standalone Block -->
-                            <div class="flex flex-col gap-1.5 justify-center">
-                                <div class="bg-[#3a2a1f]/80 border border-white/20 px-2 py-0.5 md:py-1 rounded shadow-inner flex items-center gap-2">
+                            <div class="flex flex-col gap-2 justify-center">
+                                <div class="bg-[#3a2a1f]/80 border border-white/20 px-2.5 py-1 rounded-md shadow-inner flex items-center justify-between gap-3 min-w-[90px]">
                                     <span class="text-[#d4c3b3] text-[9px] md:text-[10px] font-bold tracking-wider">OFP</span>
                                     <span class="text-white data-font font-black text-xs md:text-sm" id="out-ofp">--</span>
                                 </div>
-                                <div class="bg-[#3a2a1f]/80 border border-white/20 px-2 py-0.5 md:py-1 rounded shadow-inner flex items-center gap-2">
+                                <div class="bg-[#3a2a1f]/80 border border-white/20 px-2.5 py-1 rounded-md shadow-inner flex items-center justify-between gap-3 min-w-[90px]">
                                     <span class="text-[#d4c3b3] text-[9px] md:text-[10px] font-bold tracking-wider">EFB</span>
                                     <span class="text-white data-font font-black text-xs md:text-sm" id="out-efb">--</span>
                                 </div>
@@ -198,7 +196,6 @@
                                 </div>
                                 <div class="text-right flex flex-col items-end gap-1">
                                     <span class="text-[10px] md:text-xs bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold shadow-sm" id="out-dep-utc">UTC</span>
-                                    <span class="text-[11px] md:text-sm text-stone-500 font-bold flex items-center mt-1">BAY <span class="bg-amber-100 border border-amber-300 text-[#b35900] px-2 py-0.5 rounded-md shadow-sm text-xl md:text-2xl data-font font-black ml-1.5" id="out-dep-bay">--</span></span>
                                 </div>
                             </div>
                             <div class="flex flex-row gap-2 ml-2 md:ml-3 mt-3">
@@ -211,13 +208,6 @@
                                     <span class="data-font font-black text-xl md:text-2xl text-[#b35900] leading-none" id="out-etd">--:--</span>
                                 </div>
                             </div>
-                            <div id="dep-simple-wx" class="hidden mt-3 bg-white rounded-xl p-2 md:p-3 flex items-center gap-2 shadow-sm border border-stone-200 ml-2 md:ml-3">
-                                <div class="text-xl md:text-2xl leading-none" id="dep-wx-icon">☁️</div>
-                                <div class="flex flex-col gap-0.5">
-                                    <span class="text-[10px] md:text-[11px] font-bold text-stone-500 tracking-wide uppercase">Departure WX</span>
-                                    <span class="text-[11px] md:text-[12px] text-stone-700 font-medium" id="dep-wx-desc">Loading...</span>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Center Info (ETE & CRZ/TEMP/WIND) -->
@@ -227,9 +217,12 @@
                                 
                                 <div class="w-full h-px bg-white/20 my-4 relative z-10"></div>
                                 
-                                <div class="flex flex-col sm:flex-row items-center justify-center gap-1.5 md:gap-2 relative z-10">
-                                    <span class="data-font font-black text-xl md:text-2xl lg:text-3xl text-sky-300 leading-none whitespace-nowrap drop-shadow-md" id="out-cruise-center">---</span>
-                                    <span class="data-font font-bold text-sm md:text-base text-sky-100 whitespace-nowrap drop-shadow-md bg-sky-900/40 px-2 py-0.5 rounded border border-sky-700/50" id="out-wc">---</span>
+                                <div class="flex flex-col sm:flex-row items-center justify-center gap-1.5 relative z-10">
+                                    <span class="data-font font-black text-2xl md:text-4xl text-sky-300 leading-none drop-shadow-md" id="out-cruise-alt">---</span>
+                                    <div class="flex items-center gap-1.5 mt-1 sm:mt-0">
+                                        <span class="data-font font-bold text-sm md:text-lg text-sky-200 drop-shadow-md" id="out-cruise-temp"></span>
+                                        <span class="data-font font-bold text-xs md:text-sm text-sky-100 bg-sky-900/50 px-1.5 py-0.5 rounded border border-sky-700/50" id="out-wc">---</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -244,7 +237,6 @@
                                 </div>
                                 <div class="text-right flex flex-col items-end gap-1">
                                     <span class="text-[10px] md:text-xs bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold shadow-sm" id="out-arr-utc">UTC</span>
-                                    <span class="text-[11px] md:text-sm text-stone-500 font-bold flex items-center mt-1">BAY <span class="bg-amber-100 border border-amber-300 text-[#b35900] px-2 py-0.5 rounded-md shadow-sm text-xl md:text-2xl data-font font-black ml-1.5" id="out-arr-bay">--</span></span>
                                 </div>
                             </div>
                             <div class="flex ml-2 md:ml-3 mt-3">
@@ -253,25 +245,18 @@
                                     <span class="data-font font-black text-xl md:text-2xl text-stone-800 leading-none" id="out-sta">--:--</span>
                                 </div>
                             </div>
-                            <div id="arr-simple-wx" class="hidden mt-3 bg-white rounded-xl p-2 md:p-3 flex items-center gap-2 shadow-sm border border-stone-200 ml-2 md:ml-3">
-                                <div class="text-xl md:text-2xl leading-none" id="arr-wx-icon">☁️</div>
-                                <div class="flex flex-col gap-0.5">
-                                    <span class="text-[10px] md:text-[11px] font-bold text-stone-500 tracking-wide uppercase">Arrival WX</span>
-                                    <span class="text-[11px] md:text-[12px] text-stone-700 font-medium" id="arr-wx-desc">Loading...</span>
-                                </div>
-                            </div>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- ROW 2: Payload (4/12) & Fuel (8/12) -->
+                <!-- ROW 2: Payload (4/12) & MEL Text Block (8/12) -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
                     
                     <!-- Payload (4/12) -->
                     <div class="lg:col-span-4 border border-[#e8dfd5] rounded-xl overflow-hidden shadow-sm bg-white flex flex-col">
                         <div class="bg-[#4a3627] p-2 md:p-3 text-center border-b border-[#8b5a2b]">
-                            <div class="text-2xl md:text-3xl font-black data-font tracking-widest text-white" id="out-reg">----</div>
+                            <div class="text-2xl md:text-3xl font-black data-font tracking-widest text-white drop-shadow-sm" id="out-reg">----</div>
                         </div>
                         <div class="bg-[#7a5c43] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 text-center">Payload & Cabin</div>
                         <div class="p-4 flex flex-col gap-3 flex-grow justify-center">
@@ -281,17 +266,6 @@
                                     <div class="data-font font-black text-4xl text-[#b35900]" id="out-pax">---</div>
                                     <div class="data-font font-bold text-sm text-stone-400" id="out-pax-raw"></div>
                                 </div>
-                            </div>
-                            <div class="w-full h-px bg-stone-200 my-1"></div>
-                            
-                            <!-- 新增 Parking Bay 資訊 -->
-                            <div class="flex justify-between items-center w-full px-1">
-                                <div class="text-[10px] text-stone-400 font-bold tracking-wider">DEP BAY</div>
-                                <div class="data-font font-bold text-lg text-[#b35900]" id="out-pld-dep-bay">--</div>
-                            </div>
-                            <div class="flex justify-between items-center w-full px-1">
-                                <div class="text-[10px] text-stone-400 font-bold tracking-wider">ARR BAY</div>
-                                <div class="data-font font-bold text-lg text-[#b35900]" id="out-pld-arr-bay">--</div>
                             </div>
                             <div class="w-full h-px bg-stone-200 my-1"></div>
 
@@ -304,79 +278,41 @@
                                 <div class="data-font font-bold text-lg text-stone-700" id="out-fcst">----</div>
                             </div>
                             <div class="w-full h-px bg-stone-200 my-1"></div>
+                            
                             <div class="text-center bg-blue-50/50 rounded-lg py-2.5">
                                 <div class="text-[10px] text-stone-500 font-bold tracking-wider mb-1">WATER</div>
                                 <div class="data-font font-black text-2xl text-blue-600" id="out-water">--%</div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Fuel Distribution & Weights (8/12) -->
-                    <div class="lg:col-span-8 flex flex-col gap-4">
-                        <div class="border border-[#d4c3b3] rounded-2xl overflow-hidden flex-grow flex flex-col shadow-sm bg-white">
-                            <div class="bg-[#b37a4c] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-3 py-2.5">Weights & Fuel Distribution</div>
-                            <div class="p-3 bg-[#fdfaf6] flex flex-col gap-3 flex-grow">
-                                
-                                <!-- TOW and LDW Integration -->
-                                <div class="grid grid-cols-2 gap-3 mb-1">
-                                    <div class="bg-white border border-[#e8dfd5] rounded-xl p-3 shadow-sm flex flex-col md:flex-row md:justify-between items-start md:items-center">
-                                        <span class="text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1 md:mb-0">TOW</span>
-                                        <span class="data-font font-black text-xl text-[#4a3627]" id="out-tow">--.-</span>
-                                    </div>
-                                    <div class="bg-white border border-[#e8dfd5] rounded-xl p-3 shadow-sm flex flex-col md:flex-row md:justify-between items-start md:items-center">
-                                        <span class="text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1 md:mb-0">LDW</span>
-                                        <span class="data-font font-black text-xl text-[#4a3627]" id="out-ldw">--.-</span>
-                                    </div>
+                            
+                            <!-- 新增 Parking Bay 置於 Water 下方 -->
+                            <div class="w-full h-px bg-stone-200 my-1"></div>
+                            <div class="grid grid-cols-2 gap-2 w-full mt-1">
+                                <div class="flex flex-col items-center bg-amber-50/60 rounded-lg py-1.5 border border-amber-100/50">
+                                    <span class="text-[9px] text-amber-700/80 font-bold tracking-wider mb-0.5">DEP BAY</span>
+                                    <span class="data-font font-black text-lg text-amber-600" id="out-pld-dep-bay">--</span>
                                 </div>
-
-                                <div class="w-full h-px bg-[#e8dfd5] my-1"></div>
-
-                                <div class="flex justify-between items-end">
-                                    <div class="text-xs font-bold text-[#8b5a2b] mb-1">Total Fuel</div>
-                                    <div class="data-font font-black text-2xl text-[#6e4620]" id="out-total-fuel">----</div>
-                                </div>
-                                <div class="w-full h-px bg-[#e8dfd5] my-1"></div>
-                                <div class="flex flex-row justify-between gap-4">
-                                    <div class="flex-1">
-                                        <div class="text-[10px] text-[#8c6b5d] font-bold mb-1" id="label-div-fuel">Division Fuel</div>
-                                        <div class="data-font font-bold text-xl text-[#5c4033]" id="out-div-fuel">----</div>
-                                    </div>
-                                    <div class="w-px bg-[#e8dfd5] my-1"></div>
-                                    <div class="flex-1 text-right">
-                                        <div class="text-[10px] text-[#8c6b5d] font-bold mb-1">Spare Fuel</div>
-                                        <div class="data-font font-bold text-xl text-[#4b6b3e]" id="out-spare-fuel">----</div>
-                                    </div>
-                                </div>
-                                <div class="pl-2 border-l-2 border-[#d4c3b3] flex flex-col gap-1.5 mt-2 flex-grow justify-center">
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD WXX</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-wxx">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD OPN</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-opn">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD ATC</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-atc">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD DEV</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-dev">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CONT</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-cont">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-crit-fuel">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">TANKERING</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-tankering">--</span></div>
-                                    <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">EXTRA</span><span class="data-font text-[13px] font-bold text-stone-700" id="out-extra">--</span></div>
+                                <div class="flex flex-col items-center bg-amber-50/60 rounded-lg py-1.5 border border-amber-100/50">
+                                    <span class="text-[9px] text-amber-700/80 font-bold tracking-wider mb-0.5">ARR BAY</span>
+                                    <span class="data-font font-black text-lg text-amber-600" id="out-pld-arr-bay">--</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- ROW 3: MEL & eLB Image Area -->
-                <div class="flex flex-col gap-4 md:gap-5 w-full">
-                    
-                    <!-- MEL Text Block -->
-                    <div class="border border-[#e8dfd5] rounded-xl overflow-hidden shadow-sm bg-white flex flex-col">
+                    <!-- MEL Text Block (8/12) -->
+                    <div class="lg:col-span-8 border border-[#e8dfd5] rounded-xl overflow-hidden shadow-sm bg-white flex flex-col">
                         <div class="bg-[#5c4033] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                             <span class="flex items-center">MEL / Dispatch Remarks <span id="mel-header-reg" class="ml-2 bg-white/20 px-1.5 py-0.5 rounded text-[10px] data-font tracking-widest shadow-inner"></span></span>
                             <a href="https://elb.starlux-airlines.com/elb/#/dashboard/fleet" target="_blank" class="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition-colors flex items-center gap-1 border border-white/20 no-print">🔗 eLB 系統</a>
                         </div>
-                        <div class="p-4 bg-white flex flex-col text-xs md:text-[14px] data-font text-stone-700 mel-scroll overflow-y-auto max-h-[150px]" id="out-mel-container">
+                        <div class="p-4 bg-white flex flex-col text-xs md:text-[14px] data-font text-stone-700 mel-scroll overflow-y-auto h-[250px] lg:h-auto lg:flex-grow" id="out-mel-container">
                             <div class="text-emerald-600 font-bold text-2xl tracking-widest text-center my-auto py-4">NIL</div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- MEL Image Block -->
+                <!-- ROW 3: MEL Image Block -->
+                <div class="flex flex-col gap-4 md:gap-5 w-full">
                     <div class="border border-stone-200 rounded-xl overflow-hidden shadow-sm bg-white flex flex-col">
                         <div class="bg-gradient-to-r from-stone-500 to-stone-600 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                             <span class="flex items-center gap-1.5">
@@ -401,7 +337,65 @@
                     </div>
                 </div>
 
-                <!-- ROW 4: AVIATION WEATHER -->
+                <!-- ROW 4: Weights & Fuel Distribution (Full Width) -->
+                <div class="w-full flex flex-col border border-[#d4c3b3] rounded-2xl overflow-hidden shadow-sm bg-white">
+                    <div class="bg-[#b37a4c] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5">Weights & Fuel Distribution</div>
+                    <div class="p-4 bg-[#fdfaf6] flex flex-col lg:flex-row gap-4 lg:gap-6 items-stretch">
+                        <!-- Left: TOW & LDW & Total -->
+                        <div class="flex-1 flex flex-col gap-3 justify-center">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-white border border-[#e8dfd5] rounded-xl p-3 shadow-sm flex flex-col justify-center items-center">
+                                    <span class="text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1">TOW</span>
+                                    <span class="data-font font-black text-2xl text-[#4a3627]" id="out-tow">--.-</span>
+                                </div>
+                                <div class="bg-white border border-[#e8dfd5] rounded-xl p-3 shadow-sm flex flex-col justify-center items-center">
+                                    <span class="text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1">LDW</span>
+                                    <span class="data-font font-black text-2xl text-[#4a3627]" id="out-ldw">--.-</span>
+                                </div>
+                            </div>
+                            <div class="bg-white border border-[#e8dfd5] rounded-xl p-4 shadow-sm flex justify-between items-end">
+                                <div class="text-sm font-bold text-[#8b5a2b] mb-1">Total Fuel</div>
+                                <div class="text-right flex items-baseline gap-2">
+                                    <span class="text-xs text-[#8b5a2b] font-bold opacity-70" id="time-total-fuel"></span>
+                                    <div class="data-font font-black text-3xl text-[#6e4620]" id="out-total-fuel">----</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Middle: Div Fuel & Spare Fuel -->
+                        <div class="flex-1 flex flex-col gap-3 justify-center">
+                            <div class="bg-white border border-[#e8dfd5] rounded-xl p-4 shadow-sm flex-grow flex flex-col justify-center">
+                                 <div class="flex justify-between items-center mb-4">
+                                    <div class="text-[11px] text-[#8c6b5d] font-bold" id="label-div-fuel">Division Fuel</div>
+                                    <div class="text-right flex items-baseline gap-2">
+                                        <span class="text-[10px] text-[#8c6b5d] font-bold opacity-70" id="time-div-fuel"></span>
+                                        <div class="data-font font-bold text-2xl text-[#5c4033]" id="out-div-fuel">----</div>
+                                    </div>
+                                 </div>
+                                 
+                                 <div id="altn-bof-container" class="hidden flex flex-col gap-1.5 mb-4 bg-[#fdfaf6] p-2 rounded-lg border border-[#e8dfd5]/60"></div>
+
+                                 <div class="w-full h-px bg-[#e8dfd5] mb-4"></div>
+                                 <div class="flex justify-between items-center">
+                                    <div class="text-[11px] text-[#8c6b5d] font-bold">Spare Fuel</div>
+                                    <div class="data-font font-bold text-2xl text-[#4b6b3e]" id="out-spare-fuel">----</div>
+                                 </div>
+                            </div>
+                        </div>
+                        <!-- Right: Additions breakdown with times -->
+                        <div class="flex-1 bg-white border border-[#e8dfd5] rounded-xl p-4 shadow-sm grid grid-cols-2 gap-x-4 gap-y-2 content-center">
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD WXX</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-wxx"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-wxx">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CONT</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-cont"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-cont">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD OPN</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-opn"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-opn">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-crit-fuel"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-crit-fuel">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD ATC</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-atc"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-atc">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">TANKERING</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-tankering"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-tankering">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD DEV</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-dev"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-add-dev">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">EXTRA</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-extra"></span><span class="data-font text-[13px] font-bold text-stone-700" id="out-extra">--</span></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 5: AVIATION WEATHER -->
                 <div class="flex flex-col border border-stone-200 rounded-2xl overflow-hidden shadow-lg bg-white">
                     <div class="bg-gradient-to-r from-[#3b4c59] to-[#2c3e50] p-4 flex justify-between items-center text-white">
                         <div>
@@ -434,7 +428,7 @@
                     </div>
                 </div>
 
-                <!-- ROW 5: VERTICAL PROFILE, WNI, ATC & EDTO -->
+                <!-- ROW 6: VERTICAL PROFILE, WNI, ATC & EDTO -->
                 <div class="flex flex-col gap-4 md:gap-5 w-full">
                     
                     <!-- Vertical Flight Profile -->
@@ -744,7 +738,13 @@
                     body: JSON.stringify({ username: savedLidoUser, password: savedLidoPass, targetFlight: target })
                 });
 
-                const responseData = await response.json();
+                const textResponse = await response.text();
+                let responseData;
+                try {
+                    responseData = JSON.parse(textResponse);
+                } catch (parseError) {
+                    throw new Error('伺服器回傳了無效的格式 (HTML)。可能是查無此航班資料，或 GAS 伺服器內部發生錯誤。');
+                }
 
                 if (responseData.status === 'success') {
                     const f = responseData.data;
@@ -842,6 +842,8 @@
                         }
                     }
 
+                    const altnLabel = alt1Rwy !== 'N/A' ? `ALTN ${alt1Rwy}` : 'ALTN';
+
                     const flightDateStr = formatAviationDate(leg.scheduledDepartureTime); 
                     const stdStr = formatAviationTime(leg.scheduledDepartureTime);
                     const staStr = formatAviationTime(leg.scheduledTimeOfArrival);
@@ -865,7 +867,6 @@
 
                     let cruiseAltStr = 'N/A', wc = 'N/A', mxsh = 'N/A';
                     let totalFuel = 'N/A', divFuelCalc = 'N/A', spareFuelCalc = 'N/A';
-                    let f_addWxx = 0, f_addOpn = 0, f_addAtc = 0, f_addDev = 0, f_cont = 0, f_crit = 0, f_tank = 0, f_extra = 0;
                     let edtoData = [];
 
                     if (rawTexts['OFP']) {
@@ -909,20 +910,64 @@
                         }
                         cruiseAltStr = tocAlt + tocTemp;
 
-                        const getFuel = (regex) => { const m = ofpText.match(regex); return m ? parseInt(m[1], 10) : 0; };
-                        const f_total = getFuel(/TOTAL\s+(\d+)/);
-                        if (f_total > 0) totalFuel = f_total;
-                        
-                        const f_altn = getFuel(/ALTN(?:\s+[A-Z0-9]{3,4})?\s+(\d+)/);
-                        const f_frf = getFuel(/FINAL RES\s+(\d+)/);
-                        divFuelCalc = `${f_altn} + ${f_frf} = ${f_altn + f_frf}`;
-                        
-                        f_addWxx = getFuel(/ADD WXX\s+(\d+)/); f_addOpn = getFuel(/ADD OPN\s+(\d+)/);
-                        f_addAtc = getFuel(/ADD ATC\s+(\d+)/); f_addDev = getFuel(/ADD DEV\s+(\d+)/);
-                        f_cont = getFuel(/CONT\s+(\d+)/); f_crit = getFuel(/CRIT FUEL\s+(\d+)/);
-                        f_tank = getFuel(/TANKERING\s+(\d+)/); f_extra = getFuel(/EXTRA\s+(\d+)/);
-                        spareFuelCalc = (f_addWxx + f_addOpn + f_addAtc + f_addDev + f_cont + f_crit + f_tank + f_extra).toString();
-                        
+                        const getFuelExtended = (label) => {
+                             const regex = new RegExp(label + '\\s+(\\d{1,6})(?:\\s+(\\d{2}\\.\\d{2}))?');
+                             const m = ofpText.match(regex);
+                             if (!m) return { w: 0, t: '' };
+                             return { w: parseInt(m[1], 10), t: m[2] || '' };
+                        };
+
+                        const fw_total = getFuelExtended('TOTAL'); totalFuel = fw_total.w > 0 ? fw_total.w : 'N/A';
+                        const fw_altn = getFuelExtended('ALTN(?:\\s+[A-Z0-9]{3,4})?');
+                        const fw_frf = getFuelExtended('FINAL RES');
+                        divFuelCalc = `${fw_altn.w} + ${fw_frf.w} = ${fw_altn.w + fw_frf.w}`;
+                        let t_divFuel = '';
+                        if (fw_altn.t || fw_frf.t) t_divFuel = ` / ${fw_altn.t || '00.00'}+${fw_frf.t || '00.00'}`;
+
+                        const fw_addWxx = getFuelExtended('ADD WXX');
+                        const fw_addOpn = getFuelExtended('ADD OPN');
+                        const fw_addAtc = getFuelExtended('ADD ATC');
+                        const fw_addDev = getFuelExtended('ADD DEV');
+                        const fw_cont = getFuelExtended('CONT');
+                        const fw_crit = getFuelExtended('CRIT FUEL');
+                        const fw_tank = getFuelExtended('TANKERING');
+                        const fw_extra = getFuelExtended('EXTRA');
+                        spareFuelCalc = (fw_addWxx.w + fw_addOpn.w + fw_addAtc.w + fw_addDev.w + fw_cont.w + fw_crit.w + fw_tank.w + fw_extra.w).toString();
+
+                        const formatFuelVal = (fw) => fw.t ? `${fw.w} / ${fw.t.replace('.', ':')}` : `${fw.w}`;
+
+                        const altnLabel = alt1Rwy !== 'N/A' ? `ALTN ${alt1Rwy}` : 'ALTN';
+
+                        let bof1 = 0, bof2 = 0, bof3 = 0;
+                        if (destAltnAirports.length > 0) {
+                            const m = ofpText.match(new RegExp('^\\s*' + destAltnAirports[0] + '\\s+(?:\\S+\\s+){6}(\\d+)', 'm'));
+                            if (m) bof1 = parseInt(m[1], 10);
+                        }
+                        if (destAltnAirports.length > 1) {
+                            const m = ofpText.match(new RegExp('^\\s*' + destAltnAirports[1] + '\\s+(?:\\S+\\s+){6}(\\d+)', 'm'));
+                            if (m) bof2 = parseInt(m[1], 10);
+                        }
+                        if (destAltnAirports.length > 2) {
+                            const m = ofpText.match(new RegExp('^\\s*' + destAltnAirports[2] + '\\s+(?:\\S+\\s+){6}(\\d+)', 'm'));
+                            if (m) bof3 = parseInt(m[1], 10);
+                        }
+
+                        // 組裝 Part 1 RawBlock 性能資訊 (包含時間)
+                        var perfBlock = `性能資訊：\nTOW: ${tow}\nLDW: ${ldw}\nTotal Fuel: ${formatFuelVal(fw_total)}\n`;
+                        perfBlock += `Division Fuel (${altnLabel}+FRF): ${divFuelCalc}${t_divFuel}\n`;
+                        perfBlock += `SPARE Fuel: ${spareFuelCalc}\n`;
+                        perfBlock += `ADD WXX: ${formatFuelVal(fw_addWxx)}\n`;
+                        perfBlock += `ADD OPN: ${formatFuelVal(fw_addOpn)}\n`;
+                        perfBlock += `ADD ATC: ${formatFuelVal(fw_addAtc)}\n`;
+                        perfBlock += `ADD DEV: ${formatFuelVal(fw_addDev)}\n`;
+                        perfBlock += `CONT: ${formatFuelVal(fw_cont)}\n`;
+                        perfBlock += `CRIT FUEL: ${formatFuelVal(fw_crit)}\n`;
+                        perfBlock += `TANKERING: ${formatFuelVal(fw_tank)}\n`;
+                        perfBlock += `EXTRA: ${formatFuelVal(fw_extra)}\n`;
+                        perfBlock += `ALT1 BOF: ${bof1 > 0 ? bof1 : 'N/A'}\n`;
+                        perfBlock += `ALT2 BOF: ${bof2 > 0 ? bof2 + ' (' + (bof2 - bof1 > 0 ? '+' : '') + (bof2 - bof1) + ')' : 'N/A'}\n`;
+                        perfBlock += `ALT3 BOF: ${bof3 > 0 ? bof3 + ' (' + (bof3 - bof1 > 0 ? '+' : '') + (bof3 - bof1) + ')' : 'N/A'}\n------------------------------------------------------\n`;
+
                         if (/EDTO|ETOPS|E\.ENT/.test(ofpText)) {
                             let entMatch = ofpText.match(/E\.ENT[\s\S]{0,150}?([NS]\d{4}\.\d\s+[EW]\d{4,5}\.\d)/);
                             if (entMatch) edtoData.push(`E.ENT: ${entMatch[1].replace(/\s+/g, ' ')}`);
@@ -939,16 +984,15 @@
                     }
 
                     let edtoRawStr = edtoData.length > 0 ? edtoData.join('\n') : 'non-EDTO';
-                    const altnLabel = alt1Rwy !== 'N/A' ? `ALTN ${alt1Rwy}` : 'ALTN';
 
-                    // 組裝 Part 1 RawBlock
+                    // 再次組裝整體
                     let rawBlock = `基本資訊：\n日期: ${flightDateStr}\nFlight number: ${flightNo}\n機號: ${reg}\n出發地/目的地: ${dep}/${dest}\nSTD: ${stdStr}\nSTA: ${staStr}\nETD: ${etdStr}\nETE: ${eteStr}\n巡航高度: ${cruiseAltStr}\n起飛跑道: ${depRwy}\n落地跑道: ${destRwy}\n`;
                     rawBlock += `第一備降機場/跑道: ${alt1Rwy}\n`;
                     if (alt2Rwy !== 'N/A') rawBlock += `第二備降機場/跑道: ${alt2Rwy}\n`;
                     if (alt3Rwy !== 'N/A') rawBlock += `第三備降機場/跑道: ${alt3Rwy}\n`;
                     rawBlock += `------------------------------------------------------\n`;
                     rawBlock += `航路資訊：\nOFP 號碼: ${ofpNo}\nEFB 版本: ${efbVer}\nRoute: ${flightRoute}\nW/C: ${wc}\nMXSH: ${mxsh}\nEDTO 座標:\n${edtoRawStr}\n------------------------------------------------------\n`;
-                    rawBlock += `性能資訊：\nTOW: ${tow}\nLDW: ${ldw}\nTotal Fuel: ${totalFuel}\nDivision Fuel (${altnLabel}+FRF): ${divFuelCalc}\nSPARE Fuel: ${spareFuelCalc}\nADD WXX: ${f_addWxx}\nADD OPN: ${f_addOpn}\nADD ATC: ${f_addAtc}\nADD DEV: ${f_addDev}\nCONT: ${f_cont}\nCRIT FUEL: ${f_crit}\nTANKERING: ${f_tank}\nEXTRA: ${f_extra}\n------------------------------------------------------\n`;
+                    rawBlock += (typeof perfBlock !== 'undefined' ? perfBlock : '');
                     
                     let airportBlock = `機場資訊：\nDEPARTURE AIRPORT:\n${getAirportStr(dep)}\nDESTINATION AIRPORT:\n${getAirportStr(dest)}\n`;
                     if (destAltnSet.size > 0) { airportBlock += `DESTINATION ALTERNATE:\n`; destAltnSet.forEach(a => airportBlock += `${getAirportStr(a)}\n`); }
@@ -1015,9 +1059,6 @@
             const syncStatus = document.getElementById('global-wx-sync');
             syncStatus.textContent = "Standby";
             syncStatus.className = "text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded transition-colors";
-            
-            document.getElementById('dep-simple-wx').classList.add('hidden');
-            document.getElementById('arr-simple-wx').classList.add('hidden');
 
             if (!silent) showToastMessage('🧹 所有航班資料與快取已清除完畢！');
         }
@@ -1224,10 +1265,12 @@
             clearTimeout(parseTimer); parseTimer = setTimeout(parseData, 500);
         }
 
-        async function fetchSimpleWeather(icao, prefix) {
-            const container = document.getElementById(`${prefix}-simple-wx`);
-            const descEl = document.getElementById(`${prefix}-wx-desc`);
-            const iconEl = document.getElementById(`${prefix}-wx-icon`);
+        async function fetchSimpleWeather(icao) {
+            const container = document.getElementById(`awc-simple-wx-${icao}`);
+            const descEl = document.getElementById(`awc-wx-desc-${icao}`);
+            const iconEl = document.getElementById(`awc-wx-icon-${icao}`);
+            if (!container) return;
+
             const cacheKey = `wx_cache_simple_${icao}`;
             if (icao === '----' || !icao) return;
             container.classList.remove('hidden');
@@ -1289,19 +1332,11 @@
             document.getElementById('out-utc-date').textContent = currentDateUTC;
             document.getElementById('wx-utc-date').textContent = currentDateUTC;
 
-            if (currentDepICAO !== '----') fetchSimpleWeather(currentDepICAO, 'dep');
-            if (currentArrICAO !== '----') fetchSimpleWeather(currentArrICAO, 'arr');
-
             const mapping = [
                 { id: 'out-flight-no', key: 'Flight number' }, { id: 'out-reg', key: '機號' },
                 { id: 'out-ete', key: 'ETE' }, { id: 'out-efb', key: 'EFB 版本' }, 
                 { id: 'out-wc', key: 'W/C' }, { id: 'out-mxsh', key: 'MXSH' },
-                { id: 'out-tow', key: 'TOW' }, { id: 'out-ldw', key: 'LDW' },
-                { id: 'out-total-fuel', key: 'Total Fuel' }, { id: 'out-spare-fuel', key: 'SPARE Fuel' }, 
-                { id: 'out-add-wxx', key: 'ADD WXX' }, { id: 'out-add-opn', key: 'ADD OPN' }, 
-                { id: 'out-add-atc', key: 'ADD ATC' }, { id: 'out-add-dev', key: 'ADD DEV' }, 
-                { id: 'out-cont', key: 'CONT' }, { id: 'out-crit-fuel', key: 'CRIT FUEL' }, 
-                { id: 'out-tankering', key: 'TANKERING' }, { id: 'out-extra', key: 'EXTRA' }
+                { id: 'out-tow', key: 'TOW' }, { id: 'out-ldw', key: 'LDW' }
             ];
 
             let valFlight = '----';
@@ -1314,13 +1349,117 @@
                 }
             });
 
-            // Handle Airplane Section updates
+            // Handle Fuel Mapping specifically to include time
+            const fuelItems = [
+                { id: 'out-add-wxx', timeId: 'time-add-wxx', key: 'ADD WXX' },
+                { id: 'out-add-opn', timeId: 'time-add-opn', key: 'ADD OPN' },
+                { id: 'out-add-atc', timeId: 'time-add-atc', key: 'ADD ATC' },
+                { id: 'out-add-dev', timeId: 'time-add-dev', key: 'ADD DEV' },
+                { id: 'out-cont', timeId: 'time-cont', key: 'CONT' },
+                { id: 'out-crit-fuel', timeId: 'time-crit-fuel', key: 'CRIT FUEL' },
+                { id: 'out-tankering', timeId: 'time-tankering', key: 'TANKERING' },
+                { id: 'out-extra', timeId: 'time-extra', key: 'EXTRA' },
+                { id: 'out-total-fuel', timeId: 'time-total-fuel', key: 'Total Fuel' },
+                { id: 'out-spare-fuel', timeId: '', key: 'SPARE Fuel' }
+            ];
+
+            fuelItems.forEach(item => {
+                const el = document.getElementById(item.id);
+                const timeEl = document.getElementById(item.timeId);
+                let val = extractData(rawText, item.key);
+                if (val !== 'N/A' && val.includes('/')) {
+                    const parts = val.split('/');
+                    if (el) el.textContent = parts[0].trim();
+                    if (timeEl) {
+                        let tStr = parts[1].trim();
+                        timeEl.textContent = tStr ? tStr + 'H' : '';
+                    }
+                } else {
+                    if (el) el.textContent = (val === 'N/A' || val === '') ? '--' : val;
+                    if (timeEl) timeEl.textContent = '';
+                }
+            });
+
+            // Division Fuel Handle
+            const divFuelLabel = document.getElementById('label-div-fuel');
+            const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:\s*(.*?)(?:\n|$)/i);
+            document.getElementById('out-div-fuel').textContent = '----';
+            if (document.getElementById('time-div-fuel')) document.getElementById('time-div-fuel').textContent = '';
+            
+            if (divMatch) {
+                let rawDiv = divMatch[1].toUpperCase().replace(/^ALTN\s*/i, '').trim();
+                let divBase = rawDiv.includes('+') ? rawDiv.split('+')[0].trim() : rawDiv;
+                let suffix = rawDiv.includes('+') ? '+' + rawDiv.split('+').slice(1).join('+').trim() : '';
+                if (divBase !== 'N/A' && divBase !== 'FRF') divFuelLabel.innerHTML = `Division Fuel <span class="bg-amber-200 text-amber-900 border border-amber-400 px-1.5 py-0.5 rounded shadow-sm mx-1 inline-block">${divBase}</span><span class="text-[#8c6b5d] font-bold">${suffix}</span>`;
+                else divFuelLabel.textContent = `Division Fuel (${rawDiv})`;
+
+                let valStr = divMatch[2]; 
+                if (valStr.includes('/')) {
+                    let parts = valStr.split('/');
+                    document.getElementById('out-div-fuel').textContent = parts[0].trim();
+                    if(document.getElementById('time-div-fuel')) document.getElementById('time-div-fuel').textContent = parts[1].trim().replace('+', 'H + ') + 'H';
+                } else {
+                    document.getElementById('out-div-fuel').textContent = valStr.trim();
+                }
+            }
+
+            const alt1 = extractData(rawText, '第一備降機場/跑道');
+            const alt2 = extractData(rawText, '第二備降機場/跑道');
+            const alt3 = extractData(rawText, '第三備降機場/跑道');
+
+            const alt2Bof = extractData(rawText, 'ALT2 BOF');
+            const alt3Bof = extractData(rawText, 'ALT3 BOF');
+            const altnContainer = document.getElementById('altn-bof-container');
+            
+            let altnHtml = '';
+            
+            const alt2Icao = alt2 !== 'N/A' && alt2 !== '----' ? alt2.split('/')[0].trim() : null;
+            const alt3Icao = alt3 !== 'N/A' && alt3 !== '----' ? alt3.split('/')[0].trim() : null;
+
+            if (alt2Icao && alt2Bof !== 'N/A') {
+                const parts = alt2Bof.match(/(\d+)\s*\(([-+]\d+)\)/);
+                if(parts) {
+                    const diffColor = parseInt(parts[2]) > 0 ? 'text-red-500' : 'text-emerald-600';
+                    altnHtml += `<div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#8c6b5d]">ALTN ${alt2Icao} BOF</span><span class="data-font text-[13px] font-bold text-stone-600">${parts[1]} <span class="${diffColor}">(${parts[2]})</span></span></div>`;
+                }
+            }
+            if (alt3Icao && alt3Bof !== 'N/A') {
+                const parts = alt3Bof.match(/(\d+)\s*\(([-+]\d+)\)/);
+                if(parts) {
+                    const diffColor = parseInt(parts[2]) > 0 ? 'text-red-500' : 'text-emerald-600';
+                    altnHtml += `<div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#8c6b5d]">ALTN ${alt3Icao} BOF</span><span class="data-font text-[13px] font-bold text-stone-600">${parts[1]} <span class="${diffColor}">(${parts[2]})</span></span></div>`;
+                }
+            }
+            
+            if (altnHtml) {
+                if(altnContainer) {
+                    altnContainer.innerHTML = altnHtml;
+                    altnContainer.classList.remove('hidden');
+                }
+            } else {
+                if(altnContainer) {
+                    altnContainer.innerHTML = '';
+                    altnContainer.classList.add('hidden');
+                }
+            }
+
+
+            // Handle Airplane Section updates (ETE & split Cruise Alt / Temp)
             const eteVal = extractData(rawText, 'ETE');
             const cruVal = extractData(rawText, '巡航高度');
             const elEteCenter = document.getElementById('out-ete-center');
             if(elEteCenter) elEteCenter.textContent = (eteVal !== 'N/A' && eteVal !== '') ? eteVal : '--:--';
-            const elCruCenter = document.getElementById('out-cruise-center');
-            if(elCruCenter) elCruCenter.textContent = (cruVal !== 'N/A' && cruVal !== '') ? cruVal : '---';
+            
+            let altPart = '---', tempPart = '';
+            if (cruVal !== 'N/A' && cruVal !== '') {
+                const parts = cruVal.split('/');
+                altPart = parts[0];
+                if (parts.length > 1) tempPart = '/' + parts[1];
+            }
+            const elCruAlt = document.getElementById('out-cruise-alt');
+            const elCruTemp = document.getElementById('out-cruise-temp');
+            if(elCruAlt) elCruAlt.textContent = altPart;
+            if(elCruTemp) elCruTemp.textContent = tempPart;
 
             // Handle MEL Header Registration update
             let regVal = extractData(rawText, '機號');
@@ -1339,17 +1478,6 @@
             document.getElementById('out-std').textContent = convertToZuluLocalStr(stdStr, currentDepICAO);
             document.getElementById('out-etd').textContent = convertToZuluLocalStr(extractData(rawText, 'ETD'), currentDepICAO);
             document.getElementById('out-sta').textContent = convertToZuluLocalStr(staStr, currentArrICAO);
-            
-            const divFuelLabel = document.getElementById('label-div-fuel');
-            const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:/i);
-            document.getElementById('out-div-fuel').textContent = extractData(rawText, 'Division Fuel') !== 'N/A' ? extractData(rawText, 'Division Fuel') : '----';
-            if (divMatch) {
-                let rawDiv = divMatch[1].toUpperCase().replace(/^ALTN\s*/i, '').trim();
-                let divBase = rawDiv.includes('+') ? rawDiv.split('+')[0].trim() : rawDiv;
-                let suffix = rawDiv.includes('+') ? '+' + rawDiv.split('+').slice(1).join('+').trim() : '';
-                if (divBase !== 'N/A' && divBase !== 'FRF') divFuelLabel.innerHTML = `Division Fuel <span class="bg-amber-200 text-amber-900 border border-amber-400 px-1.5 py-0.5 rounded shadow-sm mx-1 inline-block">${divBase}</span><span class="text-[#8c6b5d] font-bold">${suffix}</span>`;
-                else divFuelLabel.textContent = `Division Fuel (${rawDiv})`;
-            } else { divFuelLabel.textContent = `Division Fuel`; }
 
             // Handle PAX calculation and raw details
             const paxMatch = rawText2.match(/PAX\s*:\s*(\d+)\/(\d+)/i);
@@ -1390,12 +1518,9 @@
                     }
                 });
             }
-            document.getElementById('out-dep-bay').textContent = depBay; document.getElementById('out-arr-bay').textContent = arrBay;
-            document.getElementById('out-pld-dep-bay').textContent = depBay; document.getElementById('out-pld-arr-bay').textContent = arrBay;
+            if (document.getElementById('out-pld-dep-bay')) document.getElementById('out-pld-dep-bay').textContent = depBay; 
+            if (document.getElementById('out-pld-arr-bay')) document.getElementById('out-pld-arr-bay').textContent = arrBay;
 
-            const alt1 = extractData(rawText, '第一備降機場/跑道');
-            const alt2 = extractData(rawText, '第二備降機場/跑道');
-            const alt3 = extractData(rawText, '第三備降機場/跑道');
             [alt1, alt2, alt3].forEach(alt => {
                 if (alt !== 'N/A' && alt !== '----' && alt !== '') {
                     const icao = alt.split('/')[0].trim();
@@ -1440,8 +1565,6 @@
             if (!navigator.onLine) { checkNetworkStatus(); return; }
             if (currentIcaosToFetch && currentIcaosToFetch.length > 0) {
                 fetchAllWeather(currentIcaosToFetch);
-                if (currentDepICAO !== '----') fetchSimpleWeather(currentDepICAO, 'dep');
-                if (currentArrICAO !== '----') fetchSimpleWeather(currentArrICAO, 'arr');
             } else {
                 const syncLabel = document.getElementById('global-wx-sync');
                 syncLabel.textContent = "NO DATA"; syncLabel.className = "text-[10px] md:text-xs font-bold text-red-300 bg-red-900/50 px-2 py-1 rounded transition-colors";
@@ -1455,7 +1578,14 @@
             else { syncLabel.textContent = "OFFLINE CACHE"; syncLabel.className = "text-[10px] md:text-xs font-bold text-stone-300 bg-stone-800/50 px-2 py-1 rounded transition-colors"; }
             
             for (const icao of icaos) container.innerHTML += createWeatherBlockHTML(icao);
+            
             await Promise.allSettled(icaos.map(icao => fetchSingleAirportWeather(icao)));
+            
+            // 觸發開源天氣輔助資訊的擷取 (僅限出發與目的地)
+            [currentDepICAO, currentArrICAO].forEach(icao => {
+                if (icao && icao !== '----') fetchSimpleWeather(icao);
+            });
+
             if (navigator.onLine) { syncLabel.textContent = "SYNCED"; syncLabel.className = "text-[10px] md:text-xs font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded transition-colors"; }
         }
 
@@ -1463,9 +1593,17 @@
             let timeTag = icao === currentDepICAO && currentDepUTC ? `<span class="bg-[#e8dfd5] text-[#8b5a2b] px-2 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 tracking-wide">DEP: ${currentDepUTC}</span>` : (icao === currentArrICAO && currentArrUTC ? `<span class="bg-[#e8dfd5] text-[#8b5a2b] px-2 py-0.5 rounded text-[10px] font-bold shadow-sm ml-2 tracking-wide">ARR: ${currentArrUTC}</span>` : '');
             let rwyTag = runwayMap[icao] ? `<span class="bg-indigo-100 text-indigo-800 border border-indigo-300 px-2 py-0.5 rounded text-[11px] md:text-xs font-black shadow-sm ml-2 tracking-wider">RWY ${runwayMap[icao]}</span>` : '';
             return `<div class="weather-block border border-stone-200 rounded-xl overflow-hidden shadow-sm bg-white" data-html2canvas-ignore="false">
-                <div class="bg-stone-100/50 text-[#3b4c59] px-3 md:px-4 py-2 border-b border-stone-200 flex justify-between items-center">
-                    <div class="flex items-center flex-wrap gap-y-1"><span class="text-lg md:text-xl font-bold tracking-widest data-font">${icao}</span>${rwyTag}${timeTag}</div>
-                    <span id="sync-${icao}" class="text-[10px] px-2 py-0.5 rounded bg-stone-300 text-stone-600 font-bold tracking-wider shadow-sm ml-2">Loading...</span>
+                <div class="bg-stone-100/50 text-[#3b4c59] px-3 md:px-4 py-2 border-b border-stone-200 flex flex-col justify-center">
+                    <div class="flex justify-between items-center w-full">
+                        <div class="flex items-center flex-wrap gap-y-1"><span class="text-lg md:text-xl font-bold tracking-widest data-font">${icao}</span>${rwyTag}${timeTag}</div>
+                        <span id="sync-${icao}" class="text-[10px] px-2 py-0.5 rounded bg-stone-300 text-stone-600 font-bold tracking-wider shadow-sm ml-2 shrink-0">Loading...</span>
+                    </div>
+                    <!-- Open source weather (僅出發與目的地才會顯示) -->
+                    ${(icao === currentDepICAO || icao === currentArrICAO) ? `
+                    <div id="awc-simple-wx-${icao}" class="hidden flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-stone-200/60">
+                        <span id="awc-wx-icon-${icao}" class="text-[13px] md:text-sm">☁️</span>
+                        <span id="awc-wx-desc-${icao}" class="text-[10px] md:text-[11px] text-[#8b5a2b] font-bold tracking-wide">Loading...</span>
+                    </div>` : ''}
                 </div>
                 <div class="p-3 md:p-4 flex flex-col gap-3 md:gap-4">
                     <div>
