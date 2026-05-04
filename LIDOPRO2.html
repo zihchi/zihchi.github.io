@@ -13,6 +13,25 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
 
+        /* iOS/iPadOS 防護機制：防止邊緣誤觸、拖曳、與意外的分割畫面 */
+        html, body {
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none; /* 禁用全域長按選單 */
+            overscroll-behavior-x: none; /* 禁用左右滑動的邊緣彈性效果 */
+        }
+
+        /* 絕對禁止拖曳網頁中的連結、圖片與圖示，杜絕產生拖曳網址的現象 */
+        a, img, svg {
+            -webkit-user-drag: none !important;
+        }
+
+        /* 確保輸入框可以正常長按複製/貼上與點擊，不受全域禁用影響 */
+        input, textarea {
+            -webkit-touch-callout: default;
+            -webkit-user-select: auto;
+            user-select: auto;
+        }
+
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #f4ece4; 
@@ -62,8 +81,6 @@
             border-left: 4px solid #d4c3b3;
             transition: all 0.3s ease;
         }
-
-        img { -webkit-touch-callout: default; }
 
         #offline-banner {
             display: none; background-color: #e74c3c; color: white; text-align: center;
