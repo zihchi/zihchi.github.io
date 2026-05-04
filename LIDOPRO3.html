@@ -157,150 +157,140 @@
             <!-- 【右側簡報畫布】 (Pro Edition Dashboard) -->
             <div id="dashboard-content" class="w-full bg-[#f4ece4] flex flex-col gap-4 md:gap-5 pb-6 px-4 pt-4 md:px-6 md:pt-6 rounded-3xl shadow-xl border border-stone-200 relative">
                 
-                <!-- ROW 1: Flight Info & Payload (Grid Layout for iPad Landscape Optimization) -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-stretch">
+                <!-- ROW 1: Flight Info & Payload (Symmetrically aligned for iPad Landscape) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-stretch h-full">
                     
                     <!-- Flight Info Card (Left: 2/3 width on LG+) -->
-                    <div class="lg:col-span-2 w-full flex flex-col border border-[#8b5a2b] rounded-2xl overflow-hidden shadow-sm bg-white h-full">
-                        <!-- Top Header: Flight, Date, OFP, EFB, Reg -->
-                        <div class="bg-gradient-to-r from-[#4a3627] to-[#8b5a2b] p-4 md:p-5 flex flex-col md:flex-row justify-between items-start md:items-center text-white relative overflow-hidden gap-4">
-                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-                            
-                            <div class="relative z-10 flex flex-col text-left justify-center">
-                                <span id="out-utc-date" class="bg-white/20 text-white px-2 py-0.5 rounded text-[10px] md:text-[11px] data-font shadow-sm tracking-widest w-max mb-1.5">----</span>
-                                <div class="text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-black data-font tracking-wider leading-none whitespace-nowrap drop-shadow-sm" id="out-flight-no">----</div>
+                    <div class="lg:col-span-2 w-full flex flex-col border border-[#d4c3b3] rounded-2xl overflow-hidden shadow-sm bg-white h-full">
+                        <!-- Top Header: Flight, Date, OFP, EFB -->
+                        <div class="bg-gradient-to-r from-[#5c4033] to-[#8b5a2b] p-4 flex justify-between items-center text-white">
+                            <div class="flex flex-col">
+                                <span id="out-utc-date" class="bg-white/20 text-white px-2 py-0.5 rounded text-[9px] data-font shadow-sm tracking-widest w-max mb-1">----</span>
+                                <div class="text-3xl lg:text-4xl font-black data-font tracking-widest leading-none" id="out-flight-no">----</div>
                             </div>
 
-                            <div class="relative z-10 flex flex-row gap-4 items-center self-end md:self-auto">
-                                <!-- OFP & EFB Standalone Block -->
-                                <div class="flex flex-col gap-2 justify-center">
-                                    <div class="bg-[#3a2a1f]/80 border border-white/20 px-2.5 py-1 rounded-md shadow-inner flex items-center justify-between gap-3 min-w-[90px]">
-                                        <span class="text-[#d4c3b3] text-[9px] md:text-[10px] font-bold tracking-wider">OFP</span>
-                                        <span class="text-white data-font font-black text-xs md:text-sm" id="out-ofp">--</span>
-                                    </div>
-                                    <div class="bg-[#3a2a1f]/80 border border-white/20 px-2.5 py-1 rounded-md shadow-inner flex items-center justify-between gap-3 min-w-[90px]">
-                                        <span class="text-[#d4c3b3] text-[9px] md:text-[10px] font-bold tracking-wider">EFB</span>
-                                        <span class="text-white data-font font-black text-xs md:text-sm" id="out-efb">--</span>
-                                    </div>
+                            <div class="flex flex-col gap-1.5">
+                                <div class="bg-[#3a2a1f]/80 px-2 py-0.5 rounded text-[10px] shadow-inner flex items-center justify-between gap-4 w-[110px]">
+                                    <span class="text-[#d4c3b3] font-bold">OFP</span>
+                                    <span class="text-white data-font font-black" id="out-ofp">--</span>
+                                </div>
+                                <div class="bg-[#3a2a1f]/80 px-2 py-0.5 rounded text-[10px] shadow-inner flex items-center justify-between gap-4 w-[110px]">
+                                    <span class="text-[#d4c3b3] font-bold">EFB</span>
+                                    <span class="text-white data-font font-black" id="out-efb">--</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bottom Body: DEP - Center(ETE/CRZ/WIND) - ARR -->
-                        <div class="p-3 md:p-4 flex-grow grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 bg-[#fbf9f6] items-stretch">
+                        <!-- Bottom Body: 3 Vertical Cards (DEP, CRZ, ARR) -->
+                        <div class="p-3 md:p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 bg-[#fbf9f6]">
                             
                             <!-- Departure Card -->
-                            <div class="bg-white rounded-xl border border-stone-200 p-3 md:p-4 shadow-sm relative overflow-hidden flex flex-col justify-center">
+                            <div class="bg-white rounded-xl border border-stone-200 p-4 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#b35900]"></div>
-                                <div class="flex justify-between items-start mb-2 ml-2 md:ml-3">
-                                    <div>
-                                        <div class="text-[10px] md:text-xs font-bold text-stone-400 tracking-widest mb-1">DEPARTURE</div>
-                                        <div class="text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none" id="out-dep">----</div>
+                                <div>
+                                    <div class="flex justify-between items-start mb-2 ml-2">
+                                        <div class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Departure</div>
+                                        <span class="text-[9px] bg-[#d4c3b3] text-[#4a3627] px-1.5 py-0.5 rounded font-bold" id="out-dep-utc">UTC</span>
                                     </div>
-                                    <div class="text-right flex flex-col items-end gap-1">
-                                        <span class="text-[10px] md:text-xs bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold shadow-sm" id="out-dep-utc">UTC</span>
-                                    </div>
+                                    <div class="text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none ml-2" id="out-dep">----</div>
                                 </div>
-                                <div class="flex flex-row gap-2 ml-2 md:ml-3 mt-3">
-                                    <div class="flex-1 bg-stone-100 rounded-lg px-2 md:px-3 py-1.5 flex flex-col justify-center">
-                                        <span class="text-[9px] md:text-[11px] font-bold text-stone-500 mb-0.5">STD</span>
-                                        <span class="data-font font-black text-lg md:text-xl xl:text-2xl text-stone-800 leading-none" id="out-std">--:--</span>
+                                <div class="grid grid-cols-2 gap-2 mt-4 ml-2">
+                                    <div class="bg-stone-50 rounded-lg px-2 py-1.5 flex flex-col justify-center">
+                                        <span class="text-[9px] font-bold text-stone-500">STD</span>
+                                        <span class="data-font font-black text-sm md:text-md text-stone-800" id="out-std">--:--</span>
                                     </div>
-                                    <div class="flex-1 bg-orange-50 border border-orange-100 rounded-lg px-2 md:px-3 py-1.5 flex flex-col justify-center">
-                                        <span class="text-[9px] md:text-[11px] font-bold text-[#b35900] mb-0.5">ETD</span>
-                                        <span class="data-font font-black text-lg md:text-xl xl:text-2xl text-[#b35900] leading-none" id="out-etd">--:--</span>
+                                    <div class="bg-orange-50 border border-orange-100 rounded-lg px-2 py-1.5 flex flex-col justify-center">
+                                        <span class="text-[9px] font-bold text-[#b35900]">ETD</span>
+                                        <span class="data-font font-black text-sm md:text-md text-[#b35900]" id="out-etd">--:--</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Center Info (ETE & CRZ/TEMP/WIND) -->
-                            <div class="flex flex-col justify-center min-w-[180px] xl:min-w-[220px]">
-                                <div class="flex flex-col bg-gradient-to-b from-[#3b4c59] to-[#2c3e50] rounded-xl shadow-md overflow-hidden relative z-10 border border-stone-300 h-full p-3 md:p-4 justify-center items-center">
-                                    <span class="data-font font-black text-2xl md:text-3xl xl:text-4xl text-amber-400 leading-none tracking-wider drop-shadow-md relative z-10" id="out-ete-center">--:--</span>
-                                    
-                                    <div class="w-full h-px bg-white/20 my-3 xl:my-4 relative z-10"></div>
-                                    
-                                    <div class="flex flex-col items-center justify-center gap-1.5 relative z-10 text-center">
-                                        <span class="data-font font-black text-xl md:text-2xl xl:text-3xl text-sky-300 leading-none drop-shadow-md" id="out-cruise-alt">---</span>
-                                        <div class="flex flex-wrap justify-center items-center gap-1.5 mt-1">
-                                            <span class="data-font font-bold text-xs md:text-sm text-sky-200 drop-shadow-md" id="out-cruise-temp"></span>
-                                            <span class="data-font font-bold text-[10px] md:text-xs text-sky-100 bg-sky-900/50 px-1.5 py-0.5 rounded border border-sky-700/50" id="out-wc">---</span>
-                                        </div>
-                                    </div>
+                            <!-- Center Info (ETE & CRZ) -->
+                            <div class="bg-[#2c3e50] rounded-xl shadow-md border border-[#1a252f] p-4 flex flex-col justify-center items-center h-full text-center">
+                                <span class="data-font font-black text-3xl xl:text-4xl text-amber-400 drop-shadow-md leading-none mb-3" id="out-ete-center">--:--</span>
+                                <div class="w-3/4 h-px bg-white/20 mb-3"></div>
+                                <span class="data-font font-black text-2xl xl:text-3xl text-sky-300 drop-shadow-md leading-none" id="out-cruise-alt">---</span>
+                                <div class="flex flex-wrap justify-center items-center gap-1.5 mt-2">
+                                    <span class="data-font font-bold text-xs text-sky-200" id="out-cruise-temp"></span>
+                                    <span class="data-font font-bold text-[9px] text-sky-100 bg-sky-900/60 px-1.5 py-0.5 rounded" id="out-wc">---</span>
                                 </div>
                             </div>
 
                             <!-- Arrival Card -->
-                            <div class="bg-white rounded-xl border border-stone-200 p-3 md:p-4 shadow-sm relative overflow-hidden flex flex-col justify-center">
+                            <div class="bg-white rounded-xl border border-stone-200 p-4 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-stone-400"></div>
-                                <div class="flex justify-between items-start mb-2 ml-2 md:ml-3">
-                                    <div>
-                                        <div class="text-[10px] md:text-xs font-bold text-stone-400 tracking-widest mb-1">ARRIVAL</div>
-                                        <div class="text-4xl md:text-5xl lg:text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none" id="out-arr">----</div>
+                                <div>
+                                    <div class="flex justify-between items-start mb-2 ml-2">
+                                        <div class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Arrival</div>
+                                        <span class="text-[9px] bg-[#d4c3b3] text-[#4a3627] px-1.5 py-0.5 rounded font-bold" id="out-arr-utc">UTC</span>
                                     </div>
-                                    <div class="text-right flex flex-col items-end gap-1">
-                                        <span class="text-[10px] md:text-xs bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold shadow-sm" id="out-arr-utc">UTC</span>
-                                    </div>
+                                    <div class="text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none ml-2" id="out-arr">----</div>
                                 </div>
-                                <div class="flex ml-2 md:ml-3 mt-3">
-                                    <div class="flex-1 bg-stone-100 rounded-lg px-2 md:px-3 py-1.5 flex flex-col justify-center">
-                                        <span class="text-[9px] md:text-[11px] font-bold text-stone-500 mb-0.5">STA</span>
-                                        <span class="data-font font-black text-lg md:text-xl xl:text-2xl text-stone-800 leading-none" id="out-sta">--:--</span>
-                                    </div>
+                                <div class="mt-4 ml-2 bg-stone-50 rounded-lg px-3 py-2 flex flex-col justify-center w-full">
+                                    <span class="text-[9px] font-bold text-stone-500">STA</span>
+                                    <span class="data-font font-black text-sm md:text-md text-stone-800" id="out-sta">--:--</span>
                                 </div>
                             </div>
 
                         </div>
                     </div>
 
-                    <!-- Payload & Cabin Card (Right: 1/3 width on LG+) -->
-                    <div class="lg:col-span-1 border border-[#e8dfd5] rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col h-full">
-                        <div class="bg-[#4a3627] p-2 md:p-3 text-center border-b border-[#8b5a2b]">
-                            <div class="text-2xl md:text-3xl font-black data-font tracking-widest text-white drop-shadow-sm" id="out-reg">----</div>
+                    <!-- Payload & Cabin Card (Right: 1/3 width on LG+, highly compact) -->
+                    <div class="lg:col-span-1 w-full border border-[#d4c3b3] rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col h-full">
+                        <div class="bg-[#4a3627] p-2.5 text-center">
+                            <div class="text-2xl font-black data-font tracking-widest text-white" id="out-reg">----</div>
                         </div>
-                        <div class="bg-[#7a5c43] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 text-center">Payload & Cabin</div>
-                        <div class="p-4 flex flex-col gap-3 flex-grow justify-center">
-                            <div class="text-center">
-                                <div class="text-[10px] text-stone-500 font-bold tracking-wider mb-1">TOTAL PAX</div>
+                        <div class="bg-[#8b5a2b] text-white text-[9px] font-bold uppercase tracking-wider py-1.5 text-center shadow-inner">Payload & Cabin</div>
+                        
+                        <div class="flex-grow flex flex-col justify-evenly p-3 lg:p-4 gap-2 bg-white">
+                            <!-- PAX -->
+                            <div class="text-center mb-1">
+                                <div class="text-[9px] text-stone-500 font-bold tracking-wider mb-0.5">TOTAL PAX</div>
                                 <div class="flex items-baseline justify-center gap-1.5">
-                                    <div class="data-font font-black text-4xl xl:text-5xl text-[#b35900]" id="out-pax">---</div>
-                                    <div class="data-font font-bold text-sm text-stone-400" id="out-pax-raw"></div>
+                                    <div class="data-font font-black text-3xl lg:text-4xl text-[#b35900]" id="out-pax">---</div>
+                                    <div class="data-font font-bold text-xs text-stone-400" id="out-pax-raw"></div>
                                 </div>
                             </div>
-                            <div class="w-full h-px bg-stone-200 my-1"></div>
+                            
+                            <div class="w-full h-px bg-stone-100"></div>
 
-                            <div class="flex justify-between items-center w-full px-1">
-                                <div class="text-[10px] text-stone-400 font-bold tracking-wider">CARGO(KG)</div>
-                                <div class="data-font font-bold text-lg xl:text-xl text-stone-700" id="out-cargo">----</div>
+                            <!-- CARGO & FCST -->
+                            <div class="flex justify-between items-center px-1">
+                                <div class="text-[9px] text-stone-400 font-bold tracking-wider">CARGO(KG)</div>
+                                <div class="data-font font-bold text-md text-stone-700" id="out-cargo">----</div>
                             </div>
-                            <div class="flex justify-between items-center w-full px-1">
-                                <div class="text-[10px] text-stone-400 font-bold tracking-wider">FCST PLD</div>
-                                <div class="data-font font-bold text-lg xl:text-xl text-stone-700" id="out-fcst">----</div>
-                            </div>
-                            <div class="w-full h-px bg-stone-200 my-1"></div>
-                            
-                            <div class="text-center bg-blue-50/50 rounded-lg py-2.5">
-                                <div class="text-[10px] text-stone-500 font-bold tracking-wider mb-1">WATER</div>
-                                <div class="data-font font-black text-2xl xl:text-3xl text-blue-600" id="out-water">--%</div>
+                            <div class="flex justify-between items-center px-1">
+                                <div class="text-[9px] text-stone-400 font-bold tracking-wider">FCST PLD</div>
+                                <div class="data-font font-bold text-md text-stone-700" id="out-fcst">----</div>
                             </div>
                             
-                            <!-- Parking Bay -->
-                            <div class="w-full h-px bg-stone-200 my-1"></div>
-                            <div class="grid grid-cols-2 gap-2 w-full mt-1">
-                                <div class="flex flex-col items-center bg-amber-50/60 rounded-lg py-1.5 border border-amber-100/50">
-                                    <span class="text-[9px] text-amber-700/80 font-bold tracking-wider mb-0.5">DEP BAY</span>
-                                    <span class="data-font font-black text-lg text-amber-600" id="out-pld-dep-bay">--</span>
+                            <div class="w-full h-px bg-stone-100"></div>
+                            
+                            <!-- WATER -->
+                            <div class="text-center bg-blue-50/50 rounded-lg py-1.5">
+                                <div class="text-[9px] text-blue-400 font-bold tracking-wider">WATER</div>
+                                <div class="data-font font-black text-xl text-blue-600" id="out-water">--%</div>
+                            </div>
+                            
+                            <div class="w-full h-px bg-stone-100"></div>
+                            
+                            <!-- BAYS -->
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <div class="flex flex-col items-center justify-center bg-amber-50/60 rounded-lg py-1.5 border border-amber-100/50">
+                                    <span class="text-[8px] text-amber-700/80 font-bold tracking-wider">DEP BAY</span>
+                                    <span class="data-font font-black text-lg text-[#b35900]" id="out-pld-dep-bay">--</span>
                                 </div>
-                                <div class="flex flex-col items-center bg-amber-50/60 rounded-lg py-1.5 border border-amber-100/50">
-                                    <span class="text-[9px] text-amber-700/80 font-bold tracking-wider mb-0.5">ARR BAY</span>
-                                    <span class="data-font font-black text-lg text-amber-600" id="out-pld-arr-bay">--</span>
+                                <div class="flex flex-col items-center justify-center bg-amber-50/60 rounded-lg py-1.5 border border-amber-100/50">
+                                    <span class="text-[8px] text-amber-700/80 font-bold tracking-wider">ARR BAY</span>
+                                    <span class="data-font font-black text-lg text-[#b35900]" id="out-pld-arr-bay">--</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ROW 2: MEL Text Block (Full Width, Flexible Height) -->
+                <!-- ROW 2: MEL Text Block (Flexible full width row) -->
                 <div class="w-full border border-[#e8dfd5] rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col">
                     <div class="bg-[#5c4033] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                         <span class="flex items-center">MEL / Dispatch Remarks <span id="mel-header-reg" class="ml-2 bg-white/20 px-1.5 py-0.5 rounded text-[10px] data-font tracking-widest shadow-inner"></span></span>
@@ -337,61 +327,68 @@
                     </div>
                 </div>
 
-                <!-- ROW 4: Weights & Fuel Distribution (Full Width - Expanded Padding for iPad) -->
+                <!-- ROW 4: Weights & Fuel Distribution (3-Column Layout specifically optimized for iPad Pro Landscape) -->
                 <div class="w-full flex flex-col border border-[#d4c3b3] rounded-2xl overflow-hidden shadow-sm bg-white">
                     <div class="bg-[#b37a4c] text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5">Weights & Fuel Distribution</div>
-                    <div class="p-5 md:p-6 lg:p-8 bg-[#fdfaf6] flex flex-col lg:flex-row gap-5 lg:gap-8 items-stretch">
-                        <!-- Left: TOW & LDW & Total -->
-                        <div class="flex-1 flex flex-col gap-4 justify-center">
+                    <!-- 強制啟用 lg:grid-cols-3 三欄網格，創造充裕呼吸空間 -->
+                    <div class="p-4 lg:p-6 bg-[#fdfaf6] grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-stretch">
+                        
+                        <!-- Left Box: TOW & LDW & Total -->
+                        <div class="flex flex-col gap-4 justify-between h-full">
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="bg-white border border-[#e8dfd5] rounded-xl p-4 lg:py-5 shadow-sm flex flex-col justify-center items-center">
+                                <div class="bg-white border border-[#e8dfd5] rounded-xl p-4 shadow-sm flex flex-col justify-center items-center h-[90px]">
                                     <span class="text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1">TOW</span>
-                                    <span class="data-font font-black text-2xl lg:text-3xl text-[#4a3627]" id="out-tow">--.-</span>
+                                    <span class="data-font font-black text-2xl xl:text-3xl text-[#4a3627] leading-none" id="out-tow">--.-</span>
                                 </div>
-                                <div class="bg-white border border-[#e8dfd5] rounded-xl p-4 lg:py-5 shadow-sm flex flex-col justify-center items-center">
+                                <div class="bg-white border border-[#e8dfd5] rounded-xl p-4 shadow-sm flex flex-col justify-center items-center h-[90px]">
                                     <span class="text-[10px] text-stone-500 font-bold uppercase tracking-wider mb-1">LDW</span>
-                                    <span class="data-font font-black text-2xl lg:text-3xl text-[#4a3627]" id="out-ldw">--.-</span>
+                                    <span class="data-font font-black text-2xl xl:text-3xl text-[#4a3627] leading-none" id="out-ldw">--.-</span>
                                 </div>
                             </div>
-                            <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 lg:py-6 shadow-sm flex justify-between items-end">
+                            <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 shadow-sm flex-grow flex justify-between items-end">
                                 <div class="text-sm font-bold text-[#8b5a2b] mb-1">Total Fuel</div>
                                 <div class="text-right flex items-baseline gap-2">
                                     <span class="text-xs text-[#8b5a2b] font-bold opacity-70" id="time-total-fuel"></span>
-                                    <div class="data-font font-black text-3xl lg:text-4xl text-[#6e4620]" id="out-total-fuel">----</div>
+                                    <div class="data-font font-black text-4xl text-[#6e4620] leading-none" id="out-total-fuel">----</div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Middle: Div Fuel & Spare Fuel -->
-                        <div class="flex-1 flex flex-col gap-4 justify-center">
-                            <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 lg:p-6 shadow-sm flex-grow flex flex-col justify-center">
-                                 <div class="flex justify-between items-center mb-5 lg:mb-6">
-                                    <div class="text-xs md:text-[13px] text-[#8c6b5d] font-bold" id="label-div-fuel">Division Fuel</div>
-                                    <div class="text-right flex items-baseline gap-2">
-                                        <span class="text-[10px] lg:text-xs text-[#8c6b5d] font-bold opacity-70" id="time-div-fuel"></span>
-                                        <div class="data-font font-bold text-2xl lg:text-3xl text-[#5c4033]" id="out-div-fuel">----</div>
-                                    </div>
-                                 </div>
-                                 
-                                 <div id="altn-bof-container" class="hidden flex flex-col gap-2 mb-5 lg:mb-6 bg-[#fdfaf6] p-3 rounded-lg border border-[#e8dfd5]/60"></div>
 
-                                 <div class="w-full h-px bg-[#e8dfd5] mb-5 lg:mb-6"></div>
-                                 <div class="flex justify-between items-center">
-                                    <div class="text-xs md:text-[13px] text-[#8c6b5d] font-bold">Spare Fuel</div>
-                                    <div class="data-font font-bold text-2xl lg:text-3xl text-[#4b6b3e]" id="out-spare-fuel">----</div>
-                                 </div>
+                        <!-- Middle Box: Div Fuel & Spare Fuel -->
+                        <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 shadow-sm flex flex-col justify-between h-full">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="flex flex-col gap-1">
+                                    <div class="text-[11px] text-stone-500 font-bold" id="label-div-fuel">Division Fuel</div>
+                                    <span class="text-[9px] text-stone-400 font-bold opacity-70 mt-1" id="time-div-fuel"></span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="data-font font-black text-2xl xl:text-3xl text-[#5c4033] tracking-widest" id="out-div-fuel">----</div>
+                                </div>
+                            </div>
+                            
+                            <div id="altn-bof-container" class="hidden flex flex-col gap-1.5 mb-6 bg-[#fdfaf6] p-2.5 rounded-lg border border-[#e8dfd5]/60"></div>
+
+                            <div class="mt-auto">
+                                <div class="w-full h-px bg-[#e8dfd5] mb-4"></div>
+                                <div class="flex justify-between items-end">
+                                    <div class="text-[11px] text-[#8c6b5d] font-bold">Spare Fuel</div>
+                                    <div class="data-font font-black text-3xl text-[#4b6b3e] leading-none" id="out-spare-fuel">----</div>
+                                </div>
                             </div>
                         </div>
-                        <!-- Right: Additions breakdown with times -->
-                        <div class="flex-1 bg-white border border-[#e8dfd5] rounded-xl p-5 lg:p-6 lg:py-8 shadow-sm grid grid-cols-2 gap-x-5 gap-y-3 lg:gap-y-4 content-center">
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">ADD WXX</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-wxx"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-add-wxx">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">CONT</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-cont"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-cont">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">ADD OPN</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-opn"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-add-opn">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-crit-fuel"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-crit-fuel">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">ADD ATC</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-atc"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-add-atc">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">TANKERING</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-tankering"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-tankering">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">ADD DEV</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-dev"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-add-dev">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] lg:text-[11px] text-stone-500 font-bold tracking-wider">EXTRA</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-extra"></span><span class="data-font text-[13px] lg:text-sm font-bold text-stone-700" id="out-extra">--</span></div></div>
+
+                        <!-- Right Box: Additions breakdown -->
+                        <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 shadow-sm h-full flex flex-col justify-between">
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD WXX</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-wxx"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-wxx">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CONT</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-cont"></span><span class="data-font text-sm font-bold text-stone-700" id="out-cont">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD OPN</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-opn"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-opn">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-crit-fuel"></span><span class="data-font text-sm font-bold text-stone-700" id="out-crit-fuel">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD ATC</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-atc"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-atc">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">TANKERING</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-tankering"></span><span class="data-font text-sm font-bold text-stone-700" id="out-tankering">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD DEV</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-dev"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-dev">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">EXTRA</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-extra"></span><span class="data-font text-sm font-bold text-stone-700" id="out-extra">--</span></div></div>
                         </div>
+
                     </div>
                 </div>
 
