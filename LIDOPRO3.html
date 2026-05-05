@@ -100,7 +100,6 @@
     <div id="offline-banner" class="fixed top-0 left-0 w-full hidden no-print">⚠️ 目前處於離線模式。顯示資料為系統最後一次快取紀錄。</div>
 
     <!-- 登入與鎖定畫面 -->
-    <!-- 修改排版位置，避免 iOS 鍵盤彈出遮擋按鈕 -->
     <div id="login-wrapper" class="flex flex-col min-h-screen items-center justify-start pt-[15vh] p-4 relative no-print overflow-y-auto">
         <div id="lido-login-screen" class="w-full max-w-md glass-panel p-8 rounded-3xl shadow-xl text-center transition-opacity duration-500">
             <svg class="w-16 h-16 mx-auto mb-4 text-[#8b5a2b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -535,6 +534,26 @@
                         </div>
                     </div>
 
+                    <!-- ROW 7: NOTAM 智慧擷取與分類 -->
+                    <div class="border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col w-full mt-2 md:mt-3">
+                        <div class="bg-gradient-to-r from-stone-700 to-stone-800 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
+                            <span class="flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                NOTAM 智慧擷取與分類 (Airports / FIR)
+                            </span>
+                            <button onclick="parseNotams()" class="text-stone-300 hover:text-white transition-colors no-print" title="重新解析 NOTAM">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            </button>
+                        </div>
+                        <div class="p-4 md:p-5 bg-[#fbf9f6] flex flex-col gap-4">
+                            <textarea id="raw-notam-input" class="w-full p-3 bg-white border border-stone-300 rounded-xl text-stone-700 font-mono text-[10px] md:text-xs focus:outline-none focus:ring-2 focus:ring-[#8b5a2b]/50 resize-y min-h-[80px]" placeholder="若系統有抓取到 NOTAM，將自動帶入並分類。您也可以手動貼上 NOTAM 報文至此處，點擊右上角重整按鈕進行解析..." oninput="debouncedParseNotams()"></textarea>
+                            
+                            <div id="notam-buttons-container" class="flex flex-wrap gap-2 md:gap-3">
+                                <div class="text-stone-400 text-[11px] md:text-sm font-bold w-full text-center py-4">請先擷取航班或手動貼上 NOTAM 資料</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -651,6 +670,7 @@
         let currentDepUTC = '', currentArrUTC = '';
         let currentIcaosToFetch = [], currentDateUTC = '----';
         let runwayMap = {};
+        window.parsedNotamGroups = {}; // 儲存解析後的 NOTAM 資料
 
         // Toast 訊息提示
         function showToast(msg, isError = false, duration = 3000) {
@@ -723,6 +743,183 @@
                 }
             }
             return null;
+        }
+
+        // ==========================================
+        // NOTAM 解析與按鈕生成邏輯
+        // ==========================================
+        let parseNotamTimer;
+        function debouncedParseNotams() {
+            clearTimeout(parseNotamTimer);
+            parseNotamTimer = setTimeout(parseNotams, 500);
+        }
+
+        function parseNotams() {
+            const text = document.getElementById('raw-notam-input').value;
+            localStorage.setItem('dispatch_notam_input', text);
+            const container = document.getElementById('notam-buttons-container');
+            
+            if (!text.trim()) {
+                container.innerHTML = '<div class="text-stone-400 text-[11px] md:text-sm font-bold w-full text-center py-4">等待 NOTAM 資料匯入...</div>';
+                return;
+            }
+            
+            const lines = text.split('\n');
+            let parsedAirports = [];
+            let parsedAreas = [];
+
+            let currentMajorCategory = null;
+            let currentSubCategory = null;
+            let currentBlock = [];
+            let isAirportSection = false;
+
+            // 定義需要做「機場小分類」的五大項
+            const airportCategories = [
+                'DEPARTURE AIRPORT',
+                'DESTINATION AIRPORT',
+                'DESTINATION ALTERNATE(S)',
+                'ENROUTE AIRPORT(S)',
+                'SUITABLE ENROUTE AIRPORT(S)'
+            ];
+
+            function saveBlock() {
+                if (currentBlock.length > 0) {
+                    if (isAirportSection && currentSubCategory) {
+                        parsedAirports.push({
+                            title: currentSubCategory,
+                            text: currentBlock.join('\n') + '\n'
+                        });
+                    } else if (!isAirportSection && currentMajorCategory) {
+                        parsedAreas.push({
+                            title: currentMajorCategory,
+                            text: currentBlock.join('\n') + '\n'
+                        });
+                    }
+                    currentBlock = [];
+                }
+            }
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const cl = line.trim();
+
+                // 1. 偵測大分類的分割線 (====)
+                if (/^={5,}$/.test(cl)) {
+                    let j = i + 1;
+                    let catName = "";
+                    // 尋找下一個 =====
+                    while (j < lines.length && !/^={5,}$/.test(lines[j].trim())) {
+                        if (lines[j].trim()) catName += lines[j].trim() + " ";
+                        j++;
+                    }
+
+                    if (j < lines.length && /^={5,}$/.test(lines[j].trim())) {
+                        saveBlock(); // 儲存上一個區塊
+
+                        currentMajorCategory = catName.trim().toUpperCase();
+                        currentSubCategory = null;
+                        isAirportSection = airportCategories.includes(currentMajorCategory);
+
+                        // 若不是機場分類，將大分類標題一併加入區塊中，保持資料完整
+                        if (!isAirportSection) {
+                            for (let k = i; k <= j; k++) {
+                                currentBlock.push(lines[k]);
+                            }
+                        }
+                        
+                        i = j; // 跳過已處理的大標題行數
+                        continue;
+                    }
+                }
+
+                // 2. 偵測機場小分類的標題 (特徵：下一行全都是 --- 且該行沒有開頭空白)
+                if (isAirportSection && i + 1 < lines.length && /^-{5,}$/.test(lines[i+1].trim())) {
+                    // 嚴格判斷：必須頂格寫 (不以空白開頭) 才能排除 NOTAM 內文的表格分隔線
+                    if (!line.startsWith(' ') && line.trim().length > 0) {
+                        saveBlock(); // 儲存上一個機場區塊
+
+                        const titleParts = cl.split(/\s{2,}|\s+\//);
+                        currentSubCategory = titleParts[0].trim(); // 取得如 RCTP 的代碼
+                        currentBlock = [line]; // 新區塊從此標題開始
+                        continue;
+                    }
+                }
+
+                // 3. 在區塊內時，持續收集內容
+                if (isAirportSection && currentSubCategory) {
+                    currentBlock.push(line);
+                } else if (!isAirportSection && currentMajorCategory) {
+                    currentBlock.push(line);
+                }
+            }
+            
+            saveBlock(); // 收尾最後一個段落
+            
+            // 開始渲染 UI
+            container.innerHTML = '';
+            
+            // [新增] 複製全文 NOTAM 按鈕
+            const copyAllBtn = document.createElement('button');
+            copyAllBtn.className = "w-full py-3.5 px-4 rounded-xl font-bold shadow-md bg-stone-700 text-white hover:bg-stone-600 transition-all active:scale-95 text-[13px] md:text-sm flex items-center justify-center gap-2 mb-2";
+            copyAllBtn.innerHTML = `📋 複製全文 NOTAM (${lines.length} 行)`;
+            copyAllBtn.onclick = () => copyNotamData(text, '完整');
+            container.appendChild(copyAllBtn);
+
+            if (parsedAirports.length === 0 && parsedAreas.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = "text-stone-400 text-[11px] md:text-sm font-bold w-full text-center py-4";
+                emptyMsg.textContent = "無法辨識標準 Lido 標題結構，但您仍可使用上方按鈕複製全文。";
+                container.appendChild(emptyMsg);
+                return;
+            }
+            
+            // [新增] 機場網格 (正方形/小按鈕)
+            if (parsedAirports.length > 0) {
+                const aptGrid = document.createElement('div');
+                aptGrid.className = "grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full";
+                parsedAirports.forEach(apt => {
+                    const btn = document.createElement('button');
+                    btn.className = "py-3 px-2 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-base md:text-lg tracking-widest flex items-center justify-center border bg-[#8b5a2b]/10 text-[#8b5a2b] border-[#8b5a2b]/30 hover:bg-[#8b5a2b]/20";
+                    btn.textContent = apt.title;
+                    btn.onclick = () => copyNotamData(apt.text, apt.title);
+                    aptGrid.appendChild(btn);
+                });
+                container.appendChild(aptGrid);
+            }
+
+            // [新增] 大分類列表 (滿版橫向按鈕)
+            if (parsedAreas.length > 0) {
+                const areaContainer = document.createElement('div');
+                areaContainer.className = "flex flex-col gap-2 mt-2 w-full";
+                parsedAreas.forEach(area => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full py-3 px-4 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-[11px] md:text-sm tracking-wider flex items-center justify-center border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100";
+                    btn.textContent = area.title;
+                    btn.onclick = () => copyNotamData(area.text, area.title);
+                    areaContainer.appendChild(btn);
+                });
+                container.appendChild(areaContainer);
+            }
+        }
+
+        function copyNotamData(text, title) {
+            if (!text) return;
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = text.trim();
+            // 修正 iOS 鍵盤彈出問題：設為 fixed 避免畫面跳動
+            tempTextarea.style.position = 'fixed';
+            tempTextarea.style.top = '0';
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToastMessage(`✅ 已成功複製 ${title} NOTAM`);
+            } catch (err) {
+                showToastMessage('❌ 複製失敗，請手動框選複製');
+            }
+            
+            document.body.removeChild(tempTextarea);
         }
 
         // ==========================================
@@ -1028,9 +1225,20 @@
                             showImage(rawTexts[key], 'sigwx');
                         }
                     });
+                    
+                    // NOTAM 資訊處理與帶入
+                    let notamFound = '';
+                    if (rawTexts['NOTAM']) {
+                        notamFound = rawTexts['NOTAM'];
+                    } else if (rawTexts['NOTAMS']) {
+                        notamFound = rawTexts['NOTAMS'];
+                    }
+                    document.getElementById('raw-notam-input').value = notamFound;
 
                     // 強制觸發 Dashboard 更新
                     debouncedParseData();
+                    parseNotams();
+                    
                     showToast('資料完美縫合！儀表板已更新。');
                 } else {
                     showToast(`擷取失敗：${responseData.message}`, true);
@@ -1059,13 +1267,16 @@
             document.getElementById('rawInput2').value = '';
             document.getElementById('atc-display').value = '';
             document.getElementById('target-flight').value = '';
+            document.getElementById('raw-notam-input').value = '';
             
             localStorage.removeItem('dispatch_rawInput_1');
             localStorage.removeItem('dispatch_rawInput_2');
+            localStorage.removeItem('dispatch_notam_input');
             
             // 清空所有圖檔區塊
             ['profile', 'mel', 'wni', 'sigwx'].forEach(prefix => clearImage(prefix));
             parseData();
+            parseNotams();
             
             const weatherContainer = document.getElementById('weather-blocks-container');
             weatherContainer.innerHTML = '<div class="col-span-1 md:col-span-2 lg:col-span-2 flex items-center justify-center h-full text-sm text-stone-400 font-bold py-10 text-center">等待擷取機場資料，系統將自動解析氣象。</div>';
@@ -1080,9 +1291,11 @@
         window.addEventListener('DOMContentLoaded', () => {
             const savedInput1 = localStorage.getItem('dispatch_rawInput_1');
             const savedInput2 = localStorage.getItem('dispatch_rawInput_2');
+            const savedNotam = localStorage.getItem('dispatch_notam_input');
             
             if (savedInput1) document.getElementById('rawInput').value = savedInput1;
             if (savedInput2) document.getElementById('rawInput2').value = savedInput2;
+            if (savedNotam) document.getElementById('raw-notam-input').value = savedNotam;
             
             // 回復一般單張截圖
             ['profile', 'mel', 'wni'].forEach(prefix => {
@@ -1095,6 +1308,7 @@
             
             checkNetworkStatus();
             if (savedInput1 || savedInput2) parseData();
+            if (savedNotam) parseNotams();
         });
 
         window.addEventListener('online', checkNetworkStatus);
