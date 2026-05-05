@@ -620,7 +620,7 @@
         let savedLidoUser = ''; let savedLidoPass = '';
         
         const airportMap = {
-            'RCTP':'TPE', 'RCKH':'KHH', 'RCSS':'TSA', 'RMQ':'RMQ',
+            'RCTP':'TPE', 'RCKH':'KHH', 'RCSS':'TSA', 'RCMQ':'RMQ',
             'VMMC':'MFM', 'VHHH':'HKG',
             'RJAA':'NRT', 'RJTT':'HND', 'RJBB':'KIX', 'RJGG':'NGO', 'RJFT':'KMJ','RJFF':'FUK', 'ROAH':'OKA', 'RJSS':'SDJ', 'RJCC':'CTS', 'RJCH':'HKD', 'RJFU':'NGS', 'RJOA':'HIJ', 'RJSN':'KIJ', 'RJFK':'KOJ',
             'KSFO':'SFO', 'KLAX':'LAX', 'KSEA':'SEA', 'KOAK':'OAK', 'KSMF':'SMF', 'KONT':'ONT', 'KPDX':'PDX', 'PANC':'ANC', 'PMDY':'MDY', 'PHNL':'HNL',
@@ -628,7 +628,7 @@
             'VVNB':'HAN', 'VVTS':'SGN', 'VVDN':'DAD', 'VVCR':'CXR', 'VVPQ':'PQC',
             'VTBS':'BKK', 'VTBD':'DMK', 'VTSG':'HKT', 'VTCC':'CNX',
             'WMKK':'KUL', 'WMKP':'PEN', 'WSSS':'SIN',
-            'WIII':'CGK', 'WADD':'DPS'
+            'WIII':'CGK', 'WADD':'DPS', 'KPHX':'PHX', 'LFBO':'TLS'
         };
         const getAirportStr = (icao) => icao && airportMap[icao] ? `${icao}/${airportMap[icao]}` : icao;
 
@@ -650,7 +650,7 @@
             'WIII': 'Asia/Jakarta', 'CGK': 'Asia/Jakarta', 'RPLL': 'Asia/Manila', 'MNL': 'Asia/Manila',
             'RPVM': 'Asia/Manila', 'CEB': 'Asia/Manila', 'RPLC': 'Asia/Manila', 'CRK': 'Asia/Manila',
             'KLAX': 'America/Los_Angeles', 'KSFO': 'America/Los_Angeles', 'KONT': 'America/Los_Angeles',
-            'KSEA': 'America/Los_Angeles'
+            'KSEA': 'America/Los_Angeles', 'KPHX': 'America/Phoenix', 'PHX': 'America/Phoenix', 'LFBO': 'Europe/Paris', 'TLS': 'Europe/Paris'
         };
 
         const airportCoordsFallback = {
@@ -766,7 +766,7 @@
             
             const lines = text.split('\n');
             let parsedAirports = [];
-            let parsedAreas = [];
+            let parsedAreas = []; // Will hold { title: 'MappedTitle', text: '...' }
 
             let currentMajorCategory = null;
             let currentSubCategory = null;
@@ -782,6 +782,14 @@
                 'SUITABLE ENROUTE AIRPORT(S)'
             ];
 
+            // 針對非機場的大範圍區域進行按鈕合併定義
+            const areaMappings = {
+                'EXTENDED AREA AROUND DEPARTURE': 'EXTENDED AREA (DEP & DEST)',
+                'EXTENDED AREA AROUND DESTINATION': 'EXTENDED AREA (DEP & DEST)',
+                'AREA ENROUTE DESTINATION - DESTINATION ALTERNATE(S)': 'AREA ENROUTE & EXTENDED (ALTN)',
+                'EXTENDED AREA AROUND DESTINATION ALTERNATE AIRPORT(S)': 'AREA ENROUTE & EXTENDED (ALTN)'
+            };
+
             function saveBlock() {
                 if (currentBlock.length > 0) {
                     if (isAirportSection && currentSubCategory) {
@@ -790,10 +798,20 @@
                             text: currentBlock.join('\n') + '\n'
                         });
                     } else if (!isAirportSection && currentMajorCategory) {
-                        parsedAreas.push({
-                            title: currentMajorCategory,
-                            text: currentBlock.join('\n') + '\n'
-                        });
+                        // 統一標準化空格，防止解析落差
+                        let normCat = currentMajorCategory.replace(/\s+/g, ' ');
+                        let displayTitle = areaMappings[normCat] || normCat;
+                        
+                        // 若合併的 Title 已經存在，就接續存入
+                        let existingArea = parsedAreas.find(a => a.title === displayTitle);
+                        if (existingArea) {
+                            existingArea.text += currentBlock.join('\n') + '\n';
+                        } else {
+                            parsedAreas.push({
+                                title: displayTitle,
+                                text: currentBlock.join('\n') + '\n'
+                            });
+                        }
                     }
                     currentBlock = [];
                 }
@@ -879,6 +897,7 @@
                 aptGrid.className = "grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full";
                 parsedAirports.forEach(apt => {
                     const btn = document.createElement('button');
+                    // 移除 AIRPORT 文字，保持純淨
                     btn.className = "py-3 px-2 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-base md:text-lg tracking-widest flex items-center justify-center border bg-[#8b5a2b]/10 text-[#8b5a2b] border-[#8b5a2b]/30 hover:bg-[#8b5a2b]/20";
                     btn.textContent = apt.title;
                     btn.onclick = () => copyNotamData(apt.text, apt.title);
@@ -893,8 +912,9 @@
                 areaContainer.className = "flex flex-col gap-2 mt-2 w-full";
                 parsedAreas.forEach(area => {
                     const btn = document.createElement('button');
-                    btn.className = "w-full py-3 px-4 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-[11px] md:text-sm tracking-wider flex items-center justify-center border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100";
-                    btn.textContent = area.title;
+                    // 移除 AREA/FIR 文字，保持純淨，字體大寫對齊
+                    btn.className = "w-full py-3.5 px-4 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-[12px] md:text-sm tracking-widest flex items-center justify-center border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100";
+                    btn.innerHTML = `<span class="uppercase">${area.title}</span>`;
                     btn.onclick = () => copyNotamData(area.text, area.title);
                     areaContainer.appendChild(btn);
                 });
