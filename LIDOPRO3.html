@@ -100,7 +100,8 @@
     <div id="offline-banner" class="fixed top-0 left-0 w-full hidden no-print">⚠️ 目前處於離線模式。顯示資料為系統最後一次快取紀錄。</div>
 
     <!-- 登入與鎖定畫面 -->
-    <div id="login-wrapper" class="flex flex-col min-h-screen items-center justify-center p-4 relative no-print">
+    <!-- 修改排版位置，避免 iOS 鍵盤彈出遮擋按鈕 -->
+    <div id="login-wrapper" class="flex flex-col min-h-screen items-center justify-start pt-[15vh] p-4 relative no-print overflow-y-auto">
         <div id="lido-login-screen" class="w-full max-w-md glass-panel p-8 rounded-3xl shadow-xl text-center transition-opacity duration-500">
             <svg class="w-16 h-16 mx-auto mb-4 text-[#8b5a2b]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <h2 class="text-2xl font-bold mb-4 tracking-wider text-stone-700">伺服器驗證</h2>
@@ -160,76 +161,78 @@
                 <!-- ROW 1: Flight Info & Payload (Symmetrically aligned for iPad Landscape) -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 items-stretch h-full">
                     
-                    <!-- Flight Info Card (Left: 2/3 width on LG+) -->
-                    <div class="lg:col-span-2 w-full flex flex-col border border-[#d4c3b3] rounded-2xl overflow-hidden shadow-sm bg-white h-full">
+                    <!-- Flight Info Card (Left: 2/3 width on LG+) - Redesigned to match requested aesthetics -->
+                    <div class="lg:col-span-2 w-full flex flex-col border border-stone-300 rounded-2xl overflow-hidden shadow-sm bg-[#fbf9f6] h-full">
                         <!-- Top Header: Flight, Date, OFP, EFB -->
-                        <div class="bg-gradient-to-r from-[#5c4033] to-[#8b5a2b] p-4 flex justify-between items-center text-white">
-                            <div class="flex flex-col">
-                                <span id="out-utc-date" class="bg-white/20 text-white px-2 py-0.5 rounded text-[9px] data-font shadow-sm tracking-widest w-max mb-1">----</span>
-                                <div class="text-3xl lg:text-4xl font-black data-font tracking-widest leading-none" id="out-flight-no">----</div>
+                        <div class="bg-[#785b42] p-4 md:p-5 flex justify-between items-start text-white">
+                            <div class="flex flex-col gap-1.5 z-10">
+                                <span id="out-utc-date" class="bg-white/20 text-white/90 px-2 py-0.5 rounded text-[10px] data-font font-bold shadow-sm tracking-widest w-max">----</span>
+                                <div class="text-4xl lg:text-5xl font-black data-font tracking-widest leading-none mt-1" id="out-flight-no">----</div>
                             </div>
 
-                            <div class="flex flex-col gap-1.5">
-                                <div class="bg-[#3a2a1f]/80 px-2 py-0.5 rounded text-[10px] shadow-inner flex items-center justify-between gap-4 w-[110px]">
-                                    <span class="text-[#d4c3b3] font-bold">OFP</span>
-                                    <span class="text-white data-font font-black" id="out-ofp">--</span>
+                            <div class="flex flex-col gap-1.5 z-10">
+                                <div class="bg-[#5c4431] border border-[#85674f] px-3 py-1 rounded-md text-[10px] shadow-sm flex items-center justify-between gap-6">
+                                    <span class="text-white/70 font-bold uppercase tracking-wider">OFP</span>
+                                    <span class="text-white data-font font-black flex items-center gap-1" id="out-ofp">--</span>
                                 </div>
-                                <div class="bg-[#3a2a1f]/80 px-2 py-0.5 rounded text-[10px] shadow-inner flex items-center justify-between gap-4 w-[110px]">
-                                    <span class="text-[#d4c3b3] font-bold">EFB</span>
+                                <div class="bg-[#5c4431] border border-[#85674f] px-3 py-1 rounded-md text-[10px] shadow-sm flex items-center justify-between gap-6">
+                                    <span class="text-white/70 font-bold uppercase tracking-wider">EFB</span>
                                     <span class="text-white data-font font-black" id="out-efb">--</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Bottom Body: 3 Vertical Cards (DEP, CRZ, ARR) -->
-                        <div class="p-3 md:p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 bg-[#fbf9f6]">
+                        <div class="p-3 md:p-4 flex-grow grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                             
                             <!-- Departure Card -->
-                            <div class="bg-white rounded-xl border border-stone-200 p-4 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
+                            <div class="bg-white rounded-xl border border-stone-200 p-4 shadow-sm flex flex-col h-full relative overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#b35900]"></div>
-                                <div>
-                                    <div class="flex justify-between items-start mb-2 ml-2">
-                                        <div class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Departure</div>
-                                        <span class="text-[9px] bg-[#d4c3b3] text-[#4a3627] px-1.5 py-0.5 rounded font-bold" id="out-dep-utc">UTC</span>
-                                    </div>
-                                    <div class="text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none ml-2" id="out-dep">----</div>
+                                <div class="flex justify-between items-start mb-2 pl-2">
+                                    <div class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Departure</div>
+                                    <span class="text-[10px] bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold" id="out-dep-utc">UTC</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-2 mt-4 ml-2">
-                                    <div class="bg-stone-50 rounded-lg px-2 py-1.5 flex flex-col justify-center">
-                                        <span class="text-[9px] font-bold text-stone-500">STD</span>
-                                        <span class="data-font font-black text-sm md:text-md text-stone-800" id="out-std">--:--</span>
-                                    </div>
-                                    <div class="bg-orange-50 border border-orange-100 rounded-lg px-2 py-1.5 flex flex-col justify-center">
-                                        <span class="text-[9px] font-bold text-[#b35900]">ETD</span>
-                                        <span class="data-font font-black text-sm md:text-md text-[#b35900]" id="out-etd">--:--</span>
+                                <div class="text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none pl-2 mb-6" id="out-dep">----</div>
+                                <div class="mt-auto pl-2">
+                                    <div class="bg-stone-50 rounded-lg p-3 flex flex-col justify-center border border-stone-100/50">
+                                        <span class="text-[9px] font-bold text-stone-500 mb-0.5">STD</span>
+                                        <span class="data-font font-black text-sm md:text-base text-stone-800 tracking-wide" id="out-std">--:--</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Center Info (ETE & CRZ) -->
-                            <div class="bg-[#2c3e50] rounded-xl shadow-md border border-[#1a252f] p-4 flex flex-col justify-center items-center h-full text-center">
-                                <span class="data-font font-black text-3xl xl:text-4xl text-amber-400 drop-shadow-md leading-none mb-3" id="out-ete-center">--:--</span>
-                                <div class="w-3/4 h-px bg-white/20 mb-3"></div>
-                                <span class="data-font font-black text-2xl xl:text-3xl text-sky-300 drop-shadow-md leading-none" id="out-cruise-alt">---</span>
-                                <div class="flex flex-wrap justify-center items-center gap-1.5 mt-2">
-                                    <span class="data-font font-bold text-xs text-sky-200" id="out-cruise-temp"></span>
-                                    <span class="data-font font-bold text-[9px] text-sky-100 bg-sky-900/60 px-1.5 py-0.5 rounded" id="out-wc">---</span>
+                            <!-- Center Info (ETE & CRZ & ETD) -->
+                            <div class="bg-[#344155] rounded-xl shadow-md border border-[#232e3d] p-4 flex flex-col h-full text-center">
+                                <div class="flex flex-col items-center justify-center flex-grow">
+                                    <span class="data-font font-black text-3xl xl:text-4xl text-[#f6ca6b] leading-none mb-3 drop-shadow-sm" id="out-ete-center">--:--</span>
+                                    <div class="w-16 h-px bg-stone-500/50 mb-3"></div>
+                                    <span class="data-font font-black text-2xl xl:text-3xl text-[#8bb4d6] leading-none mb-2" id="out-cruise-alt">---</span>
+                                    <div class="flex justify-center items-center gap-2">
+                                        <span class="data-font font-bold text-sm text-sky-100" id="out-cruise-temp"></span>
+                                        <span class="data-font font-bold text-[10px] text-white bg-[#1e293b] border border-[#475569] px-1.5 py-0.5 rounded shadow-inner" id="out-wc">---</span>
+                                    </div>
+                                </div>
+                                <div class="mt-auto pt-3 w-full">
+                                    <div class="bg-[#1e293b]/60 border border-[#475569]/50 rounded-lg p-2.5 flex flex-col justify-center items-center">
+                                        <span class="text-[9px] font-bold text-[#eab308] mb-0.5 tracking-wider uppercase">ETD</span>
+                                        <span class="data-font font-black text-sm md:text-base text-[#fde047] tracking-wide" id="out-etd">--:--</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Arrival Card -->
-                            <div class="bg-white rounded-xl border border-stone-200 p-4 shadow-sm flex flex-col justify-between h-full relative overflow-hidden">
+                            <div class="bg-white rounded-xl border border-stone-200 p-4 shadow-sm flex flex-col h-full relative overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-stone-400"></div>
-                                <div>
-                                    <div class="flex justify-between items-start mb-2 ml-2">
-                                        <div class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Arrival</div>
-                                        <span class="text-[9px] bg-[#d4c3b3] text-[#4a3627] px-1.5 py-0.5 rounded font-bold" id="out-arr-utc">UTC</span>
-                                    </div>
-                                    <div class="text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none ml-2" id="out-arr">----</div>
+                                <div class="flex justify-between items-start mb-2 pl-2">
+                                    <div class="text-[10px] font-bold text-stone-400 tracking-widest uppercase">Arrival</div>
+                                    <span class="text-[10px] bg-[#d4c3b3] text-[#4a3627] px-2 py-0.5 rounded font-bold" id="out-arr-utc">UTC</span>
                                 </div>
-                                <div class="mt-4 ml-2 bg-stone-50 rounded-lg px-3 py-2 flex flex-col justify-center w-full">
-                                    <span class="text-[9px] font-bold text-stone-500">STA</span>
-                                    <span class="data-font font-black text-sm md:text-md text-stone-800" id="out-sta">--:--</span>
+                                <div class="text-4xl xl:text-5xl font-black text-[#4a3627] data-font leading-none pl-2 mb-6" id="out-arr">----</div>
+                                <div class="mt-auto pl-2">
+                                    <div class="bg-stone-50 rounded-lg p-3 flex flex-col justify-center border border-stone-100/50">
+                                        <span class="text-[9px] font-bold text-stone-500 mb-0.5">STA</span>
+                                        <span class="data-font font-black text-sm md:text-base text-stone-800 tracking-wide" id="out-sta">--:--</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -358,7 +361,7 @@
                         <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 shadow-sm flex flex-col justify-between h-full">
                             <div class="flex justify-between items-start mb-6">
                                 <div class="flex flex-col gap-1">
-                                    <div class="text-[11px] text-stone-500 font-bold" id="label-div-fuel">Division Fuel</div>
+                                    <div class="text-[11px] text-stone-500 font-bold" id="label-div-fuel">Minimum Diversion Fuel</div>
                                     <span class="text-[9px] text-stone-400 font-bold opacity-70 mt-1" id="time-div-fuel"></span>
                                 </div>
                                 <div class="text-right">
@@ -380,12 +383,12 @@
                         <!-- Right Box: Additions breakdown -->
                         <div class="bg-white border border-[#e8dfd5] rounded-xl p-5 shadow-sm h-full flex flex-col justify-between">
                             <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD WXX</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-wxx"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-wxx">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CONT</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-cont"></span><span class="data-font text-sm font-bold text-stone-700" id="out-cont">--</span></div></div>
                             <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD OPN</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-opn"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-opn">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-crit-fuel"></span><span class="data-font text-sm font-bold text-stone-700" id="out-crit-fuel">--</span></div></div>
                             <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD ATC</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-atc"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-atc">--</span></div></div>
-                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">TANKERING</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-tankering"></span><span class="data-font text-sm font-bold text-stone-700" id="out-tankering">--</span></div></div>
                             <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">ADD DEV</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-add-dev"></span><span class="data-font text-sm font-bold text-stone-700" id="out-add-dev">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CONT</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-cont"></span><span class="data-font text-sm font-bold text-stone-700" id="out-cont">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">CRIT FUEL</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-crit-fuel"></span><span class="data-font text-sm font-bold text-stone-700" id="out-crit-fuel">--</span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">TANKERING</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-tankering"></span><span class="data-font text-sm font-bold text-stone-700" id="out-tankering">--</span></div></div>
                             <div class="flex justify-between items-center"><span class="text-[10px] text-stone-500 font-bold tracking-wider">EXTRA</span><div class="text-right"><span class="text-[9px] text-stone-400 font-bold mr-1.5" id="time-extra"></span><span class="data-font text-sm font-bold text-stone-700" id="out-extra">--</span></div></div>
                         </div>
 
@@ -660,6 +663,22 @@
         }
         function showToastMessage(msg) { showToast(msg, false, 4000); }
 
+        // Keyboard submission for login
+        document.getElementById('lido-pass').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('lido-pass').blur();
+                document.getElementById('lido-connect-btn').click();
+            }
+        });
+
+        document.getElementById('lido-user').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('lido-pass').focus();
+            }
+        });
+
         document.getElementById('lido-connect-btn').addEventListener('click', () => {
             const user = document.getElementById('lido-user').value.trim();
             const pass = document.getElementById('lido-pass').value.trim();
@@ -838,8 +857,6 @@
                             if (rwyMatch) alt3Rwy = `${alt3Icao}/${rwyMatch[1]}`;
                         }
                     }
-
-                    const altnLabel = alt1Rwy !== 'N/A' ? `ALTN ${alt1Rwy}` : 'ALTN';
 
                     const flightDateStr = formatAviationDate(leg.scheduledDepartureTime); 
                     const stdStr = formatAviationTime(leg.scheduledDepartureTime);
@@ -1346,7 +1363,7 @@
                 }
             });
 
-            // Handle Fuel Mapping specifically to include time
+            // Fuel additions updated order mapping
             const fuelItems = [
                 { id: 'out-add-wxx', timeId: 'time-add-wxx', key: 'ADD WXX' },
                 { id: 'out-add-opn', timeId: 'time-add-opn', key: 'ADD OPN' },
@@ -1377,7 +1394,7 @@
                 }
             });
 
-            // Division Fuel Handle
+            // Division Fuel Handle renaming to Minimum Diversion Fuel
             const divFuelLabel = document.getElementById('label-div-fuel');
             const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:\s*(.*?)(?:\n|$)/i);
             document.getElementById('out-div-fuel').textContent = '----';
@@ -1387,8 +1404,8 @@
                 let rawDiv = divMatch[1].toUpperCase().replace(/^ALTN\s*/i, '').trim();
                 let divBase = rawDiv.includes('+') ? rawDiv.split('+')[0].trim() : rawDiv;
                 let suffix = rawDiv.includes('+') ? '+' + rawDiv.split('+').slice(1).join('+').trim() : '';
-                if (divBase !== 'N/A' && divBase !== 'FRF') divFuelLabel.innerHTML = `Division Fuel <span class="bg-amber-200 text-amber-900 border border-amber-400 px-1.5 py-0.5 rounded shadow-sm mx-1 inline-block">${divBase}</span><span class="text-[#8c6b5d] font-bold">${suffix}</span>`;
-                else divFuelLabel.textContent = `Division Fuel (${rawDiv})`;
+                if (divBase !== 'N/A' && divBase !== 'FRF') divFuelLabel.innerHTML = `Min Diversion Fuel <span class="bg-amber-200 text-amber-900 border border-amber-400 px-1.5 py-0.5 rounded shadow-sm mx-1 inline-block">${divBase}</span><span class="text-[#8c6b5d] font-bold">${suffix}</span>`;
+                else divFuelLabel.textContent = `Min Diversion Fuel (${rawDiv})`;
 
                 let valStr = divMatch[2]; 
                 if (valStr.includes('/')) {
@@ -1417,14 +1434,14 @@
                 const parts = alt2Bof.match(/(\d+)\s*\(([-+]\d+)\)/);
                 if(parts) {
                     const diffColor = parseInt(parts[2]) > 0 ? 'text-red-500' : 'text-emerald-600';
-                    altnHtml += `<div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#8c6b5d]">ALTN ${alt2Icao} BOF</span><span class="data-font text-[13px] font-bold text-stone-600">${parts[1]} <span class="${diffColor}">(${parts[2]})</span></span></div>`;
+                    altnHtml += `<div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#8c6b5d]">2nd ALTN ${alt2}</span><span class="data-font text-[13px] font-bold text-stone-600">${parts[1]} <span class="${diffColor}">(${parts[2]})</span></span></div>`;
                 }
             }
             if (alt3Icao && alt3Bof !== 'N/A') {
                 const parts = alt3Bof.match(/(\d+)\s*\(([-+]\d+)\)/);
                 if(parts) {
                     const diffColor = parseInt(parts[2]) > 0 ? 'text-red-500' : 'text-emerald-600';
-                    altnHtml += `<div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#8c6b5d]">ALTN ${alt3Icao} BOF</span><span class="data-font text-[13px] font-bold text-stone-600">${parts[1]} <span class="${diffColor}">(${parts[2]})</span></span></div>`;
+                    altnHtml += `<div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#8c6b5d]">3rd ALTN ${alt3}</span><span class="data-font text-[13px] font-bold text-stone-600">${parts[1]} <span class="${diffColor}">(${parts[2]})</span></span></div>`;
                 }
             }
             
@@ -1439,7 +1456,6 @@
                     altnContainer.classList.add('hidden');
                 }
             }
-
 
             // Handle Airplane Section updates (ETE & split Cruise Alt / Temp)
             const eteVal = extractData(rawText, 'ETE');
@@ -1470,6 +1486,7 @@
                 turbliLink.classList.remove('hidden');
             } else { turbliLink.classList.add('hidden'); }
 
+            // Apply styling for times
             const stdStr = extractData(rawText, 'STD'), staStr = extractData(rawText, 'STA');
             currentDepUTC = extractZuluOnly(stdStr); currentArrUTC = extractZuluOnly(staStr);
             document.getElementById('out-std').textContent = convertToZuluLocalStr(stdStr, currentDepICAO);
@@ -1498,9 +1515,13 @@
             let cleanOfp1 = extractData(rawText, 'OFP 號碼') !== 'N/A' ? extractData(rawText, 'OFP 號碼').replace(/^OFP\s*/i, '').trim() : '----';
             let cleanOfp2 = rawText2.match(/OFP\s*:\s*(.+)/i) ? rawText2.match(/OFP\s*:\s*(.+)/i)[1].trim().replace(/^OFP\s*/i, '').trim() : '----';
             const ofpEl = document.getElementById('out-ofp');
-            if (cleanOfp1 !== '----' && cleanOfp2 !== '----' && cleanOfp1 === cleanOfp2) ofpEl.innerHTML = `${cleanOfp1} <svg class="inline w-3.5 h-3.5 text-emerald-400 ml-0.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
-            else if (cleanOfp1 !== '----' && cleanOfp2 !== '----' && cleanOfp1 !== cleanOfp2) ofpEl.innerHTML = `${cleanOfp1} / <span class="text-red-400">${cleanOfp2}</span>`;
-            else ofpEl.textContent = cleanOfp1 !== '----' ? cleanOfp1 : (cleanOfp2 !== '----' ? cleanOfp2 : '----');
+            if (cleanOfp1 !== '----' && cleanOfp2 !== '----' && cleanOfp1 === cleanOfp2) {
+                ofpEl.innerHTML = `${cleanOfp1} <svg class="w-3.5 h-3.5 text-emerald-400 inline-block -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+            } else if (cleanOfp1 !== '----' && cleanOfp2 !== '----' && cleanOfp1 !== cleanOfp2) {
+                ofpEl.innerHTML = `${cleanOfp1} / <span class="text-red-400">${cleanOfp2}</span>`;
+            } else {
+                ofpEl.textContent = cleanOfp1 !== '----' ? cleanOfp1 : (cleanOfp2 !== '----' ? cleanOfp2 : '--');
+            }
 
             let depBay = '--', arrBay = '--';
             const bayMatch = rawText2.match(/BAY:\s*([^]+?)(?=\(\d+\)|ADD OPN|$)/i);
