@@ -493,7 +493,7 @@
                     <div class="border border-stone-200 rounded-2xl overflow-hidden shadow-sm bg-white flex flex-col w-full">
                         <div class="bg-gradient-to-r from-blue-700 to-blue-800 text-white text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex justify-between items-center">
                             <span class="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 WNI 氣象剖面資訊
                             </span>
                             <div class="flex items-center gap-3">
@@ -1513,7 +1513,10 @@
             clearTimeout(parseTimer); parseTimer = setTimeout(parseData, 500);
         }
 
-        async function fetchSimpleWeather(icao) {
+        // ==========================================
+        // 【全新升級】開源天氣：支援動態預報擷取邏輯
+        // ==========================================
+        async function fetchSimpleWeather(icao, isArrival = false, baseDate = null, targetZulu = null, depZulu = null) {
             const container = document.getElementById(`awc-simple-wx-${icao}`);
             const descEl = document.getElementById(`awc-wx-desc-${icao}`);
             const iconEl = document.getElementById(`awc-wx-icon-${icao}`);
@@ -1531,6 +1534,7 @@
                 } else { descEl.innerText = "Offline (無快取)"; iconEl.innerText = "☁️"; }
                 return;
             }
+            
             try {
                 descEl.innerText = "Fetching data...";
                 let lat, lon;
@@ -1540,8 +1544,46 @@
                     if (!geoData.results || geoData.results.length === 0) throw new Error("Not found");
                     lat = geoData.results[0].latitude; lon = geoData.results[0].longitude;
                 }
-                const wxData = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)).json();
-                const temp = Math.round(wxData.current_weather.temperature), code = wxData.current_weather.weathercode;
+
+                // 計算欲鎖定的 ISO 8601 目標時間 (針對 Open-Meteo hourly 搜尋)
+                let targetIso = null;
+                if (targetZulu && baseDate && baseDate !== '----') {
+                    const months = {JAN:'01', FEB:'02', MAR:'03', APR:'04', MAY:'05', JUN:'06', JUL:'07', AUG:'08', SEP:'09', OCT:'10', NOV:'11', DEC:'12'};
+                    let parts = baseDate.split('-'); // 預期格式: YYYY-MMM-DD (e.g. 2024-MAY-10)
+                    if(parts.length === 3) {
+                        const monthNum = months[parts[1].toUpperCase()];
+                        // 使用 Date 建構子來抓取準確的 Date 物件 (預設為 UTC)
+                        let d = new Date(Date.UTC(parts[0], parseInt(monthNum, 10) - 1, parts[2], parseInt(targetZulu.substring(0,2), 10), 0));
+                        
+                        // 針對落地機場的跨日判斷：如果 STA 時間 < STD 時間，合理推斷已跨入隔天
+                        if (isArrival && depZulu && targetZulu.substring(0,2) < depZulu.substring(0,2)) {
+                            d.setUTCDate(d.getUTCDate() + 1);
+                        }
+                        
+                        // 組裝為 Open-Meteo 所需的格式 (YYYY-MM-DDTHH:00)
+                        targetIso = d.toISOString().substring(0,13) + ":00";
+                    }
+                }
+
+                // 呼叫包含 hourly 預報的綜合 API，確保時區對齊 GMT (即 UTC)
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,weathercode&timezone=GMT&past_days=1&forecast_days=7`;
+                const wxData = await (await fetch(url)).json();
+
+                // 預設先拿「當下」的氣象，做為防呆備案
+                let temp = Math.round(wxData.current_weather.temperature);
+                let code = wxData.current_weather.weathercode;
+                let isForecast = false;
+
+                // 若有計算出目標時間，從 hourly 陣列中抽取出我們要的那一小時
+                if (targetIso && wxData.hourly && wxData.hourly.time) {
+                    const idx = wxData.hourly.time.indexOf(targetIso);
+                    if (idx !== -1 && wxData.hourly.temperature_2m[idx] !== null) {
+                        temp = Math.round(wxData.hourly.temperature_2m[idx]);
+                        code = wxData.hourly.weathercode[idx];
+                        isForecast = true;
+                    }
+                }
+
                 const wmoMap = {
                     0: {desc: 'Clear sky', icon: '☀️'}, 1: {desc: 'Mainly clear', icon: '🌤️'}, 2: {desc: 'Partly cloudy', icon: '⛅'}, 3: {desc: 'Overcast', icon: '☁️'},
                     45: {desc: 'Fog', icon: '🌫️'}, 48: {desc: 'Depositing rime fog', icon: '🌫️'}, 51: {desc: 'Light drizzle', icon: '🌧️'}, 61: {desc: 'Slight rain', icon: '🌦️'},
@@ -1549,9 +1591,17 @@
                     95: {desc: 'Thunderstorm', icon: '🌩️'}
                 };
                 const condition = wmoMap[code] || {desc: 'Unknown', icon: '☁️'};
-                descEl.innerText = `${temp}°C and ${condition.desc.toLowerCase()}`; iconEl.innerText = condition.icon;
+                
+                // 動態調整 UI 文字，精準顯示是「預計起飛」還是「預計抵達」的天氣
+                let prefixStr = isForecast ? (isArrival ? '預計抵達 ' : '預計起飛 ') : '目前 ';
+                descEl.innerText = `${prefixStr}${temp}°C and ${condition.desc.toLowerCase()}`; 
+                iconEl.innerText = condition.icon;
+                
                 localStorage.setItem(cacheKey, JSON.stringify({ temp, desc: condition.desc, icon: condition.icon }));
-            } catch (e) { descEl.innerText = "Weather unavailable"; iconEl.innerText = "☁️"; }
+            } catch (e) { 
+                descEl.innerText = "Weather unavailable"; 
+                iconEl.innerText = "☁️"; 
+            }
         }
 
         function parseData() {
@@ -1787,7 +1837,7 @@
             } else {
                 let htmlObj = '<div class="flex flex-col gap-2">';
                 melMatch[1].trim().replace(/\bB-?\d{5}\b/gi, '').trim().split('\n').map(l => l.trim()).filter(l => l.length > 0).forEach(line => {
-                    htmlObj += `<div class="flex items-start gap-2 border-b border-stone-100 pb-1.5 last:border-0"><span class="text-[#e74c3c] mt-0.5 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></span><span class="leading-relaxed text-red-700 font-bold text-xs md:text-sm lg:text-[14px]">${line.replace(/\s{2,}/g, ' ')}</span></div>`;
+                    htmlObj += `<div class="flex items-start gap-2 border-b border-stone-100 pb-1.5 last:border-0"><span class="text-[#e74c3c] mt-0.5 shrink-0"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742-2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></span><span class="leading-relaxed text-red-700 font-bold text-xs md:text-sm lg:text-[14px]">${line.replace(/\s{2,}/g, ' ')}</span></div>`;
                 });
                 melContainer.innerHTML = htmlObj + '</div>';
             }
@@ -1833,9 +1883,13 @@
             
             await Promise.allSettled(icaos.map(icao => fetchSingleAirportWeather(icao)));
             
-            // 觸發開源天氣輔助資訊的擷取 (僅限出發與目的地)
+            // 觸發開源天氣輔助資訊的擷取 (僅限出發與目的地，帶入動態計算的 STD 與 STA)
             [currentDepICAO, currentArrICAO].forEach(icao => {
-                if (icao && icao !== '----') fetchSimpleWeather(icao);
+                if (icao && icao !== '----') {
+                    const isArrival = (icao === currentArrICAO);
+                    const targetZulu = isArrival ? currentArrUTC : currentDepUTC;
+                    fetchSimpleWeather(icao, isArrival, currentDateUTC, targetZulu, currentDepUTC);
+                }
             });
 
             if (navigator.onLine) { syncLabel.textContent = "SYNCED"; syncLabel.className = "text-[10px] md:text-xs font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded transition-colors"; }
