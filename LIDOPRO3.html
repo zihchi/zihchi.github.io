@@ -311,9 +311,12 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 DEFECT / eLB 截圖區
                             </span>
-                            <button onclick="clearImage('mel')" class="text-stone-300 hover:text-white transition-colors no-print" title="Clear Image">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
+                            <div class="flex items-center gap-3">
+                                <a href="https://elb.starlux-airlines.com/elb/#/dashboard/fleet" target="_blank" class="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition-colors flex items-center gap-1 border border-white/20 no-print">🔗 eLB 系統</a>
+                                <button onclick="clearImage('mel')" class="text-stone-300 hover:text-white transition-colors no-print" title="Clear Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="p-4 md:p-6 bg-[#fbf9f6] flex-grow flex items-center justify-center min-h-[150px] relative">
                             <div id="mel-placeholder" class="text-stone-400 font-bold text-sm tracking-wide border-2 border-dashed border-stone-300 rounded-xl w-full h-full flex flex-col items-center justify-center py-8">
@@ -670,7 +673,7 @@
         let currentDepUTC = '', currentArrUTC = '';
         let currentIcaosToFetch = [], currentDateUTC = '----';
         let runwayMap = {};
-        window.parsedNotamGroups = {}; // 儲存解析後的 NOTAM 資料
+        window.parsedNotamGroups = {}; 
 
         // Toast 訊息提示
         function showToast(msg, isError = false, duration = 3000) {
@@ -722,7 +725,6 @@
             showToast('已斷開連線，憑證清除並鎖定');
         });
 
-        // 輔助格式化函數
         function formatAviationTime(ms) {
             if (!ms) return 'N/A';
             const d = new Date(ms);
@@ -766,14 +768,13 @@
             
             const lines = text.split('\n');
             let parsedAirports = [];
-            let parsedAreas = []; // Will hold { title: 'MappedTitle', text: '...' }
+            let parsedAreas = []; 
 
             let currentMajorCategory = null;
             let currentSubCategory = null;
             let currentBlock = [];
             let isAirportSection = false;
 
-            // 定義需要做「機場小分類」的五大項
             const airportCategories = [
                 'DEPARTURE AIRPORT',
                 'DESTINATION AIRPORT',
@@ -782,7 +783,6 @@
                 'SUITABLE ENROUTE AIRPORT(S)'
             ];
 
-            // 針對非機場的大範圍區域進行按鈕合併定義
             const areaMappings = {
                 'EXTENDED AREA AROUND DEPARTURE': 'EXTENDED AREA (DEP & DEST)',
                 'EXTENDED AREA AROUND DESTINATION': 'EXTENDED AREA (DEP & DEST)',
@@ -798,11 +798,9 @@
                             text: currentBlock.join('\n') + '\n'
                         });
                     } else if (!isAirportSection && currentMajorCategory) {
-                        // 統一標準化空格，防止解析落差
                         let normCat = currentMajorCategory.replace(/\s+/g, ' ');
                         let displayTitle = areaMappings[normCat] || normCat;
                         
-                        // 若合併的 Title 已經存在，就接續存入
                         let existingArea = parsedAreas.find(a => a.title === displayTitle);
                         if (existingArea) {
                             existingArea.text += currentBlock.join('\n') + '\n';
@@ -821,49 +819,43 @@
                 const line = lines[i];
                 const cl = line.trim();
 
-                // 1. 偵測大分類的分割線 (====)
                 if (/^={5,}$/.test(cl)) {
                     let j = i + 1;
                     let catName = "";
-                    // 尋找下一個 =====
                     while (j < lines.length && !/^={5,}$/.test(lines[j].trim())) {
                         if (lines[j].trim()) catName += lines[j].trim() + " ";
                         j++;
                     }
 
                     if (j < lines.length && /^={5,}$/.test(lines[j].trim())) {
-                        saveBlock(); // 儲存上一個區塊
+                        saveBlock(); 
 
                         currentMajorCategory = catName.trim().toUpperCase();
                         currentSubCategory = null;
                         isAirportSection = airportCategories.includes(currentMajorCategory);
 
-                        // 若不是機場分類，將大分類標題一併加入區塊中，保持資料完整
                         if (!isAirportSection) {
                             for (let k = i; k <= j; k++) {
                                 currentBlock.push(lines[k]);
                             }
                         }
                         
-                        i = j; // 跳過已處理的大標題行數
+                        i = j; 
                         continue;
                     }
                 }
 
-                // 2. 偵測機場小分類的標題 (特徵：下一行全都是 --- 且該行沒有開頭空白)
                 if (isAirportSection && i + 1 < lines.length && /^-{5,}$/.test(lines[i+1].trim())) {
-                    // 嚴格判斷：必須頂格寫 (不以空白開頭) 才能排除 NOTAM 內文的表格分隔線
                     if (!line.startsWith(' ') && line.trim().length > 0) {
-                        saveBlock(); // 儲存上一個機場區塊
+                        saveBlock(); 
 
                         const titleParts = cl.split(/\s{2,}|\s+\//);
-                        currentSubCategory = titleParts[0].trim(); // 取得如 RCTP 的代碼
-                        currentBlock = [line]; // 新區塊從此標題開始
+                        currentSubCategory = titleParts[0].trim(); 
+                        currentBlock = [line]; 
                         continue;
                     }
                 }
 
-                // 3. 在區塊內時，持續收集內容
                 if (isAirportSection && currentSubCategory) {
                     currentBlock.push(line);
                 } else if (!isAirportSection && currentMajorCategory) {
@@ -871,12 +863,10 @@
                 }
             }
             
-            saveBlock(); // 收尾最後一個段落
+            saveBlock(); 
             
-            // 開始渲染 UI
             container.innerHTML = '';
             
-            // [新增] 複製全文 NOTAM 按鈕
             const copyAllBtn = document.createElement('button');
             copyAllBtn.className = "w-full py-3.5 px-4 rounded-xl font-bold shadow-md bg-stone-700 text-white hover:bg-stone-600 transition-all active:scale-95 text-[13px] md:text-sm flex items-center justify-center gap-2 mb-2";
             copyAllBtn.innerHTML = `📋 複製全文 NOTAM (${lines.length} 行)`;
@@ -891,14 +881,12 @@
                 return;
             }
             
-            // [新增] 機場網格 (正方形/小按鈕)
             if (parsedAirports.length > 0) {
                 const aptGrid = document.createElement('div');
                 aptGrid.className = "grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full";
                 parsedAirports.forEach(apt => {
                     const btn = document.createElement('button');
                     const lineCount = apt.text.trim().split('\n').length;
-                    // 移除 AIRPORT 文字，保持純淨，加入行數顯示
                     btn.className = "py-3 px-2 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-base md:text-lg tracking-widest flex flex-wrap items-baseline justify-center gap-1 border bg-[#8b5a2b]/10 text-[#8b5a2b] border-[#8b5a2b]/30 hover:bg-[#8b5a2b]/20";
                     btn.innerHTML = `<span>${apt.title}</span><span class="text-[10px] md:text-[11px] font-normal opacity-75 tracking-normal whitespace-nowrap">(${lineCount}行)</span>`;
                     btn.onclick = () => copyNotamData(apt.text, apt.title);
@@ -907,14 +895,12 @@
                 container.appendChild(aptGrid);
             }
 
-            // [新增] 大分類列表 (滿版橫向按鈕)
             if (parsedAreas.length > 0) {
                 const areaContainer = document.createElement('div');
                 areaContainer.className = "flex flex-col gap-2 mt-2 w-full";
                 parsedAreas.forEach(area => {
                     const btn = document.createElement('button');
                     const lineCount = area.text.trim().split('\n').length;
-                    // 移除 AREA/FIR 文字，保持純淨，字體大寫對齊，加入行數顯示
                     btn.className = "w-full py-3.5 px-4 rounded-xl font-bold shadow-sm transition-all active:scale-95 text-[12px] md:text-sm tracking-widest flex flex-wrap items-baseline justify-center gap-1.5 border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100";
                     btn.innerHTML = `<span class="uppercase">${area.title}</span><span class="text-[10px] md:text-[11px] font-normal opacity-75 tracking-normal whitespace-nowrap">(${lineCount}行)</span>`;
                     btn.onclick = () => copyNotamData(area.text, area.title);
@@ -928,7 +914,6 @@
             if (!text) return;
             const tempTextarea = document.createElement('textarea');
             tempTextarea.value = text.trim();
-            // 修正 iOS 鍵盤彈出問題：設為 fixed 避免畫面跳動
             tempTextarea.style.position = 'fixed';
             tempTextarea.style.top = '0';
             document.body.appendChild(tempTextarea);
@@ -955,7 +940,6 @@
 
             if (!savedLidoUser || !savedLidoPass || !targetRaw) return showToast('請輸入有效的航班編號', true);
 
-            // 擷取前先歸零（保留目標航班號碼）
             const currentTargetVal = document.getElementById('target-flight').value;
             clearData(true); 
             document.getElementById('target-flight').value = currentTargetVal;
@@ -988,7 +972,6 @@
                     const leg = ofpData.briefingPackages && ofpData.briefingPackages[0] && ofpData.briefingPackages[0].leg ? ofpData.briefingPackages[0].leg[0] : {};
                     const rawTexts = f.rawTexts || {};
 
-                    // 1. 處理 ATC 報文獨立顯示
                     let atcText = '未尋獲 ATC 報文';
                     if (rawTexts['ATS']) {
                         const fplMatch = rawTexts['ATS'].match(/\(FPL-[\s\S]*?\)/);
@@ -997,7 +980,6 @@
                     document.getElementById('atc-display').value = atcText;
                     if (atcText !== '未尋獲 ATC 報文') document.getElementById('copy-btn-atc').classList.remove('hidden');
 
-                    // 2. 解析核心資訊以建造 rawBlock 供 Pro 儀表板使用
                     const flightNo = (leg.commercialAirlineICAO || '') + (leg.flightNumber || '');
                     const reg = leg.aircraftDetails?.aircraftRegistration || 'N/A';
                     const dep = leg.departureAirportICAO || 'N/A';
@@ -1039,7 +1021,6 @@
                         extractAirports('SUITABLE ENROUTE AIRPORT\\(S\\)', suitableSet);
                     }
 
-                    // 從 OFP 中補充備降機場（以防 IWFR 解析失敗）
                     if (destAltnSet.size === 0 && rawTexts['OFP']) {
                         const altnSection = rawTexts['OFP'].match(/ALTERNATES[\s\S]+?(?=NAVIGATION LOG|EDTO SUMMARY)/);
                         if (altnSection) {
@@ -1185,7 +1166,6 @@
                             if (m) bof3 = parseInt(m[1], 10);
                         }
 
-                        // 組裝 Part 1 RawBlock 性能資訊 (包含時間)
                         var perfBlock = `性能資訊：\nTOW: ${tow}\nLDW: ${ldw}\nTotal Fuel: ${formatFuelVal(fw_total)}\n`;
                         perfBlock += `Division Fuel (${altnLabel}+FRF): ${divFuelCalc}${t_divFuel}\n`;
                         perfBlock += `SPARE Fuel: ${spareFuelCalc}\n`;
@@ -1218,7 +1198,6 @@
 
                     let edtoRawStr = edtoData.length > 0 ? edtoData.join('\n') : 'non-EDTO';
 
-                    // 再次組裝整體
                     let rawBlock = `基本資訊：\n日期: ${flightDateStr}\nFlight number: ${flightNo}\n機號: ${reg}\n出發地/目的地: ${dep}/${dest}\nSTD: ${stdStr}\nSTA: ${staStr}\nETD: ${etdStr}\nETE: ${eteStr}\n巡航高度: ${cruiseAltStr}\n起飛跑道: ${depRwy}\n落地跑道: ${destRwy}\n`;
                     rawBlock += `第一備降機場/跑道: ${alt1Rwy}\n`;
                     if (alt2Rwy !== 'N/A') rawBlock += `第二備降機場/跑道: ${alt2Rwy}\n`;
@@ -1233,22 +1212,18 @@
                     if (suitableSet.size > 0) { airportBlock += `SUITABLE ENROUTE AIRPORT(S):\n`; suitableSet.forEach(a => airportBlock += `${getAirportStr(a)}\n`); }
                     rawBlock += airportBlock;
 
-                    // 寫入畫面
                     document.getElementById('rawInput').value = rawBlock;
                     
-                    // Vertical Profile 處理
                     if (rawTexts['VERTPROF'] && rawTexts['VERTPROF'].startsWith('data:image')) {
-                        showImage(rawTexts['VERTPROF'], 'profile');
+                        showImage(rawTexts['VERTPROF'], 'profile', true); // explicit true to avoid double saving if not needed, though the routine will handle it
                     }
 
-                    // SIGWX 陣列圖檔處理
                     Object.keys(rawTexts).forEach(key => {
                         if ((key.startsWith('SIGWX') || key.startsWith('UAD')) && rawTexts[key].startsWith('data:image')) {
                             showImage(rawTexts[key], 'sigwx');
                         }
                     });
                     
-                    // NOTAM 資訊處理與帶入
                     let notamFound = '';
                     if (rawTexts['NOTAM']) {
                         notamFound = rawTexts['NOTAM'];
@@ -1257,7 +1232,6 @@
                     }
                     document.getElementById('raw-notam-input').value = notamFound;
 
-                    // 強制觸發 Dashboard 更新
                     debouncedParseData();
                     parseNotams();
                     
@@ -1295,7 +1269,6 @@
             localStorage.removeItem('dispatch_rawInput_2');
             localStorage.removeItem('dispatch_notam_input');
             
-            // 清空所有圖檔區塊
             ['profile', 'mel', 'wni', 'sigwx'].forEach(prefix => clearImage(prefix));
             parseData();
             parseNotams();
@@ -1319,12 +1292,10 @@
             if (savedInput2) document.getElementById('rawInput2').value = savedInput2;
             if (savedNotam) document.getElementById('raw-notam-input').value = savedNotam;
             
-            // 回復一般單張截圖
             ['profile', 'mel', 'wni'].forEach(prefix => {
                 const savedImg = localStorage.getItem(`dispatch_${prefix}_image`);
                 if (savedImg) showImage(savedImg, prefix, true);
             });
-            // 回復 SigWX 多張圖表
             const savedSigwx = JSON.parse(localStorage.getItem('dispatch_sigwx_image') || '[]');
             savedSigwx.forEach(dataUrl => showImage(dataUrl, 'sigwx', true));
             
@@ -1351,7 +1322,6 @@
 
        window.addEventListener('paste', function(e) {
             if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') { return; }
-
             let prefix = 'profile'; 
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -1404,30 +1374,77 @@
             event.target.value = '';
         }
 
+        // 高效圖像壓縮與快取機制 (修復 Safari QuotaExceededError)
         function showImage(dataUrl, prefix, skipSave = false) {
             document.getElementById(`${prefix}-placeholder`).classList.add('hidden');
             
-            if (prefix === 'sigwx') {
-                const container = document.getElementById('sigwx-container');
-                const img = document.createElement('img');
-                img.src = dataUrl;
-                img.className = "w-full lg:w-[calc(50%-0.5rem)] h-auto max-h-[600px] lg:max-h-[350px] object-contain rounded-lg shadow-sm border border-stone-200 sigwx-img-item transition-all duration-300";
-                container.insertBefore(img, document.getElementById('sigwx-upload'));
-                
-                if (!skipSave) {
-                    let saved = JSON.parse(localStorage.getItem('dispatch_sigwx_image') || '[]');
-                    if (!saved.includes(dataUrl)) {
-                        saved.push(dataUrl);
-                        localStorage.setItem('dispatch_sigwx_image', JSON.stringify(saved));
+            const applyAndSave = (finalUrl) => {
+                if (prefix === 'sigwx') {
+                    const container = document.getElementById('sigwx-container');
+                    const img = document.createElement('img');
+                    img.src = finalUrl;
+                    img.className = "w-full lg:w-[calc(50%-0.5rem)] h-auto max-h-[600px] lg:max-h-[350px] object-contain rounded-lg shadow-sm border border-stone-200 sigwx-img-item transition-all duration-300";
+                    container.insertBefore(img, document.getElementById('sigwx-upload'));
+                    
+                    if (!skipSave) {
+                        try {
+                            let saved = JSON.parse(localStorage.getItem('dispatch_sigwx_image') || '[]');
+                            if (!saved.includes(finalUrl)) {
+                                saved.push(finalUrl);
+                                localStorage.setItem('dispatch_sigwx_image', JSON.stringify(saved));
+                            }
+                        } catch (e) {
+                            console.warn('Storage quota exceeded', e);
+                            showToast('設備儲存空間不足，部分圖片可能無法保留', true);
+                        }
+                    }
+                } else {
+                    const img = document.getElementById(`${prefix}-image`);
+                    if (img) {
+                        img.src = finalUrl; 
+                        img.classList.remove('hidden');
+                        if (!skipSave) {
+                            try {
+                                localStorage.setItem(`dispatch_${prefix}_image`, finalUrl);
+                            } catch (e) {
+                                console.warn('Storage quota exceeded', e);
+                                showToast('設備儲存空間不足，部分圖片可能無法保留', true);
+                            }
+                        }
                     }
                 }
+            };
+
+            // 如果是新上傳或貼上的圖片，自動進行等比例壓縮編碼至 JPEG
+            if (!skipSave && dataUrl.startsWith('data:image/')) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_WIDTH = 2000;
+                    const MAX_HEIGHT = 2000;
+                    if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+                        const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+                        width *= ratio;
+                        height *= ratio;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 填充白底，防範 PNG 透明圖檔變黑
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 利用 JPEG 0.82 轉換，能將動輒 4~5MB 的圖幅壓縮到 200KB 左右
+                    const compressedUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    applyAndSave(compressedUrl);
+                };
+                img.src = dataUrl;
             } else {
-                const img = document.getElementById(`${prefix}-image`);
-                if (img) {
-                    img.src = dataUrl; 
-                    img.classList.remove('hidden');
-                    if (!skipSave) localStorage.setItem(`dispatch_${prefix}_image`, dataUrl);
-                }
+                applyAndSave(dataUrl);
             }
         }
 
@@ -1547,36 +1564,29 @@
                     lat = geoData.results[0].latitude; lon = geoData.results[0].longitude;
                 }
 
-                // 計算欲鎖定的 ISO 8601 目標時間 (針對 Open-Meteo hourly 搜尋)
                 let targetIso = null;
                 if (targetZulu && baseDate && baseDate !== '----') {
                     const months = {JAN:'01', FEB:'02', MAR:'03', APR:'04', MAY:'05', JUN:'06', JUL:'07', AUG:'08', SEP:'09', OCT:'10', NOV:'11', DEC:'12'};
-                    let parts = baseDate.split('-'); // 預期格式: YYYY-MMM-DD (e.g. 2024-MAY-10)
+                    let parts = baseDate.split('-'); 
                     if(parts.length === 3) {
                         const monthNum = months[parts[1].toUpperCase()];
-                        // 使用 Date 建構子來抓取準確的 Date 物件 (預設為 UTC)
                         let d = new Date(Date.UTC(parts[0], parseInt(monthNum, 10) - 1, parts[2], parseInt(targetZulu.substring(0,2), 10), 0));
                         
-                        // 針對落地機場的跨日判斷：如果 STA 時間 < STD 時間，合理推斷已跨入隔天
                         if (isArrival && depZulu && targetZulu.substring(0,2) < depZulu.substring(0,2)) {
                             d.setUTCDate(d.getUTCDate() + 1);
                         }
                         
-                        // 組裝為 Open-Meteo 所需的格式 (YYYY-MM-DDTHH:00)
                         targetIso = d.toISOString().substring(0,13) + ":00";
                     }
                 }
 
-                // 呼叫包含 hourly 預報的綜合 API，確保時區對齊 GMT (即 UTC)
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,weathercode&timezone=GMT&past_days=1&forecast_days=7`;
                 const wxData = await (await fetch(url)).json();
 
-                // 預設先拿「當下」的氣象，做為防呆備案
                 let temp = Math.round(wxData.current_weather.temperature);
                 let code = wxData.current_weather.weathercode;
                 let isForecast = false;
 
-                // 若有計算出目標時間，從 hourly 陣列中抽取出我們要的那一小時
                 if (targetIso && wxData.hourly && wxData.hourly.time) {
                     const idx = wxData.hourly.time.indexOf(targetIso);
                     if (idx !== -1 && wxData.hourly.temperature_2m[idx] !== null) {
@@ -1594,7 +1604,6 @@
                 };
                 const condition = wmoMap[code] || {desc: 'Unknown', icon: '☁️'};
                 
-                // 動態調整 UI 文字，精準顯示是「預計起飛」還是「預計抵達」的天氣
                 let prefixStr = isForecast ? (isArrival ? '預計抵達 ' : '預計起飛 ') : '目前 ';
                 descEl.innerText = `${prefixStr}${temp}°C and ${condition.desc.toLowerCase()}`; 
                 iconEl.innerText = condition.icon;
@@ -1649,7 +1658,6 @@
                 }
             });
 
-            // Fuel additions updated order mapping
             const fuelItems = [
                 { id: 'out-add-wxx', timeId: 'time-add-wxx', key: 'ADD WXX' },
                 { id: 'out-add-opn', timeId: 'time-add-opn', key: 'ADD OPN' },
@@ -1680,7 +1688,6 @@
                 }
             });
 
-            // Division Fuel Handle renaming to Minimum Diversion Fuel
             const divFuelLabel = document.getElementById('label-div-fuel');
             const divMatch = rawText.match(/Division Fuel\s*\((.*?)\)\s*:\s*(.*?)(?:\n|$)/i);
             document.getElementById('out-div-fuel').textContent = '----';
@@ -1743,7 +1750,6 @@
                 }
             }
 
-            // Handle Airplane Section updates (ETE & split Cruise Alt / Temp)
             const eteVal = extractData(rawText, 'ETE');
             const cruVal = extractData(rawText, '巡航高度');
             const elEteCenter = document.getElementById('out-ete-center');
@@ -1760,7 +1766,6 @@
             if(elCruAlt) elCruAlt.textContent = altPart;
             if(elCruTemp) elCruTemp.textContent = tempPart;
 
-            // Handle MEL Header Registration update
             let regVal = extractData(rawText, '機號');
             const melHeaderReg = document.getElementById('mel-header-reg');
             if(melHeaderReg) melHeaderReg.textContent = (regVal !== 'N/A' && regVal !== '') ? regVal : '----';
@@ -1772,14 +1777,12 @@
                 turbliLink.classList.remove('hidden');
             } else { turbliLink.classList.add('hidden'); }
 
-            // Apply styling for times
             const stdStr = extractData(rawText, 'STD'), staStr = extractData(rawText, 'STA');
             currentDepUTC = extractZuluOnly(stdStr); currentArrUTC = extractZuluOnly(staStr);
             document.getElementById('out-std').textContent = convertToZuluLocalStr(stdStr, currentDepICAO);
             document.getElementById('out-etd').textContent = convertToZuluLocalStr(extractData(rawText, 'ETD'), currentDepICAO);
             document.getElementById('out-sta').textContent = convertToZuluLocalStr(staStr, currentArrICAO);
 
-            // Handle PAX calculation and raw details
             const paxMatch = rawText2.match(/PAX\s*:\s*(\d+)\/(\d+)/i);
             if (paxMatch) {
                 const p1 = parseInt(paxMatch[1], 10);
@@ -1885,7 +1888,6 @@
             
             await Promise.allSettled(icaos.map(icao => fetchSingleAirportWeather(icao)));
             
-            // 觸發開源天氣輔助資訊的擷取 (僅限出發與目的地，帶入動態計算的 STD 與 STA)
             [currentDepICAO, currentArrICAO].forEach(icao => {
                 if (icao && icao !== '----') {
                     const isArrival = (icao === currentArrICAO);
@@ -1906,7 +1908,6 @@
                         <div class="flex items-center flex-wrap gap-y-1"><span class="text-lg md:text-xl font-bold tracking-widest data-font">${icao}</span>${rwyTag}${timeTag}</div>
                         <span id="sync-${icao}" class="text-[10px] px-2 py-0.5 rounded bg-stone-300 text-stone-600 font-bold tracking-wider shadow-sm ml-2 shrink-0">Loading...</span>
                     </div>
-                    <!-- Open source weather (僅出發與目的地才會顯示) -->
                     ${(icao === currentDepICAO || icao === currentArrICAO) ? `
                     <div id="awc-simple-wx-${icao}" class="hidden flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-stone-200/60">
                         <span id="awc-wx-icon-${icao}" class="text-[13px] md:text-sm">☁️</span>
